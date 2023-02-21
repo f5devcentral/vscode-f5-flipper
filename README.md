@@ -9,6 +9,54 @@ Future goals include conversion outputs for different supported F5 solutions, in
 
 ![Project Flipper](project-flipper-dophin.png)
 
+# Breakdown Process
+
+## 1. Archive unpack
+
+> if file is .conf, skip to next step...
+
+- stream archive
+  - capture all .conf files
+  - certs?
+  - logs?
+
+
+## 2. Breakdown config
+
+- abstract each line to object type?
+
+  config name | js object name?
+  | :--- | ---: 
+  add lb vserver | addLbVserver
+  set ssl vserver | setSslVserver
+  add lb monitor | addLbMonitor
+  add ssl certKey | addSslCertkey
+  bind lb vserver | bingLbVserver
+  add server | addServer
+  add ns ip | addNsIp
+
+
+## 3. Abstract applications
+
+1. start with each 'add lb vserver'
+2. add ssl options with 'set ssl vserver'
+3. add pool binding with 'bind lb vserver'
+4. add pool details with 'add serviceGroup'
+5. add pool bingdings with 'bind serviceGroup'
+6. add monitor from service pool binginds 'add lb monitor'
+
+# Notes
+
+- All of the 'add' operations need to happen before the 'bind' operations
+- .conf are the main config files, like tmos
+  - each line is a single config (unlike tmos)
+- archive files has an .tgz extension
+  - Full and basic backups
+- .log for log files
+  - location?
+- certs?
+  - location?
+
 # Resources
 
 ## NGINX
@@ -58,17 +106,7 @@ NetScaler Firmware | 13.1 (GA: 15-Sep-21) | EN | N/A | N/A | 15-Sep-25 | 15-Sep-
 NetScaler Firmware | 13.0 (GA: 15-May-19) | EN | N/A | N/A | 15-Jul-23 | 15-Jul-24
 NetScaler Firmware | 12.1 (GA: 25-May-18) | EN | N/A | N/A | 30-May-22 | 30-May-23
 
-# Notes
 
-- All of the 'add' operations need to happen before the 'bind' operations
-- .conf are the main config files, like tmos
-  - each line is a single config (unlike tmos)
-- archive files has an .tgz extension
-  - Full and basic backups
-- .log for log files
-  - location?
-- certs?
-  - location?
 
 
 
