@@ -1,0 +1,59 @@
+{
+  "name": "project-flipper",
+  "version": "0.0.1",
+  "description": "breaking down Citrix NetScaler configs",
+  "main": "dist/index.js",
+  "scripts": {
+    "lint": "tsc --noEmit && eslint 'src/**/*.{js,ts,tsx}' 'tests/**/*.{js,ts,tsx}'",
+    "watch": "tsc -watch -p ./",
+    "compile": "tsc -p ./",
+    "test": "nyc mocha -r ts-node/register \"tests/*.tests.ts\"",
+    "build-code-docs": "typedoc --out code_docs src",
+    "build-package": "npm run compile && npm pack",
+    "publish-package": "npm run compile && npm publish"
+  },
+  "engines": {
+    "node": "16.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DumpySquare/project-flipper.git"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/DumpySquare/project-flipper/issues"
+  },
+  "homepage": "https://github.com/DumpySquare/project-flipper#readme",
+  "nyc": {
+    "check-coverage": true,
+    "lines": 80,
+    "functions": 80,
+    "branches": 80,
+    "statements": 80,
+    "reporter": [
+      "html",
+      "text"
+    ],
+    "cache": false
+  },
+  "devDependencies": {
+    "@types/assert": "^1.5.2",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^16.11.7",
+    "@types/object-path": "^0.11.1",
+    "@types/tar-stream": "^2.2.2",
+    "@typescript-eslint/eslint-plugin": "^5.53.0",
+    "@typescript-eslint/parser": "^5.53.0",
+    "assert": "^2.0.0",
+    "eslint": "^8.34.0",
+    "mocha": "^10.2.0",
+    "nyc": "^15.1.0",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.4.4"
+  },
+  "dependencies": {
+    "deepmerge": "^4.3.0",
+    "tar-stream": "^3.0.0"
+  }
+}

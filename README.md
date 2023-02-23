@@ -3,7 +3,7 @@
 
 Exploring Citrix/NetScaler configs
 
-This project aims to explore the process of breaking down, analyzing and abstracting applications from a Citrix NetScaler config/archive (.conf/.gzip?)
+This project aims to explore the process of breaking down, analyzing and abstracting applications from a Citrix NetScaler config/archive (.conf/.tgz)
 
 Future goals include conversion outputs for different supported F5 solutions, including BIG-IP TMOS, NGINX and F5 Distributed Cloud (XC)
 
@@ -15,7 +15,7 @@ Future goals include conversion outputs for different supported F5 solutions, in
 
 > if file is .conf, skip to next step...
 
-- stream archive
+- stream archive (.tgz)
   - capture all .conf files
   - certs?
   - logs?
