@@ -25,15 +25,15 @@ Future goals include conversion outputs for different supported F5 solutions, in
 
 - abstract each line to object type?
 
-  config name | js object name?
-  | :--- | ---: 
-  add lb vserver | addLbVserver
-  set ssl vserver | setSslVserver
-  add lb monitor | addLbMonitor
-  add ssl certKey | addSslCertkey
-  bind lb vserver | bingLbVserver
-  add server | addServer
-  add ns ip | addNsIp
+  config name | js object name? | documentation
+  | :--- | :---: | ---:
+  add lb vserver | addLbVserver | https://developer-docs.citrix.com/projects/netscaler-command-reference/en/12.0/lb/lb-vserver/lb-vserver/
+  set ssl vserver | setSslVserver | 
+  add lb monitor | addLbMonitor | 
+  add ssl certKey | addSslCertkey | 
+  bind lb vserver | bingLbVserver | 
+  add server | addServer | 
+  add ns ip | addNsIp | 
 
 
 ## 3. Abstract applications
@@ -48,6 +48,8 @@ Future goals include conversion outputs for different supported F5 solutions, in
 # Notes
 
 - All of the 'add' operations need to happen before the 'bind' operations
+- order config lines by the following to make sure things are parsed in order
+  - add -> set -> bind -> link -> enable -> disable
 - .conf are the main config files, like tmos
   - each line is a single config (unlike tmos)
 - archive files has an .tgz extension
@@ -56,6 +58,17 @@ Future goals include conversion outputs for different supported F5 solutions, in
   - location?
 - certs?
   - location?
+- config lines with ip addresses in them (unique to customer env)
+  - add ns ip
+  - bind vlan ...
+  - add snmp trap generic ...
+  - add server <name> <ip>
+  - add lb vserver <name> <type> <ip>
+  - add cs vserver <name> <type> <ip>
+  - add gslb site <name> <ip>
+  - set ns rcpNode <ip>
+  - seems that **'add lb vserver'** and **'add cs vserver'** are the two to indicate the front door for an app
+
 
 # Resources
 

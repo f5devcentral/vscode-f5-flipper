@@ -2,7 +2,62 @@
 
 
 export type AdcConfObj = {
-    vserver?: string
+    vserver?: string;
+    set?: {
+        ns?: {
+            config?: string;
+            hostname?: string;
+
+        };
+        system?: string;
+        rsskeytype?: string;
+        lacp?: string;
+        interface?: string;
+        nd6RAvariables?: string;
+        snmp?: string;
+        cmp?: string;
+        service?: string;
+        aaa?: string;
+        lb?: string;
+        cache?: string;
+        appflow?: string;
+        bot?: string;
+        appfw?: string;
+        subscriber?: string;
+        ssl?: string;
+        cloud?: string;
+        cloudtunnel?: string;
+        ip6TunnelParam?: string;
+        ptp?: string;
+        videooptimization?: string;
+    };
+    enable?: {
+        ns?: unknown;
+    };
+    add?: {
+        ns?: string;
+        server?: string;
+        serviceGroup?: string;
+        ssl?: string;
+        lb?: {
+            vserver?: string[];
+        };
+        cs?: string;
+        rewrite?: string;
+        cache?: string;
+        dns?: string;
+        route?: string;
+        appfw?: string;
+    };
+    bind?: {
+        cache?: string;
+        lb?: string;
+        cs?: string;
+        serviceGroup?: string;
+        audit?: string;
+        tunnel?: string;
+        ssl?: string;
+    };
 }
 
 /**
@@ -91,36 +146,33 @@ export type Stats = {
 
 
 export type AdcRegExTree = {
-    adcVersion: RegExp,
-    adcBuild: RegExp,
-    vs: {
-        pool: {
-            obj: RegExp,
-            members: RegExp,
-            nodesFromMembers: RegExp,
-            monitors: RegExp
-        },
-        profiles: {
-            obj: RegExp,
-            names: RegExp
-        },
-        rules: {
-            obj: RegExp,
-            names: RegExp
-        },
-        snat: {
-            obj: RegExp,
-            name: RegExp
-        },
-        ltPolicies: {
-            obj: RegExp,
-            names: RegExp
-        },
-        persist: {
-            obj: RegExp,
-            name: RegExp
-        },
-        fbPersist: RegExp,
-        destination: RegExp
-    }
+    adcVersion: RegExp;
+    adcBuild: RegExp;
+    cfgOptions: RegExp;
+    cfgOptionsQuotes: RegExp;
+    verbs: RegExp;
+    'add ns ip': RegExp;
+    'add ns ip6': RegExp;
+    'add ns rpcNode': RegExp;
+    'add route': RegExp;
+    'add dns nameServer': RegExp;
+    'add lb vserver': RegExp;
+    'add lb monitor': RegExp;
+    'add ssl certKey': RegExp;
+    'add server': RegExp;
+    'add service': RegExp;
+    'add serviceGroup': RegExp;
+    'add cs vserver': RegExp;
+    'add cs action': RegExp;
+    'add cs policy': RegExp;
+    'add rewrite action': RegExp;
+    'add rewrite policy': RegExp;
+    'set ssl vserver': RegExp;
+    'set lb monitor': RegExp;
+    'set ns param': RegExp;
+    'bind service': RegExp;
+    'bind serviceGroup': RegExp;
+    'bind lb vserver': RegExp;
+    'bind cs vserver': RegExp;
+    'bind ssl vserver': RegExp;
 }

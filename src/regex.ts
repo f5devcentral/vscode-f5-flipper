@@ -40,33 +40,14 @@ export class RegExTree {
     public adcHostname = /set ns hostName (\S+)/;
 
     /**
-     * vs detail regexs
+     * captures ns config options that begin with "-"
+     * example;  "set ns config -IPAddress 192.168.86.140 -netmask 255.255.255.0"
+     * captures ['-IPAddress 192.168.86.140', '-netmask 255.255.255.0']
      */
-    //following regex will get pool, but not snat pool from vs config
-    private poolRegex = /(?<!source-address-translation {\n\s+)    pool (.+?)\n/;
-    private profilesRegex = /profiles {([\s\S]+?)\n    }\n/;
-    private rulesRegex = /rules {([\s\S]+?)\n    }\n/;
-    private snatRegex = /source-address-translation {([\s\S]+?)\n    }\n/;
-    private ltPoliciesRegex = /policies {([\s\S]+?)\n    }\n/;
-    private persistRegex = /persist {([\s\S]+?)\n    }\n/;
-    private fallBackPersistRegex = /fallback-persistence (\/\w+.+?)\n/;
-    private destination = /destination (\/\w+\/[\w+\.\-]+:\d+)/;
+    public cfgOptions = /-\w+ \S+/g;
+    public cfgOptionsQuotes = /-\w+ "[\S ]+"/g;
 
-    /**
-     * pool detail regexs
-     */
-    private poolMembersRegex = /members {([\s\S]+?)\n    }\n/;
-    private poolNodesFromMembersRegex = /(\/\w+\/.+?)(?=:)/g;
-    private poolMonitorsRegex = /monitor (\/\w+.+?)\n/;
-
-    /**
-     * profiles
-     */
-    private profileNamesRegex = /(\/[\w\-\/.]+)/g;
-    private snatNameRegex = /pool (\/[\w\-\/.]+)/;
-    private ruleNamesRegex = /(\/[\w\-\/.]+)/g;
-    private ltpNamesRegex = /(\/[\w\-\/.]+)/g;
-    private persistNameRegex = /(\/[\w\-\/.]+)/;
+    private ipAddr = /(?:[0-9]{1,3}\.){3}[0-9]{1,3}/;
 
     /**
      * base regex tree for extracting citrix ns adc config items
@@ -74,36 +55,33 @@ export class RegExTree {
     private regexTree: AdcRegExTree = {
         adcVersion: this.adcVersionBaseReg,
         adcBuild: this.adcVersionBuildReg,
-        vs: {
-            pool: {
-                obj: this.poolRegex,
-                members: this.poolMembersRegex,
-                nodesFromMembers: this.poolNodesFromMembersRegex,
-                monitors: this.poolMonitorsRegex
-            },
-            profiles: {
-                obj: this.profilesRegex,
-                names: this.profileNamesRegex
-            },
-            rules: {
-                obj: this.rulesRegex,
-                names: this.ruleNamesRegex
-            },
-            snat: {
-                obj: this.snatRegex,
-                name: this.snatNameRegex
-            },
-            ltPolicies: {
-                obj: this.ltPoliciesRegex,
-                names: this.ltpNamesRegex
-            },
-            persist: {
-                obj: this.persistRegex,
-                name: this.persistNameRegex
-            },
-            fbPersist: this.fallBackPersistRegex,
-            destination: this.destination
-        }
+        cfgOptions: this.cfgOptions,
+        cfgOptionsQuotes: this.cfgOptionsQuotes,
+        verbs: /^(add|set|bind|link|enable|disable) /,
+        'add ns ip': /add ns ip (?<name>\S+) (?<mask>\S+) (?<opts>[\S ]+)/,
+        'add ns ip6': /add ns ip6 (?<name>\S+) (?<opts>[\S ]+)/,
+        'add ns rpcNode': /add ns rpcNode (?<name>\S+) (?<opts>[\S ]+)/,
+        'add route': /add server (?<opts>\S+)/,
+        'add dns nameServer': /add lb nameServer (?<server>\S+)/,
+        'add lb vserver': /add lb vserver (?<name>\S+) (?<type>\S+) (?<ipAddress>[\d.]+) (?<port>\d+) (?<opts>[\S ]+)/,
+        'add lb monitor': /add lb monitor (?<name>\S+) (?<type>\S+) (?<opts>[\S ]+)/,
+        'add ssl certKey': /add ssl certKey (?<name>\S+) (?<opts>[\S ]+)/,
+        'add server': /add server (?<name>\S+) (?<value>\S+)/,
+        'add service': /add service (?<name>\S+) (?<value>\S+)/,
+        'add serviceGroup': /add serviceGroup (?<name>\S+) (?<value>\S+)/,
+        'add cs vserver': /add cs vserver (?<name>\S+) (?<opts>\S+)/,
+        'add cs action': /add cs action (?<name>\S+) (?<opts>\S+)/,
+        'add cs policy': /add cs policy (?<name>\S+) (?<opts>\S+)/,
+        'add rewrite action': /add rewrite action (?<name>\S+) (?<opts>\S+)/,
+        'add rewrite policy': /add rewrite policy (?<name>\S+) (?<opts>\S+)/,
+        'set ssl vserver': /set ssl vserver (?<name>\S+) (?<opts>[\S ]+)/,
+        'set lb monitor': /set lb monitor (?<name>\S+) (?<opts>[\S ]+)/,
+        'set ns param': /set ns param (?<opts>[\S ]+)/,
+        'bind service': /bind service (?<opts>[\S ]+)/,
+        'bind serviceGroup': /bind serviceGroup (?<opts>[\S ]+)/,
+        'bind lb vserver': /bind lb vserver (?<opts>[\S ]+)/,
+        'bind cs vserver': /bind cs vserver (?<opts>[\S ]+)/,
+        'bind ssl vserver': /bind ssl vserver (?<opts>[\S ]+)/,
     }
 
     constructor() {
@@ -126,8 +104,8 @@ export class RegExTree {
         // full tmos version without decimals
         if(x > 19000) {
             logger.error('>v19.0.0.0 tmos detected - this should never happen!!!')
-            this.regexTree.vs.fbPersist = /new-fallBackPersist-regex/;
-            this.regexTree.vs.pool.obj = /new-pool-regex/;
+            // this.regexTree.vs.fbPersist = /new-fallBackPersist-regex/;
+            // this.regexTree.vs.pool.obj = /new-pool-regex/;
         }
         if(x < 12000){
             logger.error('<v12.0.0.0 tmos detected - have not tested this yet!!!')
