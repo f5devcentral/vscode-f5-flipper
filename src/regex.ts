@@ -69,7 +69,7 @@ export class RegExTree {
         'add server': /add server (?<name>\S+) (?<value>\S+)/,
         'add service': /add service (?<name>\S+) (?<value>\S+)/,
         'add serviceGroup': /add serviceGroup (?<name>\S+) (?<value>\S+)/,
-        'add cs vserver': /add cs vserver (?<name>\S+) (?<opts>\S+)/,
+        'add cs vserver': /add cs vserver (?<name>\S+) (?<type>\S+) (?<ipAddress>[\d.]+) (?<port>\d+) (?<opts>[\S ]+)/,
         'add cs action': /add cs action (?<name>\S+) (?<opts>\S+)/,
         'add cs policy': /add cs policy (?<name>\S+) (?<opts>\S+)/,
         'add rewrite action': /add rewrite action (?<name>\S+) (?<opts>\S+)/,

@@ -237,8 +237,20 @@ export function parseNsOptions(str: string, rx: AdcRegExTree): { [k: string]: st
         obj[k] = v;
         str = str.replace(el, '')
     })
+
+    // // turn certain object values to arrays
+    // if () {
+
+    // }
+
     return obj;
 }
+
+// export function parseBindings(str: string, rx: AdcRegExTree): { [k: string]: string } {
+//     const obj = {}
+
+
+// }
 
 
 /**

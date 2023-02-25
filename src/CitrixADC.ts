@@ -5,11 +5,12 @@
 import { EventEmitter } from 'events';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { digAppsArrys } from './digAppsArrys';
 // import { RegExTree, TmosRegExTree } from './regex'
 import logger from './logger';
 import { AdcConfObj, AdcRegExTree, ConfigFile, Explosion, Stats } from './models'
 import { parseAdcConf } from './parseAdc';
-import { digVserverArrys, parseAdcConfArrays } from './parseAdcArrys';
+import { parseAdcConfArrays } from './parseAdcArrys';
 import { RegExTree } from './regex';
 // import { countObjects } from './objCounter';
 // import { ConfigFile } from './models';
@@ -34,7 +35,7 @@ export default class ADC extends EventEmitter {
      * - consolidated parant object keys like ltm/apm/sys/...
      */
     public configObject: AdcConfObj = {};
-    public configObjectArry: unknown = {};
+    public configObjectArry: AdcConfObj = {};
     /**
      * adc version
      */
@@ -151,7 +152,7 @@ export default class ADC extends EventEmitter {
         this.configObject = await parseAdcConf(config, this.rx!);
         this.configObjectArry = await parseAdcConfArrays(config, this.rx!);
 
-        // parse line by line
+        // get hostname from confObj, assign to parent class for easy access
 
     }
 
@@ -286,27 +287,32 @@ export default class ADC extends EventEmitter {
             //     return x;
             // }
 
-        } else if (this.configObject.add?.lb?.vserver && this.configObject.add?.lb?.vserver.length > 0) {
+        } else if (this.configObject.add?.lb?.vserver) {
 
             // means we didn't get an app name, so try to dig all apps...
             const apps = [];
 
+            await digAppsArrys(this.configObjectArry, this.rx)
+                .then(appCfg => {
+
+                })
+
             // loop through app objects
-            for (const el of this.configObject.add?.lb?.vserver) {
-                // breakdown the vserver details
-                const deets = el.match(/(?<name>\S+) (?<type>\S+) (?<ipAddress>[\d.]+) (?<port>\d+) (?<opts>[\S ]+)/)!
-                const app = deets.groups!.name;
+            // for (const el of this.configObjectArry.add?.lb?.vserver) {
+            //     // breakdown the vserver details
+            //     const deets = el.match(/(?<name>\S+) (?<type>\S+) (?<ipAddress>[\d.]+) (?<port>\d+) (?<opts>[\S ]+)/)!
+            //     const app = deets.groups!.name;
 
-                this.emit('extractApp', {
-                    app,
-                    time: Number(process.hrtime.bigint() - startTime) / 1000000
-                })
+            //     this.emit('extractApp', {
+            //         app,
+            //         time: Number(process.hrtime.bigint() - startTime) / 1000000
+            //     })
 
-                await digVserverArrys(app)
-                .then( appCfg => {
-                    
-                })
-            }
+            //     await digVserverArrys(app)
+            //     .then( appCfg => {
+
+            //     })
+            // }
 
             // for (const [key, value] of Object.entries(this.configObject.ltm.virtual)) {
             //     // event about extracted app

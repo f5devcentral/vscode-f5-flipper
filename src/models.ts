@@ -35,28 +35,49 @@ export type AdcConfObj = {
         ns?: unknown;
     };
     add?: {
-        ns?: string;
-        server?: string;
-        serviceGroup?: string;
-        ssl?: string;
+        ns?: {
+            ip?: string[];
+            ip6?: string[];
+        };
+        server?: string[];
+        serviceGroup?: string[];
+        ssl?: {
+            certKey?: string[];
+        };
         lb?: {
             vserver?: string[];
+            monitor?: string[];
         };
-        cs?: string;
-        rewrite?: string;
+        cs?: {
+            vserver?: string[];
+            action?: string[];
+            policy?: string[];
+        };
+        rewrite?: {
+            action?: string[];
+            policy?: string[];
+        };
         cache?: string;
-        dns?: string;
-        route?: string;
+        dns?: {
+            nameServer?: string[];
+        };
+        route?: string[];
         appfw?: string;
     };
     bind?: {
         cache?: string;
-        lb?: string;
-        cs?: string;
-        serviceGroup?: string;
+        lb?: {
+            vserver?: string[];
+        };
+        cs?: {
+            vserver?: string[];
+        };
+        serviceGroup?: string[];
         audit?: string;
         tunnel?: string;
-        ssl?: string;
+        ssl?: {
+            vserver?: string[];
+        };
     };
 }
 

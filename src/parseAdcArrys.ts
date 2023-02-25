@@ -57,10 +57,19 @@ export async function parseAdcConfArrays(config: string[], rx: AdcRegExTree) {
 
         // if no match return to next config line
         if(!m1) return;
-
+        
+        // now that we have m1, trim leading/trailing spaces
+        const m2 = m1.trim();
+        // split by spaces into an array
+        const location = m2.split(' ')
+        // pop the last item off the array, should be object type (vserver/...)
+        const name = location.pop() as string;
+        // split the details off the parent
         const body = line.slice(m1.length);
 
-        const tmpObj = nestedObjValue(m1.split(' '), [ body ])
+        // create the nested object/details
+        const tmpObj = nestedObjValue(location, { [name]: [ body ] })
+        // merge with main object
         deepmergeInto(cfgObj, tmpObj)
 
         const a = 'debugger!'
@@ -69,6 +78,3 @@ export async function parseAdcConfArrays(config: string[], rx: AdcRegExTree) {
     return cfgObj;
 }
 
-export async function digVserverArrys(app: string) {
-    
-}

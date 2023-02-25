@@ -68,15 +68,15 @@ describe('NS Conf parser unit tests', function () {
             debugger;
         })
         
-        // await adc.explode()
-        // .then( expld => {
-        //     // debugger;
-        // })
-        // .catch( thisErr => {
-        //     err = thisErr;
-        //     log = device.logs()
-        //     debugger
-        // });
+        await adc.explode()
+        .then( expld => {
+            debugger;
+        })
+        .catch( thisErr => {
+            err = thisErr;
+            log = adc.logs();
+            debugger;
+        });
 
     })
 
