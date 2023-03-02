@@ -232,6 +232,7 @@ export function parseNsOptions(str: string, rx: AdcRegExTree): { [k: string]: st
         str = str.replace(el, '')
     })
 
+    // capture everything else without spaces
     str.match(rx.cfgOptions)?.forEach(el => {
         const [k, v] = el.split(' ')
         obj[k] = v;

@@ -11,8 +11,10 @@ export type AdcApp = {
     opts?: { [k: string]: string };
     lines?: string[];
     bindings?: {
-        '-lbvserver': string[];
-        '-policyName': string[];
+        '-lbvserver'?: string[];
+        '-policyName'?: string[];
+        service?: string[];
+        serviceGroup?: string[];
     };
     policies?: {
         name: string;
@@ -21,41 +23,45 @@ export type AdcApp = {
     apps?: AdcApp[]
 }
 
-export async function digAppsArrys(obj: AdcConfObj, rx: AdcRegExTree) {
+
+
+
+export async function digAddCsVserver(app: string, obj: AdcConfObj, rx: AdcRegExTree) {
 
     // start with 'add cs server', build details
 
 
-    for (const el of obj.add?.cs?.vserver) {
+    // for (const el of obj.add?.cs?.vserver) {
 
-        const originalString = 'add cs vserver ' + el;
+    const originalString = 'add cs vserver ' + app;
 
-        const vserver = originalString.match(rx["add cs vserver"])
+    const vserver = originalString.match(rx["add cs vserver"])
 
-        // object to hold all app details
-        const app: AdcApp = {
-            name: vserver!.groups!.name,
-            ipAddress: vserver!.groups!.ipAddress,
-            type: vserver!.groups!.type,
-            port: vserver!.groups!.port as unknown as number,
-            opts: parseNsOptions(vserver!.groups!.opts, rx),
-            lines: [originalString],
-            bindings: {
-                '-lbvserver': [],
-                '-policyName': []
-            }
+    // object to hold all app details
+    const appDet: AdcApp = {
+        name: vserver!.groups!.name,
+        ipAddress: vserver!.groups!.ipAddress,
+        type: vserver!.groups!.type,
+        port: vserver!.groups!.port as unknown as number,
+        opts: parseNsOptions(vserver!.groups!.opts, rx),
+        lines: [originalString],
+        bindings: {
+            '-lbvserver': [],
+            '-policyName': []
         }
-
-        digBindCsVservers(app, obj, rx);
-
-        // digAddLbVservers()
-
-        // digAddCsVservers()
-
-        // find -policyName from 'add cs bind's
-
-        const xxx = 'debugger!'
     }
+
+    digBindCsVservers(appDet, obj, rx);
+
+    // digAddLbVservers()
+
+    // digAddCsVservers()
+
+    // find -policyName from 'add cs bind's
+
+    const xxx = 'debugger!'
+    return appDet;
+    // }
 }
 
 
@@ -92,7 +98,10 @@ export function digBindCsVservers(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree
 
                 // dig -lbvserver details
                 // 'add lb vserver' -> digAddLbVserver
-                digAddLbVserver(el, obj, rx);
+                // may want to pass on digging the lbVserver at this point
+                //      and just use the binding reference to pull it in during explosion
+                // const lbApp = await digAddLbVserver(el, obj, rx);
+                // app.apps.push(lbApp)
             }
 
         })
@@ -128,15 +137,23 @@ export function digAddCsPolicy(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) {
 }
 
 
-export function digAddLbVserver(lbVserver: string, obj: AdcConfObj, rx: AdcRegExTree) {
+/**
+ * dig by just vserver name so we can use this to look up 'add cs vserver' bindings also
+ * @param lbVserver 
+ * @param obj 
+ * @param rx 
+ * @returns 
+ */
+export async function digAddLbVserver(lbVserver: string, obj: AdcConfObj, rx: AdcRegExTree) {
     // check app to see if we have an -lbsvserver binding
     // if not, then what???
 
-    const lbApp: AdcApp = {
+    let lbApp: AdcApp = {
         name: '',
         type: '',
         ipAddress: '',
-        port: 0
+        port: 0,
+        lines: []
     }
 
     // start with 'add lb vserver'
@@ -144,37 +161,135 @@ export function digAddLbVserver(lbVserver: string, obj: AdcConfObj, rx: AdcRegEx
         .forEach(x => {
             // should only be one add lb vserver with this name...
             const originalString = 'add lb vserver ' + x;
+            lbApp.lines.push(originalString)
             const parent = originalString.match(rx['add lb vserver']);
-            const lbApp: AdcApp = {
-                name: lbVserver,
-                type: parent!.groups!.type,
-                ipAddress: parent!.groups!.ipAddress,
-                port: parent!.groups!.port as unknown as number
-            }
-            // merge in vserver config options
+            lbApp.name = lbVserver,
+                lbApp.type = parent!.groups!.type,
+                lbApp.ipAddress = parent!.groups!.ipAddress,
+                lbApp.port = parent!.groups!.port as unknown as number,
+                // merge in vserver config options
+                deepmergeInto(
+                    lbApp,
+                    parseNsOptions(parent!.groups!.opts, rx)
+                )
+        })
+
+    // dig 'bind lb vserver'
+
+    digBindLbVserver(lbApp, obj, rx)
+
+
+    return lbApp;
+
+
+
+}
+
+
+export function digBindLbVserver(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) {
+
+    // get the app name
+    // const appName = app.name;
+
+    // app.lines = []
+
+    // Q?: can a vserver has multiple service bindings?
+
+    // loop through 'bind lb vserver' for matches to app name
+    obj.bind.lb.vserver.filter(el => el.startsWith(app.name))
+        .forEach(x => {
+
+            const originalString = 'bind lb vserver ' + x;
+            app.lines.push(originalString)
+
+            app.bindings = {};  // start buiding the bingings object
+            app.bindings.service = []   // create the service array
+            app.bindings.serviceGroup = []   // create the service array
+
+            const serviceName = x.split(' ').pop();
+
+            // 'add service <serviceName>'
+            obj.add.service?.filter(s => s.startsWith(serviceName))
+                .forEach(x => {
+                    app.lines.push('add service' + x);
+                    app.bindings.service.push(serviceName)
+                })
+
+            const sg = digServiceGroup(serviceName, obj, rx)
+
+            app.lines.push(...sg.lines);
+            app.bindings.serviceGroup.push(sg.serviceGroup)
+
+            // 'add serviceGroup <serviceName>'
+            // obj.add.serviceGroup.filter(s => s.startsWith(serviceName))
+            //     .forEach(x => {
+            //         app.lines.push('add serviceGroup' + x);
+            //     })
+
+            // // 'bind serviceGroup <serviceName>'
+            // obj.bind.serviceGroup.filter(s => s.startsWith(serviceName))
+            //     .forEach(x => {
+            //         app.lines.push('bind serviceGroup' + x);
+
+            //     })
+        })
+}
+
+/**
+ * 
+ * @param name serviceGroup name from 'bind lb vserver'
+ * @param obj 
+ * @param rx 
+ */
+export function digServiceGroup(serviceName: string, obj: AdcConfObj, rx: AdcRegExTree) {
+
+    const lines = []
+    const serviceGroup: any = {
+        servers: []
+    };
+
+    // 'add serviceGroup <serviceName>'
+    obj.add.serviceGroup.filter(s => s.startsWith(serviceName))
+        .forEach(x => {
+            const originalString = 'add serviceGroup ' + x
+            lines.push(originalString);
+            const parent = originalString.match(rx["add serviceGroup"])
+            serviceGroup.name = parent.groups.name;
+            serviceGroup.type = parent.groups.type;
             deepmergeInto(
-                lbApp,
+                serviceGroup,
                 parseNsOptions(parent!.groups!.opts, rx)
             )
         })
 
-        return lbApp;
+    // 'bind serviceGroup <serviceName>'
+    obj.bind.serviceGroup.filter(s => s.startsWith(serviceName))
+        .forEach(x => {
+            const originalString = 'bind serviceGroup ' + x
+            lines.push(originalString);
+            const parent = originalString.match(rx["bind serviceGroup"])
+            if (parent.groups?.serv) {
+                
+                serviceGroup.servers.push(parent.groups.serv)
 
+            } else if (parent.groups?.monitor) {
 
+                const monitorName = parent.groups.monitor.split(' ').pop();
+                
+                // get monitor config line
+                obj.add.lb.monitor.filter(m => m.startsWith(monitorName))
+                    .forEach(eM => {
+                        lines.push('add lb monitor ' + eM)
+                        serviceGroup.monitor = monitorName;
+                    })
 
-    // // loop through the lbserver bindings on the app
-    // app.bindings["-lbvserver"].forEach(el => {
-    //     // filter out the lbservers with that name
-    //     obj.add.lb.vserver.filter(x => x.includes(el))
-    //         .forEach(y => {
-    //             // add this line to the raw config lines
-    //             app.lines.push('add lb vserver ' + y);
-    //         })
-    // })
-}
+            } else if (parent.groups?.opts) {
+                deepmergeInto(
+                    serviceGroup,
+                    parseNsOptions(parent!.groups!.opts, rx)
+                )
+            }
+        })
 
-
-export function digAddCsAction(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) {
-
-    // 
+    return { lines, serviceGroup };
 }

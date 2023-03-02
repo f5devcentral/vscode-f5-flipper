@@ -6,7 +6,7 @@ export type AdcConfObj = {
     set?: {
         ns?: {
             config?: string;
-            hostname?: string;
+            hostName?: string;
 
         };
         system?: string;
@@ -40,6 +40,7 @@ export type AdcConfObj = {
             ip6?: string[];
         };
         server?: string[];
+        service?: string[];
         serviceGroup?: string[];
         ssl?: {
             certKey?: string[];
@@ -138,14 +139,15 @@ export type Explosion = {
  *  - child of stats - child of explosion
  */
 export type ObjStats = {
-    virtuals?: number,
-    profiles?: number,
-    policies?: number,
-    pools?: number,
-    irules?: number,
-    monitors?: number,
-    nodes?: number,
-    snatPools?: number
+    csPolicy?: number,
+    csAction?: number,
+    csVserver?: number,
+    lbVserver?: number,
+    lbMonitor?: number,
+    server?: number,
+    service?: number,
+    serviceGroup?: number
+    sslCerKey?: number
 }
 
 /**

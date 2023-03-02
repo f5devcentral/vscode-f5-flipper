@@ -1,6 +1,6 @@
 {
   "name": "project-flipper",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "breaking down Citrix NetScaler configs",
   "main": "dist/index.js",
   "scripts": {
@@ -54,6 +54,7 @@
   },
   "dependencies": {
     "deepmerge-ts": "^4.3.0",
+    "lodash.get": "^4.4.2",
     "tar-stream": "^3.0.0"
   }
 }

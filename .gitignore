@@ -2,3 +2,6 @@
 /jalam
 /node_modules
 /dist
+/tmp
+
+project-flipper-*.tgz

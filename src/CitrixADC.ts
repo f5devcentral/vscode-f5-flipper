@@ -5,10 +5,11 @@
 import { EventEmitter } from 'events';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { digAppsArrys } from './digAppsArrys';
+import { digAddLbVserver, digAddCsVserver } from './digAppsArrys';
 // import { RegExTree, TmosRegExTree } from './regex'
 import logger from './logger';
 import { AdcConfObj, AdcRegExTree, ConfigFile, Explosion, Stats } from './models'
+import { countMainObjects } from './objectCounter';
 import { parseAdcConf } from './parseAdc';
 import { parseAdcConfArrays } from './parseAdcArrys';
 import { RegExTree } from './regex';
@@ -153,7 +154,15 @@ export default class ADC extends EventEmitter {
         this.configObjectArry = await parseAdcConfArrays(config, this.rx!);
 
         // get hostname from confObj, assign to parent class for easy access
+        if (this.configObject.set.ns.hostName) {
+            this.hostname = this.configObject.set.ns.hostName;
+        }
 
+        // gather stats on the number of different objects found (vservers/monitors/policies)
+        await countMainObjects(this.configObjectArry)
+            .then(stats => {
+                this.stats.objects = stats;
+            });
     }
 
 
@@ -234,10 +243,10 @@ export default class ADC extends EventEmitter {
             logs: await this.logs()                 // get all the processing logs
         }
 
-        // if (apps.length > 0) {
-        //     // add virtual servers (apps), if found
-        //     retObj.config['apps'] = apps;
-        // }
+        if (apps.length > 0) {
+            // add virtual servers (apps), if found
+            retObj.config['apps'] = apps;
+        }
 
         if (this.fileStore.length > 0) {
             // add files from file store
@@ -287,15 +296,35 @@ export default class ADC extends EventEmitter {
             //     return x;
             // }
 
-        } else if (this.configObject.add?.lb?.vserver) {
+        } else if (this.configObjectArry.add.cs.vserver || this.configObjectArry.add.lb.vserver) {
 
             // means we didn't get an app name, so try to dig all apps...
             const apps = [];
 
-            await digAppsArrys(this.configObjectArry, this.rx)
-                .then(appCfg => {
+            // dig each 'add cs vserver'
 
-                })
+            for (const app of this.configObjectArry.add.cs.vserver) {
+
+                await digAddCsVserver(app, this.configObjectArry, this.rx)
+                    .then(appCfg => {
+
+                        apps.push(appCfg)
+
+                    })
+
+            }
+
+            // dig each 'add lb vserver', but check for existing
+
+            for (const app of this.configObjectArry.add.lb.vserver) {
+
+                const appName = app.split(' ').shift();
+
+                await digAddLbVserver(appName, this.configObjectArry, this.rx)
+                    .then(appCfg => {
+                        apps.push(appCfg)
+                    })
+            }
 
             // loop through app objects
             // for (const el of this.configObjectArry.add?.lb?.vserver) {

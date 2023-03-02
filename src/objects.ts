@@ -11,3 +11,10 @@ export function nestedObjValue(fields: string[], value: unknown): unknown {
     const reducer = (acc, item, index, arr) => ({ [item]: index + 1 < arr.length ? acc : value });
     return fields.reduceRight(reducer, {});
 }
+
+
+// export function deepGet(obj: Object, path: string) {
+
+//     return path.split(".")
+//     .reduce((o, key) => o && typeof o[key] !== 'undefined' ? o[key] : undefined, obj)
+// }

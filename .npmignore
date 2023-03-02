@@ -1,0 +1,25 @@
+# Source directory
+src/
+# Tests directory
+tests/
+# example configs
+example_configs/
+# Coverage directory
+coverage/
+# Code Documentation directory
+code_docs/
+# Local Documentation directory
+docs/
+# NYC Output directory
+.nyc_output/
+# Git Allowed File
+.gitallowed
+# CI File
+.gitlab-ci.yml
+# vscode project configuration settings
+.vscode
+# ignore archive building temp dir
+/tmp
+# ignore existing packages
+*.tgz
+*.png

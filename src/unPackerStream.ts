@@ -160,7 +160,7 @@ export class UnPacker extends EventEmitter {
             })
 
         } else {
-            const msg = `file type of "${filePath.ext}", not supported, try (.conf|.ucs|.kqview|.gz)`
+            const msg = `file type of "${filePath.ext}", not supported, try (.conf.gz)`
             logger.error(msg);
             throw new Error(`not able to read file => ${msg}`);
         }
