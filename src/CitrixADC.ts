@@ -7,7 +7,7 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { digAddLbVserver, digAddCsVserver } from './digAppsArrys';
 // import { RegExTree, TmosRegExTree } from './regex'
-import logger from './logger';
+import intLogger from './intLogger';
 import { AdcConfObj, AdcRegExTree, ConfigFile, Explosion, Stats } from './models'
 import { countMainObjects } from './objectCounter';
 import { parseAdcConf } from './parseAdc';
@@ -178,7 +178,7 @@ export default class ADC extends EventEmitter {
                 // do nothing, current file version matches existing files tmos verion
             } else {
                 const err = `Parsing [${x.fileName}], adc version of this file does not match previous file [${this.adcVersion}]`;
-                logger.error(err)
+                intLogger.error(err)
                 // throw new Error(err);
             }
         } else {
@@ -186,7 +186,7 @@ export default class ADC extends EventEmitter {
             // first time through - build everything
             const rex = new RegExTree();  // instantiate regex tree
             [this.adcVersion, this.adcBuild] = this.getAdcVersion(x.content, rex.adcVersionBaseReg);  // get adc version
-            logger.info(`Recieved .conf file of version: ${this.adcVersion}`)
+            intLogger.info(`Recieved .conf file of version: ${this.adcVersion}`)
 
             // assign regex tree for particular version
             this.rx = rex.get(this.adcVersion)
@@ -263,7 +263,7 @@ export default class ADC extends EventEmitter {
      * Get processing logs
      */
     async logs(): Promise<string[]> {
-        return logger.getLogs();
+        return intLogger.getLogs();
     }
 
 
@@ -363,7 +363,7 @@ export default class ADC extends EventEmitter {
             this.stats.appTime = Number(process.hrtime.bigint() - startTime) / 1000000;
             return apps;
         } else {
-            logger.info('no ltm virtual servers found - excluding apps information')
+            intLogger.info('no ltm virtual servers found - excluding apps information')
             return [];
         }
     }
@@ -384,7 +384,7 @@ export default class ADC extends EventEmitter {
             return [version[1], build];
         } else {
             const msg = 'citrix adc/ns version not detected -> meaning this probably is not an ns.conf'
-            logger.error(msg)
+            intLogger.error(msg)
             throw new Error(msg)
         }
     }

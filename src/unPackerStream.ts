@@ -10,7 +10,7 @@
 
 import path from "path";
 import * as fs from 'fs';
-import logger from "./logger";
+import logger from "./intLogger";
 import zlib from 'zlib';
 import tar from 'tar-stream'
 import { EventEmitter } from "events";
@@ -160,7 +160,7 @@ export class UnPacker extends EventEmitter {
             })
 
         } else {
-            const msg = `file type of "${filePath.ext}", not supported, try (.conf.gz)`
+            const msg = `file type of "${filePath.ext}", not supported, try (.conf/.tgz)`
             logger.error(msg);
             throw new Error(`not able to read file => ${msg}`);
         }

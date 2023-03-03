@@ -1,6 +1,6 @@
 
 
-import logger from "./logger";
+import logger from "./intLogger";
 import { AdcRegExTree } from "./models";
 
 // /**

@@ -1,7 +1,8 @@
-/cstalhood
-/jalam
-/node_modules
-/dist
-/tmp
-
+cstalhood
+jalam
+node_modules
+dist
+tmp
+out
+cache
 project-flipper-*.tgz

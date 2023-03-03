@@ -1,8 +1,29 @@
 {
-  "name": "project-flipper",
-  "version": "0.1.0",
-  "description": "breaking down Citrix NetScaler configs",
-  "main": "dist/index.js",
+  "name": "vscode-f5-flipper",
+  "displayName": "F5-flipper",
+  "description": "Breaking down Citrix NetScaler ADC configs",
+  "publisher": "F5DevCentral",
+  "version": "0.1.0-apha",
+  "keywords": [
+    "F5",
+    "F5Networks",
+    "NetScaler",
+    "ADC",
+    "Citrix"
+  ],
+  "engines": {
+    "vscode": "^1.63.0",
+    "node": "^16"
+  },
+  "icon": "images/f5.png",
+  "galleryBanner": {
+    "color": "#DCDCDC",
+    "theme": "light"
+  },
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./out/extLoader.js",
   "scripts": {
     "lint": "tsc --noEmit && eslint 'src/**/*.{js,ts,tsx}' 'tests/**/*.{js,ts,tsx}'",
     "watch": "tsc -watch -p ./",
@@ -12,12 +33,12 @@
     "build-package": "npm run compile && npm pack",
     "publish-package": "npm run compile && npm publish"
   },
-  "engines": {
-    "node": "16.x"
-  },
+  "categories": [
+    "Other"
+  ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DumpySquare/project-flipper.git"
+    "url": "https://github.com/DumpySquare/project-flipper.git"
   },
   "author": "",
   "license": "Apache-2.0",
@@ -25,6 +46,38 @@
     "url": "https://github.com/DumpySquare/project-flipper/issues"
   },
   "homepage": "https://github.com/DumpySquare/project-flipper#readme",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "f5-ns-container",
+          "title": "F5 Flipper",
+          "icon": "images/flipper2.svg"
+        }
+      ]
+    },
+    "views": {
+      "f5-ns-container": [
+        {
+          "id": "nsConfig",
+          "name": "Citrix ADC/NS Configs"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "nsConfig",
+        "contents": "Welome to project-flipper!\nThis project aims to explore the process of breaking down, analyzing and abstracting applications from a Citrix NetScaler config/archive (.conf/.tgz)\n- Phase 1: Unpack config\n- Phase 2: Abstract Applications\n- Phase 3: Diagnostics\n- Phase 4: Conversion Outputs (tmos/xc?/nginx?)\nImport a Citrix ADC/NS config/archive to continue.\n[Import .conf/.tgz from local file](command:f5-flipper.cfgExplore)\n[Repo](https://github.com/DumpySquare/project-flipper)"
+      }
+    ],
+    "commands": [
+      {
+        "command": "f5-flipper.cfgExplore",
+        "title": "Import ADC/NS (.config/tgz)",
+        "category": "F5-Flipper"
+      }
+    ]
+  },
   "nyc": {
     "check-coverage": true,
     "lines": 80,
@@ -39,12 +92,14 @@
   },
   "devDependencies": {
     "@types/assert": "^1.5.2",
+    "@types/js-yaml": "^4.0.5",
     "@types/mocha": "^10.0.1",
     "@types/node": "^16.11.7",
     "@types/object-path": "^0.11.1",
     "@types/tar-stream": "^2.2.2",
-    "@typescript-eslint/eslint-plugin": "^5.53.0",
-    "@typescript-eslint/parser": "^5.53.0",
+    "@types/vscode": "^1.63.0",
+    "@typescript-eslint/eslint-plugin": "^5.42.0",
+    "@typescript-eslint/parser": "^5.42.0",
     "assert": "^2.0.0",
     "eslint": "^8.34.0",
     "mocha": "^10.2.0",
@@ -54,6 +109,8 @@
   },
   "dependencies": {
     "deepmerge-ts": "^4.3.0",
+    "f5-conx-core": "^0.17.2",
+    "js-yaml": "^4.1.0",
     "lodash.get": "^4.4.2",
     "tar-stream": "^3.0.0"
   }

@@ -9,15 +9,17 @@
         "esModuleInterop": true,
         "sourceMap": true,
         "declaration": true,
+        "skipLibCheck": true,
         // "strict": true,
         "rootDir": "src",
-        "outDir": "dist",
+        "outDir": "out",
     },
     "compileOnSave": true,
     "include": [
         "src/**/*"
     ],
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "src/test/**/*"
     ]
 }
