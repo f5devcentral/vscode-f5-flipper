@@ -1,10 +1,11 @@
 
-import { 
+import {
     ExtensionContext,
     commands,
-    window
+    window,
+    Uri
 } from 'vscode';
-import { CfgProvider } from './cfgViewProvider';
+import { NsCfgProvider } from './nsCfgViewProvider';
 import { ext, initSettings, loadSettings } from './extensionVariables';
 import fs from 'fs';
 import * as os from 'os';
@@ -15,52 +16,49 @@ import { Telemetry } from './telemetry';
 logger.console = false;
 
 // create OUTPUT channel
-const f5OutputChannel = window.createOutputChannel('f5-flipper');
+const f5FlipperOutputChannel = window.createOutputChannel('f5-flipper');
 
 // inject vscode output into logger
 logger.output = function (log: string) {
-	f5OutputChannel.appendLine(log);
+    f5FlipperOutputChannel.appendLine(log);
 };
 
 export async function activateInternal(context: ExtensionContext) {
 
-    logger.info('flipper is here to help!!!');
+    process.on('unhandledRejection', error => {
+        logger.error('--- unhandledRejection ---', error);
+        // ext.telemetry.capture({ unhandledRejection: JSON.stringify(error) });
+    });
 
+    logger.info(`Extension/Host details: `, {
+        name: context.extension.packageJSON.name,
+        displayName: context.extension.packageJSON.displayName,
+        publisher: context.extension.packageJSON.publisher,
+        description: context.extension.packageJSON.description,
+        version: context.extension.packageJSON.version,
+        license: context.extension.packageJSON.license,
+        repository: context.extension.packageJSON.repository.url,
+        host: JSON.stringify({
+            hostOS: os.type(),
+            platform: os.platform(),
+            release: os.release()
+        }),
+        userInfo: JSON.stringify(os.userInfo())
+    });
 
-	process.on('unhandledRejection', error => {
-		logger.error('--- unhandledRejection ---', error);
-		// ext.telemetry.capture({ unhandledRejection: JSON.stringify(error) });
-	});
+    // initialize extension settings
+    await initSettings(context);
 
-	logger.info(`Extension/Host details: `, {
-		name: context.extension.packageJSON.name,
-		displayName: context.extension.packageJSON.displayName,
-		publisher: context.extension.packageJSON.publisher,
-		description: context.extension.packageJSON.description,
-		version: context.extension.packageJSON.version,
-		license: context.extension.packageJSON.license,
-		repository: context.extension.packageJSON.repository.url,
-		host: JSON.stringify({
-			hostOS: os.type(),
-			platform: os.platform(),
-			release: os.release()
-		}),
-		userInfo: JSON.stringify(os.userInfo())
-	});
+    // load ext config to ext.settings.
+    await loadSettings();
 
-		// initialize extension settings
-		await initSettings(context);
+    // create the telemetry service
+    ext.telemetry = new Telemetry(context);
 
-		// load ext config to ext.settings.
-		await loadSettings();
-
-			// create the telemetry service
-	ext.telemetry = new Telemetry(context);
-
-	const cfgProvider = new CfgProvider();
+    const nsCfgProvider = new NsCfgProvider();
     // const cfgView = window.registerTreeDataProvider('cfgTree', cfgProvider);
-    const cfgView = window.createTreeView('cfgTree', {
-        treeDataProvider: cfgProvider,
+    const cfgView = window.createTreeView('nsConfig', {
+        treeDataProvider: nsCfgProvider,
         showCollapseAll: true,
         canSelectMany: true
     });
@@ -75,12 +73,15 @@ export async function activateInternal(context: ExtensionContext) {
 
         let filePath: string;
 
-        // ext.telemetry.capture({ command: 'f5-flipper.cfgExplore' });
+        ext.telemetry.capture({ command: 'f5-flipper.cfgExplore' });
+
+        f5FlipperOutputChannel.show();
 
         if (!item) {
             // no input means we need to browse for a local file
             item = await window.showOpenDialog({
-                canSelectMany: false
+                canSelectMany: false,
+                defaultUri: Uri.file('/home/ted/project-flipper/example_configs/ns1_v13.1.conf')
             });
 
             // if we got a file from the showOpenDialog, it comes in an array, even though we told it to only allow single item selection -> return the single array item
@@ -118,19 +119,90 @@ export async function activateInternal(context: ExtensionContext) {
 
         logger.info(`f5-flipper.cfgExplore: exploding config @ ${filePath}`);
 
-        cfgProvider.makeExplosion(filePath);
+        nsCfgProvider.makeExplosion(filePath);
 
         await new Promise(resolve => { setTimeout(resolve, 2000); });
-        commands.executeCommand('cfgTree.focus');
+        commands.executeCommand('nsConfig.focus');
 
     }));
 
-	// context.subscriptions.push(disposable);
+    
+    context.subscriptions.push(commands.registerCommand('f5-flipper.cfgExploreClear', async (text) => {
+        ext.telemetry.capture({ command: 'f5-flipper.cfgExploreClear' });
+        nsCfgProvider.clear();
+        nsCfgProvider.xcDiag = false;
+    }));
+
+    context.subscriptions.push(commands.registerCommand('f5-flipper.cfgExploreRefresh', async (text) => {
+        nsCfgProvider.refresh();
+    }));
+
+    context.subscriptions.push(commands.registerCommand('f5-flipper.cfgExplore-xcDiagSwitch', async (text) => {
+        
+        // flip switch and refresh details
+        if(nsCfgProvider.xcDiag){
+            nsCfgProvider.xcDiag = false;
+            ext.xcDiag.enabled = false;
+            console.log('xc diag updatediagnostics disable');
+            if(ext.xcDiag.lastDoc) {
+                // clear the last editor diags
+                ext.xcDiag.updateDiagnostic(ext.xcDiag.lastDoc);
+            }
+        } else {
+            nsCfgProvider.xcDiag = true;
+            
+            // was having errors about functions undefined, so, make sure everything is loaded as we turn this on
+            // if (ext.xcDiag.updateDiagnostic === undefined) {
+                console.log('xc diag updatediagnostics enable');
+                // ext.xcDiag = new XcDiag(context);
+                ext.xcDiag.enabled = true;
+            // }
+        }
+        nsCfgProvider.refresh();
+    }));
+
+    
+    context.subscriptions.push(commands.registerCommand('f5-flipper.render', async (text) => {
+        const x = cfgView?.selection;
+        let full: string[] = [];
+        // let text2;
+        if (Array.isArray(x) && x.length > 1) {
+            // got multi-select array, push all necessary details to a single object
+
+            x.forEach((el) => {
+                const y = el.command?.arguments;
+                if (y) {
+                    full.push(y[0].join('\n'));
+                    full.push('\n\n#############################################\n\n');
+                }
+            });
+            text = full;
+
+            // } else if (Array.isArray(x) && x.length === 1) {
+            // 	return window.showWarningMessage('Select multiple apps with "Control" key');
+        } else if (typeof text === 'string') {
+            // just text, convert to single array with render
+            text = [text];
+        }
+
+        // todo: add logic to catch single right click
+
+        let diagTag = false;
+        const y = x[0];
+        if (x[0]?.contextValue === 'cfgPartition' || x[0]?.contextValue === 'cfgAppItem') {
+            diagTag = true;
+        }
+
+        // provide the text and "IF" xc diagnostics "CAN" be applied
+        nsCfgProvider.render(text, diagTag);
+    }));
+
+    // context.subscriptions.push(disposable);
 }
 
 
 
 // this method is called when your extension is deactivated
 export async function deactivateInternal(context: ExtensionContext) {
-	// log deactivation event
+    // log deactivation event
 }

@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { digAddLbVserver, digAddCsVserver } from './digAppsArrys';
 // import { RegExTree, TmosRegExTree } from './regex'
 import intLogger from './intLogger';
-import { AdcConfObj, AdcRegExTree, ConfigFile, Explosion, Stats } from './models'
+import { AdcApp, AdcConfObj, AdcRegExTree, ConfigFile, Explosion, Stats } from './models'
 import { countMainObjects } from './objectCounter';
 import { parseAdcConf } from './parseAdc';
 import { parseAdcConfArrays } from './parseAdcArrys';
@@ -308,7 +308,7 @@ export default class ADC extends EventEmitter {
                 await digAddCsVserver(app, this.configObjectArry, this.rx)
                     .then(appCfg => {
 
-                        apps.push(appCfg)
+                        apps.push(sortAdcApp(appCfg))
 
                     })
 
@@ -322,7 +322,7 @@ export default class ADC extends EventEmitter {
 
                 await digAddLbVserver(appName, this.configObjectArry, this.rx)
                     .then(appCfg => {
-                        apps.push(appCfg)
+                        apps.push(sortAdcApp(appCfg))
                     })
             }
 
@@ -392,6 +392,27 @@ export default class ADC extends EventEmitter {
 }
 
 
+/**
+ * sorts AdcApp object properties
+ *  mainly makes sure name/type/ipAddress/port are at the top and lines are at the bottom
+ * @param app 
+ * @returns 
+ */
+function sortAdcApp(app: AdcApp): AdcApp {
+
+    const sorted: AdcApp = {
+        name: app.name,
+        type: app.type,
+        ipAddress: app.ipAddress,
+        port: app.port,
+        opts: app.opts || undefined,
+        bindings: app.bindings,
+        policies: app.policies,
+        lines: app.lines,
+        apps: app.apps
+    }
+    return sorted;
+}
 
 // /**
 //  * standardize line endings to linux

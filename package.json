@@ -21,7 +21,7 @@
     "theme": "light"
   },
   "activationEvents": [
-    "*"
+    "onCommand:f5-flipper.cfgExplore"
   ],
   "main": "./out/extLoader.js",
   "scripts": {
@@ -75,8 +75,22 @@
         "command": "f5-flipper.cfgExplore",
         "title": "Import ADC/NS (.config/tgz)",
         "category": "F5-Flipper"
-      }
-    ]
+      },
+      {
+				"command": "f5-flipper.cfgExploreClear",
+				"title": "Clear",
+				"category": "F5-Flipper"
+			}
+    ],
+    "menus": {
+      "view/title": [
+        {
+					"command": "f5-flipper.cfgExploreClear",
+					"when": "view == nsConfig",
+					"group": "navigation"
+				}
+      ]
+    }
   },
   "nyc": {
     "check-coverage": true,

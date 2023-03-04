@@ -1,27 +1,8 @@
 import { deepmergeInto } from "deepmerge-ts";
-import { AdcConfObj, AdcRegExTree } from "./models";
+import { AdcApp, AdcConfObj, AdcRegExTree } from "./models";
 import { parseNsOptions } from "./parseAdc";
 
 
-export type AdcApp = {
-    name: string;
-    ipAddress: string;
-    type: string;
-    port: number
-    opts?: { [k: string]: string };
-    lines?: string[];
-    bindings?: {
-        '-lbvserver'?: string[];
-        '-policyName'?: string[];
-        service?: string[];
-        serviceGroup?: string[];
-    };
-    policies?: {
-        name: string;
-    }[];
-    // additional apps referenced by this app (ie. cs servers pointing to lb servers)
-    apps?: AdcApp[]
-}
 
 
 

@@ -1,4 +1,141 @@
 
+export type AdcApp = {
+    name: string;
+    type: string;
+    ipAddress: string;
+    port: number
+    opts?: { [k: string]: string };
+    bindings?: {
+        '-lbvserver'?: string[];
+        '-policyName'?: string[];
+        service?: string[];
+        serviceGroup?: string[];
+    };
+    policies?: {
+        name: string;
+    }[];
+    lines?: string[];
+    // additional apps referenced by this app (ie. cs servers pointing to lb servers)
+    apps?: AdcApp[]
+}
+
+
+
+/**
+ * defines the structure of the archive file extraction or single bigip.conf
+ */
+export type ConfigFile = {
+    fileName: string,
+    size: number,
+    content: string
+}
+
+
+/**
+ * array item of returned "apps"
+ */
+export type NsApp = {
+    name: string,
+    configs: string[],
+    map?: AppMap
+}
+
+/**
+ * object type for each app map
+ * - child of explosion
+ */
+export type AppMap = {
+    // the virtual server clients connect to
+    vsDest?: string,
+    // default pool members (ip:port)
+    pool?: string[]
+}
+
+
+/**
+ * main explosion output
+ * 
+ */
+export type Explosion = {
+    id: string,
+    dateTime: Date,
+    hostname?: string,
+    inputFileType: string,
+    config: {
+        sources: ConfigFile[],
+        apps?: AdcApp[]
+    },
+    stats: Stats,
+    fileStore?: ConfigFile[]
+    logs: string[]
+}
+
+
+/**
+ * ltm object stats
+ *  - child of stats - child of explosion
+ */
+export type ObjStats = {
+    csPolicy?: number,
+    csAction?: number,
+    csVserver?: number,
+    lbVserver?: number,
+    lbMonitor?: number,
+    server?: number,
+    service?: number,
+    serviceGroup?: number
+    sslCerKey?: number
+}
+
+/**
+ * stats object type for object counts
+ * - child of explosion
+ */
+export type Stats = {
+    configBytes?: number,
+    loadTime?: number,
+    parseTime?: number,
+    appTime?: number,
+    packTime?: number,
+    sourceAdcVersion?: string,
+    objectCount?: number,
+    lineCount?: number,
+    objects?: ObjStats
+    sourceSize?: number;
+}
+
+
+export type AdcRegExTree = {
+    adcVersion: RegExp;
+    adcBuild: RegExp;
+    cfgOptions: RegExp;
+    cfgOptionsQuotes: RegExp;
+    verbs: RegExp;
+    'add ns ip': RegExp;
+    'add ns ip6': RegExp;
+    'add ns rpcNode': RegExp;
+    'add route': RegExp;
+    'add dns nameServer': RegExp;
+    'add lb vserver': RegExp;
+    'add lb monitor': RegExp;
+    'add ssl certKey': RegExp;
+    'add server': RegExp;
+    'add service': RegExp;
+    'add serviceGroup': RegExp;
+    'add cs vserver': RegExp;
+    'add cs action': RegExp;
+    'add cs policy': RegExp;
+    'add rewrite action': RegExp;
+    'add rewrite policy': RegExp;
+    'set ssl vserver': RegExp;
+    'set lb monitor': RegExp;
+    'set ns param': RegExp;
+    'bind service': RegExp;
+    'bind serviceGroup': RegExp;
+    'bind lb vserver': RegExp;
+    'bind cs vserver': RegExp;
+    'bind ssl vserver': RegExp;
+}
 
 
 export type AdcConfObj = {
@@ -80,122 +217,4 @@ export type AdcConfObj = {
             vserver?: string[];
         };
     };
-}
-
-/**
- * defines the structure of the archive file extraction or single bigip.conf
- */
-export type ConfigFile = {
-    fileName: string,
-    size: number,
-    content: string
-}
-
-
-/**
- * array item of returned "apps"
- */
-export type NsApp = {
-    name: string,
-    configs: string[],
-    map?: AppMap
-}
-
-/**
- * object type for each app map
- * - child of explosion
- */
-export type AppMap = {
-    // the virtual server clients connect to
-    vsDest?: string,
-    // default pool members (ip:port)
-    pool?: string[]
-}
-
-
-/**
- * main explosion output
- * 
- */
-export type Explosion = {
-    id: string,
-    dateTime: Date,
-    hostname?: string,
-    inputFileType: string,
-    config: {
-        sources: ConfigFile[],
-        apps?: NsApp[],
-        base?: string[],
-        doClasses?: string[]
-    },
-    stats: Stats,
-    fileStore?: ConfigFile[]
-    logs: string[]
-}
-
-
-/**
- * ltm object stats
- *  - child of stats - child of explosion
- */
-export type ObjStats = {
-    csPolicy?: number,
-    csAction?: number,
-    csVserver?: number,
-    lbVserver?: number,
-    lbMonitor?: number,
-    server?: number,
-    service?: number,
-    serviceGroup?: number
-    sslCerKey?: number
-}
-
-/**
- * stats object type for object counts
- * - child of explosion
- */
-export type Stats = {
-    configBytes?: number,
-    loadTime?: number,
-    parseTime?: number,
-    appTime?: number,
-    packTime?: number,
-    sourceAdcVersion?: string,
-    objectCount?: number,
-    lineCount?: number,
-    objects?: ObjStats
-    sourceSize?: number;
-}
-
-
-export type AdcRegExTree = {
-    adcVersion: RegExp;
-    adcBuild: RegExp;
-    cfgOptions: RegExp;
-    cfgOptionsQuotes: RegExp;
-    verbs: RegExp;
-    'add ns ip': RegExp;
-    'add ns ip6': RegExp;
-    'add ns rpcNode': RegExp;
-    'add route': RegExp;
-    'add dns nameServer': RegExp;
-    'add lb vserver': RegExp;
-    'add lb monitor': RegExp;
-    'add ssl certKey': RegExp;
-    'add server': RegExp;
-    'add service': RegExp;
-    'add serviceGroup': RegExp;
-    'add cs vserver': RegExp;
-    'add cs action': RegExp;
-    'add cs policy': RegExp;
-    'add rewrite action': RegExp;
-    'add rewrite policy': RegExp;
-    'set ssl vserver': RegExp;
-    'set lb monitor': RegExp;
-    'set ns param': RegExp;
-    'bind service': RegExp;
-    'bind serviceGroup': RegExp;
-    'bind lb vserver': RegExp;
-    'bind cs vserver': RegExp;
-    'bind ssl vserver': RegExp;
 }

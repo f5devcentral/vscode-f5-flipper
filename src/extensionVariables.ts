@@ -145,10 +145,10 @@ export async function loadSettings() {
     
     ext.settings.timeoutInMilliseconds = f5Cfg.get('f5-flipper.timeoutinmilliseconds')!;
     ext.settings.previewColumn = parseColumn(f5Cfg.get('newEditorColumn')!);
-    ext.settings.httpResponseDetails = f5Cfg.get('httpResponseDetails')!;
+    // ext.settings.httpResponseDetails = f5Cfg.get('httpResponseDetails')!;
     ext.settings.preserveEditorFocus = f5Cfg.get('preserveEditorFocus')!;
     ext.settings.newEditorTabForAll = f5Cfg.get('newEditorTabForAll', false);
-    ext.settings.prompts = f5Cfg.get('enablePrompts', false);
+    // ext.settings.prompts = f5Cfg.get('enablePrompts', false);
     
     ext.settings.preview = f5Cfg.get('preview')!;
     // plugin preview setting to view context
@@ -156,18 +156,18 @@ export async function loadSettings() {
 
     process.env.F5_VSCODE_LOG_LEVEL = f5Cfg.get('logLevel');
 
-    process.env[ext.teemEnv] = f5Cfg.get('f5-flipper.TEEM')!;
+    process.env[ext.teemEnv] = f5Cfg.get('f5.TEEM') || 'true';
 
-    process.env.F5_CONX_CORE_REJECT_UNAUTORIZED = f5Cfg.get('rejectUnauthorizedBIGIP')!.toString();
+    // process.env.F5_CONX_CORE_REJECT_UNAUTORIZED = f5Cfg.get('rejectUnauthorizedBIGIP')!.toString();
     
-    // get cookie config from vscode and place in env
-    const cookie = f5Cfg.get('cookie')!.toString();
-    if (cookie) {
-        process.env.F5_CONX_CORE_COOKIES = cookie;
-    } else {
-        // clear if not found
-        delete process.env.F5_CONX_CORE_COOKIES;
-    }
+    // // get cookie config from vscode and place in env
+    // const cookie = f5Cfg.get('cookie')!.toString();
+    // if (cookie) {
+    //     process.env.F5_CONX_CORE_COOKIES = cookie;
+    // } else {
+    //     // clear if not found
+    //     delete process.env.F5_CONX_CORE_COOKIES;
+    // }
     
     logger.info('------ Environment Variables ------');
     // log envs
@@ -180,9 +180,9 @@ export async function loadSettings() {
     //     .filter(el => el[0].startsWith('F5_VSCODE_'))
     //     .forEach(el => logger.info(`${el[0]}=${el[1]}`));
 
-    if(process.env.NODE_TLS_REJECT_UNAUTHORIZED) {
-        logger.info(`NODE_TLS_REJECT_UNAUTHORIZED=${process.env.NODE_TLS_REJECT_UNAUTHORIZED}`);
-    }
+    // if(process.env.NODE_TLS_REJECT_UNAUTHORIZED) {
+    //     logger.info(`NODE_TLS_REJECT_UNAUTHORIZED=${process.env.NODE_TLS_REJECT_UNAUTHORIZED}`);
+    // }
 
     // // reload device hosts view
     // if(ext.hostsTreeProvider) {
