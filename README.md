@@ -18,8 +18,10 @@ Future goals include conversion outputs for different supported F5 solutions, in
 5. Right click in editor of the file
 6. Select 'Explore ADC/NS (.conf/tgz)'
 7. This should bring you to the new view from project-flipper with the config breakdown
-  - Select an application to view it's config
-  - Hover over the top menu item to see breakdown stats
+     - Select an application to view it's config
+     - Hover over the top menu item to see breakdown stats
+
+<img src="./images/flipper-2.gif" alt="drawing" width="100%"/>
 
 # Breakdown Process
 

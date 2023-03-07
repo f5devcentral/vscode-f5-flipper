@@ -78,37 +78,37 @@
         "category": "F5-Flipper"
       },
       {
-				"command": "f5-flipper.report",
-				"title": "Flipper Report",
-				"category": "F5-Flipper",
-				"icon": "$(output)"
-			},
+        "command": "f5-flipper.report",
+        "title": "Flipper Report",
+        "category": "F5-Flipper",
+        "icon": "$(output)"
+      },
       {
-				"command": "f5-flipper.cfgExploreClear",
-				"title": "Clear",
-				"category": "F5-Flipper"
-			}
+        "command": "f5-flipper.cfgExploreClear",
+        "title": "Clear",
+        "category": "F5-Flipper"
+      }
     ],
     "menus": {
       "view/title": [
         {
-					"command": "f5-flipper.cfgExploreClear",
-					"when": "view == nsConfigView",
-					"group": "navigation"
-				}
+          "command": "f5-flipper.cfgExploreClear",
+          "when": "view == nsConfigView",
+          "group": "navigation"
+        }
       ],
       "view/item/context": [
         {
-					"command": "f5-flipper.report",
-					"when": "view == nsConfigView && viewItem == nsReport",
-					"group": "inline"
-				}
+          "command": "f5-flipper.report",
+          "when": "view == nsConfigView && viewItem == nsReport",
+          "group": "inline"
+        }
       ],
       "editor/context": [
         {
-					"command": "f5-flipper.cfgExplore",
-					"group": "F5-Flipper"
-				}
+          "command": "f5-flipper.cfgExplore",
+          "group": "F5-Flipper"
+        }
       ]
     }
   },
@@ -131,6 +131,7 @@
     "@types/node": "^16.11.7",
     "@types/object-path": "^0.11.1",
     "@types/tar-stream": "^2.2.2",
+    "@types/uuid": "^9.0.1",
     "@types/vscode": "^1.63.0",
     "@typescript-eslint/eslint-plugin": "^5.42.0",
     "@typescript-eslint/parser": "^5.42.0",
@@ -146,6 +147,7 @@
     "f5-conx-core": "^0.17.2",
     "js-yaml": "^4.1.0",
     "lodash.get": "^4.4.2",
-    "tar-stream": "^3.0.0"
+    "tar-stream": "^3.0.0",
+    "uuid": "^9.0.0"
   }
 }
