@@ -118,24 +118,6 @@ export class UnPacker extends EventEmitter {
                                     content: contentBuffer.join('')
                                 })
 
-                            // } else if ((header.name as string).endsWith('.xml')) {
-
-                            //     // emit .xml stats files
-                            //     this.emit('stat', {
-                            //         fileName: header.name,
-                            //         size: header.size,
-                            //         content: contentBuffer.join('')
-                            //     })
-
-                            // } else {
-
-                            //     // buffer all other files to be returned when complete
-                            //     files.push({
-                            //         fileName: header.name,
-                            //         size: header.size,
-                            //         content: contentBuffer.join('')
-                            //     })
-
                             }
                         }
                         next();

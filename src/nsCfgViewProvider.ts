@@ -76,7 +76,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
         window.withProgress({
             location: {
-                viewId: 'nsConfig'
+                viewId: 'nsConfigView'
             },
             title: `Extracting Citrix/ADC Configs`,
         }, async () => {
@@ -316,7 +316,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
         // this loop is syncronous
         for (const el of editors) {
-            if (el.document.fileName === 'app.na.conf' || el.document.fileName === 'app.json') {
+            if (el.document.fileName === 'app.ns.conf' || el.document.fileName === 'app.ns.json') {
                 viewColumn = el.viewColumn;
             }
         };

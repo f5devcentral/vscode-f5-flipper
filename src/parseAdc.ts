@@ -1,11 +1,18 @@
 import { AdcRegExTree } from "./models";
 import { nestedObjValue } from "./objects";
 import { deepmergeInto } from 'deepmerge-ts'
+import { logger } from "./logger";
 
 
 
 
-
+/**
+ * this first attempt at parsing the config broke down important lines to an object
+ * *** depricated in favor of the array method - 3.6.2023 ***
+ * @param config 
+ * @param rx 
+ * @returns 
+ */
 export async function parseAdcConf(config: string[], rx: AdcRegExTree) {
 
 
@@ -48,6 +55,11 @@ export async function parseAdcConf(config: string[], rx: AdcRegExTree) {
         item = 'add lb vserver'
         if (line.startsWith(item)) {
             const parent = line.match(rx[item]);
+
+            if (!parent) {
+                logger.error(`regex "${rx[item]}" - failed for line "${item}"`, )
+                return;
+            }
             const pName = parent!.groups!.name;
             // build base object with vserver details
             const baseObj = {
@@ -73,6 +85,12 @@ export async function parseAdcConf(config: string[], rx: AdcRegExTree) {
         item = 'set ssl vserver'
         if (line.startsWith(item)) {
             const parent = line.match(rx[item]);
+
+            if (!parent) {
+                logger.error(`regex "${rx[item]}" - failed for line "${item}"`, )
+                return;
+            }
+
             const pName = parent!.groups!.name;
             const baseObj = { [pName]: {} }  // initialize the object
             deepmergeInto(
@@ -87,6 +105,12 @@ export async function parseAdcConf(config: string[], rx: AdcRegExTree) {
         item = 'add lb monitor'
         if (line.startsWith(item)) {
             const parent = line.match(rx[item]);
+            
+            if (!parent) {
+                logger.error(`regex "${rx[item]}" - failed for line "${item}"`, )
+                return;
+            }
+
             const pName = parent!.groups!.name;
             const baseObj = { [pName]: {
                 type: parent!.groups!.type
@@ -103,6 +127,12 @@ export async function parseAdcConf(config: string[], rx: AdcRegExTree) {
         item = 'add ssl certKey'
         if (line.startsWith(item)) {
             const parent = line.match(rx[item]);
+            
+            if (!parent) {
+                logger.error(`regex "${rx[item]}" - failed for line "${item}"`, )
+                return;
+            }
+
             const pName = parent!.groups!.name;
             const baseObj = { [pName]: {} }
             deepmergeInto(
@@ -122,6 +152,12 @@ export async function parseAdcConf(config: string[], rx: AdcRegExTree) {
             //  <serviceGroupName>@ | 
             //  (-policyName <string>@ [-priority <positive_integer>] [-gotoPriorityExpression <expression>] [-type ( REQUEST | RESPONSE )] [-invoke (<labelType> <labelName>) ] ))
             const parent = line.match(rx[item]);
+
+            if (!parent) {
+                logger.error(`regex "${rx[item]}" - failed for line "${item}"`, )
+                return;
+            }
+
             // const pName = parent!.groups!.name;
             // const baseObj = { [pName]: {} }
             // // if we found config options with '-', then add them as needed
@@ -149,6 +185,12 @@ export async function parseAdcConf(config: string[], rx: AdcRegExTree) {
             // synopsys; https://developer-docs.citrix.com/projects/netscaler-command-reference/en/12.0/basic/server/server/
             // add server <name>@ (<IPAddress>@ | (<domain>@ [-domainResolveRetry <integer>] [-IPv6Address ( YES | NO )]) | (-translationIp <ip_addr> -translationMask <netmask>)) [-state ( ENABLED | DISABLED )] [-comment <string>] [-td <positive_integer>]
             const parent = line.match(rx[item]);
+
+            if (!parent) {
+                logger.error(`regex "${rx[item]}" - failed for line "${item}"`, )
+                return;
+            }
+
             const pName = parent!.groups!.name;
             const pValue = parent!.groups!.value;
             const baseObj = { [pName]: pValue }
@@ -161,6 +203,12 @@ export async function parseAdcConf(config: string[], rx: AdcRegExTree) {
         if (line.startsWith(item)) {
             item = item.trim()
             const parent = line.match(rx[item]);
+
+            if (!parent) {
+                logger.error(`regex "${rx[item]}" - failed for line "${item}"`, )
+                return;
+            }
+
             const pName = parent!.groups!.name;
             const baseObj = { [pName]: {} }
             deepmergeInto(
@@ -176,6 +224,12 @@ export async function parseAdcConf(config: string[], rx: AdcRegExTree) {
         if (line.startsWith(item)) {
             item = item.trim()
             const parent = line.match(rx[item]);
+
+            if (!parent) {
+                logger.error(`regex "${rx[item]}" - failed for line "${item}"`, )
+                return;
+            }
+
             const pName = parent!.groups!.name;
             const mask = parent!.groups!.mask;
             const baseObj = {

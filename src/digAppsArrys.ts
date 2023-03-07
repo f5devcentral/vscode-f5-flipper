@@ -1,4 +1,5 @@
 import { deepmergeInto } from "deepmerge-ts";
+import { logger } from "./logger";
 import { AdcApp, AdcConfObj, AdcRegExTree } from "./models";
 import { parseNsOptions } from "./parseAdc";
 
@@ -18,12 +19,17 @@ export async function digAddCsVserver(app: string, obj: AdcConfObj, rx: AdcRegEx
 
     const vserver = originalString.match(rx["add cs vserver"])
 
+    if (!vserver) {
+        logger.error(`regex "${rx["add cs vserver"]}" - failed for line "${originalString}"`, )
+        return;
+    }
+
     // object to hold all app details
     const appDet: AdcApp = {
         name: vserver!.groups!.name,
         ipAddress: vserver!.groups!.ipAddress,
         type: vserver!.groups!.type,
-        port: vserver!.groups!.port as unknown as number,
+        port: vserver!.groups!.port,
         opts: parseNsOptions(vserver!.groups!.opts, rx),
         lines: [originalString],
         bindings: {
@@ -133,7 +139,7 @@ export async function digAddLbVserver(lbVserver: string, obj: AdcConfObj, rx: Ad
         name: '',
         type: '',
         ipAddress: '',
-        port: 0,
+        port: '',
         lines: []
     }
 
@@ -144,10 +150,14 @@ export async function digAddLbVserver(lbVserver: string, obj: AdcConfObj, rx: Ad
             const originalString = 'add lb vserver ' + x;
             lbApp.lines.push(originalString)
             const parent = originalString.match(rx['add lb vserver']);
+            if (!parent) {
+                logger.error(`regex "${rx['add lb vserver']}" - failed for line "${originalString}"`, )
+                return;
+            }
             lbApp.name = lbVserver,
                 lbApp.type = parent!.groups!.type,
                 lbApp.ipAddress = parent!.groups!.ipAddress,
-                lbApp.port = parent!.groups!.port as unknown as number,
+                lbApp.port = parent!.groups!.port,
                 // merge in vserver config options
                 deepmergeInto(
                     lbApp,

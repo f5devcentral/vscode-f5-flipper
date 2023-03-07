@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { digAddLbVserver, digAddCsVserver } from './digAppsArrys';
 // import { RegExTree, TmosRegExTree } from './regex'
 import intLogger from './intLogger';
+import { logger } from './logger';
 import { AdcApp, AdcConfObj, AdcRegExTree, ConfigFile, Explosion, Stats } from './models'
 import { countMainObjects } from './objectCounter';
 import { parseAdcConf } from './parseAdc';
@@ -35,7 +36,7 @@ export default class ADC extends EventEmitter {
      * tmos config as nested json objects 
      * - consolidated parant object keys like ltm/apm/sys/...
      */
-    public configObject: AdcConfObj = {};
+    // public configObject: AdcConfObj = {};
     public configObjectArry: AdcConfObj = {};
     /**
      * adc version
@@ -150,12 +151,13 @@ export default class ADC extends EventEmitter {
         // array of unused/unparsed objects
         const orphans: string[] = [];
 
-        this.configObject = await parseAdcConf(config, this.rx!);
+        // this.configObject = await parseAdcConf(config, this.rx!);
         this.configObjectArry = await parseAdcConfArrays(config, this.rx!);
 
-        // get hostname from confObj, assign to parent class for easy access
-        if (this.configObject.set.ns.hostName) {
-            this.hostname = this.configObject.set.ns.hostName;
+        // get hostname from configObjectArry, assign to parent class for easy access
+        if (this.configObjectArry.set.ns.hostName.length > 0) {
+            // there should always be only one in this array
+            this.hostname = this.configObjectArry.set.ns.hostName[0];
         }
 
         // gather stats on the number of different objects found (vservers/monitors/policies)
@@ -272,50 +274,34 @@ export default class ADC extends EventEmitter {
      * @param app single app string
      * @return [{ name: <appName>, config: <appConfig>, map: <appMap> }]
      */
-    async apps(app?: string) {
+    async apps() {
 
-        /**
-         * todo:  add support for app array to return multiple specific apps at same time.
-         */
+        // setup our array to hold the apps
+        const apps: AdcApp[] = []
 
+        // start our timer for abstracting apps
         const startTime = process.hrtime.bigint();
 
-        if (app) {
-            // extract single app config
-            // const value = this.configObject.ltm.virtual[app]
 
-            // this.emit('extractApp', {
-            //     app,
-            //     time: Number(process.hrtime.bigint() - startTime) / 1000000
-            // })
-
-            // if (value) {
-            //     // dig config, then stop timmer, then return config...
-            //     const x = [await digVsConfig(app, value, this.configObject, this.rx)];
-            //     this.stats.appTime = Number(process.hrtime.bigint() - startTime) / 1000000
-            //     return x;
-            // }
-
-        } else if (this.configObjectArry.add.cs.vserver || this.configObjectArry.add.lb.vserver) {
-
-            // means we didn't get an app name, so try to dig all apps...
-            const apps = [];
-
+        // if we have any 'add cs vserver's
+        if (this.configObjectArry.add?.cs?.vserver) {
+            
             // dig each 'add cs vserver'
-
             for (const app of this.configObjectArry.add.cs.vserver) {
 
                 await digAddCsVserver(app, this.configObjectArry, this.rx)
                     .then(appCfg => {
-
                         apps.push(sortAdcApp(appCfg))
-
                     })
 
             }
 
-            // dig each 'add lb vserver', but check for existing
-
+        } 
+        
+        // if we have any 'add lb vserver's
+        if (this.configObjectArry.add?.lb?.vserver) {
+            
+            // dig each 'add lb vserver', but check for existing?
             for (const app of this.configObjectArry.add.lb.vserver) {
 
                 const appName = app.split(' ').shift();
@@ -324,48 +310,21 @@ export default class ADC extends EventEmitter {
                     .then(appCfg => {
                         apps.push(sortAdcApp(appCfg))
                     })
+
             }
 
-            // loop through app objects
-            // for (const el of this.configObjectArry.add?.lb?.vserver) {
-            //     // breakdown the vserver details
-            //     const deets = el.match(/(?<name>\S+) (?<type>\S+) (?<ipAddress>[\d.]+) (?<port>\d+) (?<opts>[\S ]+)/)!
-            //     const app = deets.groups!.name;
-
-            //     this.emit('extractApp', {
-            //         app,
-            //         time: Number(process.hrtime.bigint() - startTime) / 1000000
-            //     })
-
-            //     await digVserverArrys(app)
-            //     .then( appCfg => {
-
-            //     })
-            // }
-
-            // for (const [key, value] of Object.entries(this.configObject.ltm.virtual)) {
-            //     // event about extracted app
-            //     this.emit('extractApp', {
-            //         app: key,
-            //         time: Number(process.hrtime.bigint() - startTime) / 1000000
-            //     })
-
-            //     // dig config, but catch errors
-            //     await digVsConfig(key, value, this.configObject, this.rx)
-            //     .then(vsConfig => {
-            //             apps.push({ name: key, configs: vsConfig.config, map: vsConfig.map });
-            //         })
-            //         .catch(err => {
-            //             apps.push({ name: key, configs: err, map: '' });
-            //         })
-            // }
-
-            this.stats.appTime = Number(process.hrtime.bigint() - startTime) / 1000000;
-            return apps;
-        } else {
-            intLogger.info('no ltm virtual servers found - excluding apps information')
-            return [];
         }
+        
+        // capture app abstraction time
+        this.stats.appTime = Number(process.hrtime.bigint() - startTime) / 1000000;
+        
+        // log a warning if we didn't abstract any apps
+        if (apps.length === 0) {
+            logger.warn('no "add cs vserver" or "add lb vserver" objects found - excluding apps information')
+        }
+
+        // return the app array
+        return apps;
     }
 
 

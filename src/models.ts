@@ -3,7 +3,7 @@ export type AdcApp = {
     name: string;
     type: string;
     ipAddress: string;
-    port: number
+    port: string
     opts?: { [k: string]: string };
     bindings?: {
         '-lbvserver'?: string[];

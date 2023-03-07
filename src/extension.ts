@@ -57,7 +57,7 @@ export async function activateInternal(context: ExtensionContext) {
 
     const nsCfgProvider = new NsCfgProvider();
     // const cfgView = window.registerTreeDataProvider('cfgTree', cfgProvider);
-    const cfgView = window.createTreeView('nsConfig', {
+    const cfgView = window.createTreeView('nsConfigView', {
         treeDataProvider: nsCfgProvider,
         showCollapseAll: true,
         canSelectMany: true
@@ -122,7 +122,7 @@ export async function activateInternal(context: ExtensionContext) {
         nsCfgProvider.makeExplosion(filePath);
 
         await new Promise(resolve => { setTimeout(resolve, 2000); });
-        commands.executeCommand('nsConfig.focus');
+        commands.executeCommand('nsConfigView.focus');
 
     }));
 

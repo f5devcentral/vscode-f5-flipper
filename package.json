@@ -59,21 +59,21 @@
     "views": {
       "f5-ns-container": [
         {
-          "id": "nsConfig",
+          "id": "nsConfigView",
           "name": "Citrix ADC/NS Configs"
         }
       ]
     },
     "viewsWelcome": [
       {
-        "view": "nsConfig",
+        "view": "nsConfigView",
         "contents": "Welome to project-flipper!\nThis project aims to explore the process of breaking down, analyzing and abstracting applications from a Citrix NetScaler config/archive (.conf/.tgz)\n- Phase 1: Unpack config\n- Phase 2: Abstract Applications\n- Phase 3: Diagnostics\n- Phase 4: Conversion Outputs (tmos/xc?/nginx?)\nImport a Citrix ADC/NS config/archive to continue.\n[Import .conf/.tgz from local file](command:f5-flipper.cfgExplore)\n[Repo](https://github.com/DumpySquare/project-flipper)"
       }
     ],
     "commands": [
       {
         "command": "f5-flipper.cfgExplore",
-        "title": "Import ADC/NS (.config/tgz)",
+        "title": "Explore ADC/NS (.conf/tgz)",
         "category": "F5-Flipper"
       },
       {
@@ -86,8 +86,14 @@
       "view/title": [
         {
 					"command": "f5-flipper.cfgExploreClear",
-					"when": "view == nsConfig",
+					"when": "view == nsConfigView",
 					"group": "navigation"
+				}
+      ],
+      "editor/context": [
+        {
+					"command": "f5-flipper.cfgExplore",
+					"group": "F5"
 				}
       ]
     }

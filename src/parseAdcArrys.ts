@@ -44,6 +44,7 @@ export async function parseAdcConfArrays(config: string[], rx: AdcRegExTree) {
             'set ssl vserver ',
             'set lb monitor ',
             'set ns param ',
+            'set ns hostName ',
             'bind service ',
             'bind serviceGroup ',
             'bind lb vserver ',
@@ -58,7 +59,6 @@ export async function parseAdcConfArrays(config: string[], rx: AdcRegExTree) {
         // if no match return to next config line
         if(!m1) return;
 
-        // this.emit('parseObject', line)
         
         // now that we have m1, trim leading/trailing spaces
         const m2 = m1.trim();

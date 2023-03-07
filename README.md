@@ -9,6 +9,18 @@ Future goals include conversion outputs for different supported F5 solutions, in
 
 ![Project Flipper](project-flipper-dophin.png)
 
+# How to get started
+
+1. Download the extension from the releases
+2. Install the extension to VSCode
+3. Open a folder with a Citrix ADC/NS archive or .conf
+4. Open a Citrix ADC/NS .conf file
+5. Right click in editor of the file
+6. Select 'Explore ADC/NS (.conf/tgz)'
+7. This should bring you to the new view from project-flipper with the config breakdown
+  - Select an application to view it's config
+  - Hover over the top menu item to see breakdown stats
+
 # Breakdown Process
 
 ## 1. Archive unpack
@@ -35,8 +47,17 @@ Future goals include conversion outputs for different supported F5 solutions, in
   add server | addServer | 
   add ns ip | addNsIp | 
 
+### Parse - verb sensetive
+
+This first pass will break down config into parent objects based on <verb> (<type>|<type> <subType>)
+
+
 
 ## 3. Abstract applications
+
+### walk vservers
+
+This second phase will loop through each 'add vs vserver' and 'add lb vserver' to walk the config tree and abstract each application's config
 
 1. start with each 'add lb vserver'
 2. add ssl options with 'set ssl vserver'
@@ -44,6 +65,7 @@ Future goals include conversion outputs for different supported F5 solutions, in
 4. add pool details with 'add serviceGroup'
 5. add pool bingdings with 'bind serviceGroup'
 6. add monitor from service pool binginds 'add lb monitor'
+...
 
 # Notes
 
