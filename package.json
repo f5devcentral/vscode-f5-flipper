@@ -1,9 +1,9 @@
 {
   "name": "vscode-f5-flipper",
-  "displayName": "F5-flipper",
+  "displayName": "F5 Flipper",
   "description": "Breaking down Citrix NetScaler ADC configs",
   "publisher": "F5DevCentral",
-  "version": "0.1.0-apha",
+  "version": "0.1.0",
   "keywords": [
     "F5",
     "F5Networks",
@@ -25,6 +25,7 @@
   ],
   "main": "./out/extLoader.js",
   "scripts": {
+    "vscode:prepublish": "npm run compile",
     "lint": "tsc --noEmit && eslint 'src/**/*.{js,ts,tsx}' 'tests/**/*.{js,ts,tsx}'",
     "watch": "tsc -watch -p ./",
     "compile": "tsc -p ./",
@@ -60,7 +61,7 @@
       "f5-ns-container": [
         {
           "id": "nsConfigView",
-          "name": "Citrix ADC/NS Configs"
+          "name": "Citrix ADC/NS Config Explorer"
         }
       ]
     },
@@ -77,6 +78,12 @@
         "category": "F5-Flipper"
       },
       {
+				"command": "f5-flipper.report",
+				"title": "Flipper Report",
+				"category": "F5-Flipper",
+				"icon": "$(output)"
+			},
+      {
 				"command": "f5-flipper.cfgExploreClear",
 				"title": "Clear",
 				"category": "F5-Flipper"
@@ -90,10 +97,17 @@
 					"group": "navigation"
 				}
       ],
+      "view/item/context": [
+        {
+					"command": "f5-flipper.report",
+					"when": "view == nsConfigView && viewItem == nsReport",
+					"group": "inline"
+				}
+      ],
       "editor/context": [
         {
 					"command": "f5-flipper.cfgExplore",
-					"group": "F5"
+					"group": "F5-Flipper"
 				}
       ]
     }

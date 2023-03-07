@@ -17,6 +17,8 @@ export async function countMainObjects(cfgObj: AdcConfObj): Promise<ObjStats> {
     'add cs action',
     'add lb vserver',
     'add lb monitor',
+    'add gslb vserver',
+    'add gslb service',
     'add server',
     'add service',
     'add serviceGroup',

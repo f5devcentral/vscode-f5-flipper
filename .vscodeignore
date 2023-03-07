@@ -1,0 +1,31 @@
+.vscode/**
+.vscode-test/**
+out/test/**
+# ignore new documentation site
+docs/**
+# ignore source typescript files
+src/**
+.gitignore
+# ignore original readme docs
+README_docs/**
+vsc-extension-quickstart.md
+**/tsconfig.json
+**/.eslintrc.json
+**/*.map
+**/*.ts
+# **/*.gif
+# ignore cache directories
+atc_ilx_rpm_cache/**
+cache/**
+fastTemplateFolderUploadTemp/**
+# ignore test seed file
+*.vscode-f5.json
+# ignore github actions
+.github/**
+# ignore node cpu profiling file
+*.cpuprofile
+tmp
+tests
+*.tgz
+*.vsix
+dist

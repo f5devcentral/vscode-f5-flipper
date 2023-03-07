@@ -9,8 +9,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## [0.1.0] - (03-02-2023)
+## [0.1.0] - (03-07-2023)
 
 - initial project
   - document goals and supporting details
-  - create initial unPacking/parsing/abstraction functions similar to f5-corkscrew
+  - create initial unPacking/parsing/abstraction functions similar to f5-corkscrew (explorer)
+  - provide tree view to list abstraction stats/details and applications for browsing
+  - build basic abstraction report
+

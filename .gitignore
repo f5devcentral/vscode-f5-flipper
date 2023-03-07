@@ -6,3 +6,4 @@ tmp
 out
 cache
 project-flipper-*.tgz
+*.vsix

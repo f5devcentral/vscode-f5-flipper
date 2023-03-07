@@ -192,9 +192,9 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             // header element describing source details and explosion stats
             const title = this.explosion.hostname || this.explosion.config.sources[0].fileName;
             const desc = `${this.explosion.inputFileType} - ${this.explosion.stats.sourceAdcVersion}`;
-            const expStatsYml = jsYaml.dump(this.explosion.stats, { indent: 4 });
+            const expStatsYml = jsYaml.dump(this.explosion.stats, { indent: 4, lineWidth: -1 });
             const expStatsYmlToolTip = new MarkdownString().appendCodeblock(expStatsYml, 'yaml');
-            this.viewElement = new NsCfgApp(title, expStatsYmlToolTip, desc, '', '', TreeItemCollapsibleState.None);
+            this.viewElement = new NsCfgApp(title, expStatsYmlToolTip, desc, 'nsReport', '', TreeItemCollapsibleState.None);
             treeItems.push(this.viewElement);
 
             // tmos to xc diangostics header/switch

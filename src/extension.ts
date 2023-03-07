@@ -3,7 +3,9 @@ import {
     ExtensionContext,
     commands,
     window,
-    Uri
+    Uri,
+    workspace,
+    TextDocument
 } from 'vscode';
 import { NsCfgProvider } from './nsCfgViewProvider';
 import { ext, initSettings, loadSettings } from './extensionVariables';
@@ -11,6 +13,7 @@ import fs from 'fs';
 import * as os from 'os';
 import { logger } from './logger';
 import { Telemetry } from './telemetry';
+import jsyaml from 'js-yaml';
 
 // turn off console logging
 logger.console = false;
@@ -195,6 +198,64 @@ export async function activateInternal(context: ExtensionContext) {
 
         // provide the text and "IF" xc diagnostics "CAN" be applied
         nsCfgProvider.render(text, diagTag);
+    }));
+
+
+    context.subscriptions.push(commands.registerCommand('f5-flipper.report', async (text) => {
+        ext.telemetry.capture({ command: 'f5-flipper.report' });
+
+        const brkr = '\n\n--- ##################################################\n\n'
+
+        // build a welcome banner
+        const welcome = [
+            'Citrix ADC/NS -> F5 Application report.',
+            '',
+            'Please visit the following repo for any questions, issues or enhancements',
+            '',
+            'https://github.com/DumpySquare/project-flipper',
+            brkr
+        ]
+
+
+        // build report header
+        const reportHeader = {
+            hostname: nsCfgProvider.explosion.hostname,
+            id: nsCfgProvider.explosion.id,
+            inputFileType: nsCfgProvider.explosion.inputFileType,
+            dateTime: nsCfgProvider.explosion.dateTime,
+            stats: nsCfgProvider.explosion.stats,
+            sources: nsCfgProvider.explosion.config.sources.map(el => {
+                return { fileName: el.fileName, size: el.size }
+            })
+        }
+
+        // build apps
+        const reportApps = []
+        for (const app of nsCfgProvider.explosion.config.apps) {
+            const appCopy = JSON.parse(JSON.stringify(app))
+            delete appCopy.lines;
+            reportApps.push(
+                brkr,
+                jsyaml.dump(appCopy, { indent: 4 }),
+                '',
+                '--- Original Application config lines',
+                ...app.lines, '', '')
+        }
+
+        // put all the content together
+        const content = [
+            welcome.join('\n'),
+            jsyaml.dump(reportHeader, { indent: 4, lineWidth: -1 }),
+            reportApps.join('\n')
+        ].join('')
+
+        var vDoc: Uri = Uri.parse("untitled:" + 'CitrixADC_Report.txt');
+        return await workspace.openTextDocument({ language: 'yaml', content })
+        .then( async (doc) => {
+            await window.showTextDocument(doc);
+            // this.documents.push(doc);  // add the document to this class doc list
+            return doc;
+        });
     }));
 
     // context.subscriptions.push(disposable);

@@ -101,7 +101,7 @@ export function digAddCsPolicy(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) {
         // split off the name of the policy from the rest of the details
         const name = el.split(' ').shift()
         // filter out all the policies with this name
-        obj.add.cs.policy.filter(x => x.includes(name))
+        obj.add.cs.policy?.filter(x => x.includes(name))
             .forEach(y => {
                 // ad this line to the raw config lines
                 app.lines.push('add cs policy ' + y);
@@ -144,7 +144,7 @@ export async function digAddLbVserver(lbVserver: string, obj: AdcConfObj, rx: Ad
     }
 
     // start with 'add lb vserver'
-    obj.add.lb.vserver.filter(el => el.startsWith(lbVserver))
+    obj.add.lb.vserver?.filter(el => el.startsWith(lbVserver))
         .forEach(x => {
             // should only be one add lb vserver with this name...
             const originalString = 'add lb vserver ' + x;
