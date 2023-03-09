@@ -1,13 +1,17 @@
 
 export type AdcApp = {
     name: string;
-    type: string;
-    ipAddress: string;
-    port: string
+    // cs vserver/lb vserver/gslb vserver
+    type: 'cs' | 'lb' | 'gslb' | string;
+    protocol: 'HTTP' | 'SSL' | 'TCP' | string;
+    ipAddress?: string;
+    port?: string
     opts?: { [k: string]: string };
     bindings?: {
         '-lbvserver'?: string[];
         '-policyName'?: string[];
+        '-domainName'?: string[];
+        '-serviceName'?: GslbService[];
         service?: string[];
         serviceGroup?: string[];
     };
@@ -19,6 +23,13 @@ export type AdcApp = {
     apps?: AdcApp[]
 }
 
+export type GslbService = {
+    serviceName: string;
+    protocol?: 'SSL' | 'HTTP' | 'TCP' | string;
+    port?: string;
+    serverName?: string;
+    serverDest?: string;
+}
 
 
 /**
@@ -31,14 +42,14 @@ export type ConfigFile = {
 }
 
 
-/**
- * array item of returned "apps"
- */
-export type NsApp = {
-    name: string,
-    configs: string[],
-    map?: AppMap
-}
+// /**
+//  * array item of returned "apps"
+//  */
+// export type NsApp = {
+//     name: string,
+//     configs: string[],
+//     map?: AppMap
+// }
 
 /**
  * object type for each app map
@@ -111,66 +122,44 @@ export type AdcRegExTree = {
     cfgOptions: RegExp;
     cfgOptionsQuotes: RegExp;
     verbs: RegExp;
-    'add ns ip': RegExp;
-    'add ns ip6': RegExp;
-    'add ns rpcNode': RegExp;
-    'add route': RegExp;
-    'add dns nameServer': RegExp;
-    'add lb vserver': RegExp;
-    'add lb monitor': RegExp;
-    'add ssl certKey': RegExp;
-    'add server': RegExp;
-    'add service': RegExp;
-    'add serviceGroup': RegExp;
-    'add cs vserver': RegExp;
-    'add cs action': RegExp;
-    'add cs policy': RegExp;
-    'add rewrite action': RegExp;
-    'add rewrite policy': RegExp;
-    'set ssl vserver': RegExp;
-    'set lb monitor': RegExp;
-    'set ns param': RegExp;
-    'bind service': RegExp;
-    'bind serviceGroup': RegExp;
-    'bind lb vserver': RegExp;
-    'bind cs vserver': RegExp;
-    'bind ssl vserver': RegExp;
+    parents: {
+        'add ns ip': RegExp;
+        'add ns ip6': RegExp;
+        'add ns rpcNode': RegExp;
+        'add route': RegExp;
+        'add dns nameServer': RegExp;
+        'add lb vserver': RegExp;
+        'add lb monitor': RegExp;
+        'add ssl certKey': RegExp;
+        'add server': RegExp;
+        'add service': RegExp;
+        'add serviceGroup': RegExp;
+        'add cs vserver': RegExp;
+        'add cs action': RegExp;
+        'add cs policy': RegExp;
+        'add gslb vserver': RegExp;
+        'add gslb service': RegExp;
+        'add gslb site': RegExp;
+        'add rewrite action': RegExp;
+        'add rewrite policy': RegExp;
+        'set ssl vserver': RegExp;
+        'set ssl service': RegExp;
+        'set lb monitor': RegExp;
+        'set ns param': RegExp;
+        'set ns hostName': RegExp;
+        'set gslb vserver': RegExp;
+        'bind service': RegExp;
+        'bind serviceGroup': RegExp;
+        'bind lb vserver': RegExp;
+        'bind cs vserver': RegExp;
+        'bind ssl vserver': RegExp;
+        'bind gslb vserver': RegExp;
+    }
 }
 
 
 export type AdcConfObj = {
     vserver?: string;
-    set?: {
-        ns?: {
-            config?: string;
-            hostName?: string;
-
-        };
-        system?: string;
-        rsskeytype?: string;
-        lacp?: string;
-        interface?: string;
-        nd6RAvariables?: string;
-        snmp?: string;
-        cmp?: string;
-        service?: string;
-        aaa?: string;
-        lb?: string;
-        cache?: string;
-        appflow?: string;
-        bot?: string;
-        appfw?: string;
-        subscriber?: string;
-        ssl?: string;
-        cloud?: string;
-        cloudtunnel?: string;
-        ip6TunnelParam?: string;
-        ptp?: string;
-        videooptimization?: string;
-    };
-    enable?: {
-        ns?: unknown;
-    };
     add?: {
         ns?: {
             ip?: string[];
@@ -191,6 +180,10 @@ export type AdcConfObj = {
             action?: string[];
             policy?: string[];
         };
+        gslb?: {
+            vserver?: string[];
+            service?: string[];
+        }
         rewrite?: {
             action?: string[];
             policy?: string[];
@@ -202,6 +195,39 @@ export type AdcConfObj = {
         route?: string[];
         appfw?: string;
     };
+    set?: {
+        ns?: {
+            config?: string;
+            hostName?: string;
+
+        };
+        gslb?: {
+            vserver?: string[];
+        }
+        system?: string;
+        rsskeytype?: string;
+        lacp?: string;
+        interface?: string;
+        nd6RAvariables?: string;
+        snmp?: string;
+        cmp?: string;
+        service?: string;
+        aaa?: string;
+        lb?: string;
+        cache?: string;
+        appflow?: string;
+        bot?: string;
+        appfw?: string;
+        subscriber?: string;
+        ssl?: {
+            service?: string[];
+        };
+        cloud?: string;
+        cloudtunnel?: string;
+        ip6TunnelParam?: string;
+        ptp?: string;
+        videooptimization?: string;
+    };
     bind?: {
         cache?: string;
         lb?: {
@@ -210,11 +236,17 @@ export type AdcConfObj = {
         cs?: {
             vserver?: string[];
         };
+        gslb?: {
+            vserver?: string[];
+        }
         serviceGroup?: string[];
         audit?: string;
         tunnel?: string;
         ssl?: {
             vserver?: string[];
         };
+    };
+    enable?: {
+        ns?: unknown;
     };
 }

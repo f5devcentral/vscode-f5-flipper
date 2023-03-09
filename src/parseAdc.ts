@@ -54,10 +54,10 @@ export async function parseAdcConf(config: string[], rx: AdcRegExTree) {
 
         item = 'add lb vserver'
         if (line.startsWith(item)) {
-            const parent = line.match(rx[item]);
+            const parent = line.match(rx.parents[item]);
 
             if (!parent) {
-                logger.error(`regex "${rx[item]}" - failed for line "${item}"`, )
+                logger.error(`regex "${rx.parents[item]}" - failed for line "${item}"`, )
                 return;
             }
             const pName = parent!.groups!.name;
@@ -84,10 +84,10 @@ export async function parseAdcConf(config: string[], rx: AdcRegExTree) {
 
         item = 'set ssl vserver'
         if (line.startsWith(item)) {
-            const parent = line.match(rx[item]);
+            const parent = line.match(rx.parents[item]);
 
             if (!parent) {
-                logger.error(`regex "${rx[item]}" - failed for line "${item}"`, )
+                logger.error(`regex "${rx.parents[item]}" - failed for line "${item}"`, )
                 return;
             }
 
@@ -104,10 +104,10 @@ export async function parseAdcConf(config: string[], rx: AdcRegExTree) {
 
         item = 'add lb monitor'
         if (line.startsWith(item)) {
-            const parent = line.match(rx[item]);
+            const parent = line.match(rx.parents[item]);
             
             if (!parent) {
-                logger.error(`regex "${rx[item]}" - failed for line "${item}"`, )
+                logger.error(`regex "${rx.parents[item]}" - failed for line "${item}"`, )
                 return;
             }
 
@@ -126,10 +126,10 @@ export async function parseAdcConf(config: string[], rx: AdcRegExTree) {
 
         item = 'add ssl certKey'
         if (line.startsWith(item)) {
-            const parent = line.match(rx[item]);
+            const parent = line.match(rx.parents[item]);
             
             if (!parent) {
-                logger.error(`regex "${rx[item]}" - failed for line "${item}"`, )
+                logger.error(`regex "${rx.parents[item]}" - failed for line "${item}"`, )
                 return;
             }
 
@@ -151,10 +151,10 @@ export async function parseAdcConf(config: string[], rx: AdcRegExTree) {
             //  ((<serviceName>@ [-weight <positive_integer>] ) | 
             //  <serviceGroupName>@ | 
             //  (-policyName <string>@ [-priority <positive_integer>] [-gotoPriorityExpression <expression>] [-type ( REQUEST | RESPONSE )] [-invoke (<labelType> <labelName>) ] ))
-            const parent = line.match(rx[item]);
+            const parent = line.match(rx.parents[item]);
 
             if (!parent) {
-                logger.error(`regex "${rx[item]}" - failed for line "${item}"`, )
+                logger.error(`regex "${rx.parents[item]}" - failed for line "${item}"`, )
                 return;
             }
 
@@ -184,10 +184,10 @@ export async function parseAdcConf(config: string[], rx: AdcRegExTree) {
         if (line.startsWith(item)) {
             // synopsys; https://developer-docs.citrix.com/projects/netscaler-command-reference/en/12.0/basic/server/server/
             // add server <name>@ (<IPAddress>@ | (<domain>@ [-domainResolveRetry <integer>] [-IPv6Address ( YES | NO )]) | (-translationIp <ip_addr> -translationMask <netmask>)) [-state ( ENABLED | DISABLED )] [-comment <string>] [-td <positive_integer>]
-            const parent = line.match(rx[item]);
+            const parent = line.match(rx.parents[item]);
 
             if (!parent) {
-                logger.error(`regex "${rx[item]}" - failed for line "${item}"`, )
+                logger.error(`regex "${rx.parents[item]}" - failed for line "${item}"`, )
                 return;
             }
 
@@ -202,10 +202,10 @@ export async function parseAdcConf(config: string[], rx: AdcRegExTree) {
         item = 'add ns ip6 '
         if (line.startsWith(item)) {
             item = item.trim()
-            const parent = line.match(rx[item]);
+            const parent = line.match(rx.parents[item]);
 
             if (!parent) {
-                logger.error(`regex "${rx[item]}" - failed for line "${item}"`, )
+                logger.error(`regex "${rx.parents[item]}" - failed for line "${item}"`, )
                 return;
             }
 
@@ -223,10 +223,10 @@ export async function parseAdcConf(config: string[], rx: AdcRegExTree) {
         item = 'add ns ip '
         if (line.startsWith(item)) {
             item = item.trim()
-            const parent = line.match(rx[item]);
+            const parent = line.match(rx.parents[item]);
 
             if (!parent) {
-                logger.error(`regex "${rx[item]}" - failed for line "${item}"`, )
+                logger.error(`regex "${rx.parents[item]}" - failed for line "${item}"`, )
                 return;
             }
 

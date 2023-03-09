@@ -5,7 +5,10 @@
 import { EventEmitter } from 'events';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { digAddLbVserver, digAddCsVserver } from './digAppsArrys';
+import { digAddCsVserver } from './digAppsArrys';
+import { digGslbVservers } from './digGslbVserver';
+import { digLbVserver } from './digLbVserver';
+
 // import { RegExTree, TmosRegExTree } from './regex'
 import intLogger from './intLogger';
 import { logger } from './logger';
@@ -57,7 +60,7 @@ export default class ADC extends EventEmitter {
     /**
      * tmos version specific regex tree for abstracting applications
      */
-    private rx: AdcRegExTree | undefined;
+    public rx: AdcRegExTree | undefined;
     /**
      * ns processing stats object
      */
@@ -293,9 +296,7 @@ export default class ADC extends EventEmitter {
                     .then(appCfg => {
                         apps.push(sortAdcApp(appCfg))
                     })
-
             }
-
         } 
         
         // if we have any 'add lb vserver's
@@ -306,14 +307,17 @@ export default class ADC extends EventEmitter {
 
                 const appName = app.split(' ').shift();
 
-                await digAddLbVserver(appName, this.configObjectArry, this.rx)
+                await digLbVserver(appName, this.configObjectArry, this.rx)
                     .then(appCfg => {
                         apps.push(sortAdcApp(appCfg))
                     })
-
             }
-
         }
+
+
+        const gslbApps = await digGslbVservers(this.configObjectArry, this.rx)
+        const gslbAppsSorted = gslbApps.map(app => sortAdcApp(app))
+        apps.push(...gslbAppsSorted)
         
         // capture app abstraction time
         this.stats.appTime = Number(process.hrtime.bigint() - startTime) / 1000000;
@@ -362,6 +366,7 @@ function sortAdcApp(app: AdcApp): AdcApp {
     const sorted: AdcApp = {
         name: app.name,
         type: app.type,
+        protocol: app.protocol,
         ipAddress: app.ipAddress,
         port: app.port,
         opts: app.opts || undefined,

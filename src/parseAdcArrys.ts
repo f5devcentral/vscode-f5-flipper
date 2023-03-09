@@ -24,41 +24,12 @@ export async function parseAdcConfArrays(config: string[], rx: AdcRegExTree) {
         if (line.startsWith('#')) return;
         if (line === '') return;
 
-        const parents = [
-            'add ns ip ',
-            'add ns ip6 ',
-            'add ns rpcNode ',
-            'add route ',
-            'add dns nameServer ',
-            'add lb vserver ',
-            'add lb monitor ',
-            'add ssl certKey ',
-            'add server ',
-            'add service ',
-            'add serviceGroup ',
-            'add cs vserver ',
-            'add cs action ',
-            'add cs policy ',
-            'add gslb vserver ',
-            'add gslb service ',
-            'add rewrite action ',
-            'add rewrite policy ',
-            'set ssl vserver ',
-            'set ssl service ',
-            'set gslb vserver ',
-            'set lb monitor ',
-            'set ns param ',
-            'set ns hostName ',
-            'bind service ',
-            'bind serviceGroup ',
-            'bind lb vserver ',
-            'bind gslb vserver ',
-            'bind cs vserver ',
-            'bind ssl vserver '
-        ]
+        // grab all the keys from the parents rx list
+        const parents = Object.keys(rx.parents)
 
+        // filter out the config items that have a regex
         const m1 = parents.filter(el => {
-            return line.match(el)?.length
+            return line.match(el + ' ')
         })[0];
 
         // if no match return to next config line
@@ -72,7 +43,7 @@ export async function parseAdcConfArrays(config: string[], rx: AdcRegExTree) {
         // pop the last item off the array, should be object type (vserver/...)
         const name = location.pop() as string;
         // split the details off the parent
-        const body = line.slice(m1.length);
+        const body = line.slice(m1.length + 1);
 
         // create the nested object/details
         const tmpObj = nestedObjValue(location, { [name]: [ body ] })

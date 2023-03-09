@@ -9,6 +9,13 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [0.2.0] - (03-10-2023)
+
+- Added initial logic for gslb
+  - changed app 'type' to 'protocol' and added a new type for cs/lb/gslb
+
+---
+
 ## [0.1.0] - (03-07-2023)
 
 - initial project
