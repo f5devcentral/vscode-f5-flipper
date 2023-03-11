@@ -1,8 +1,9 @@
 
 
 import { deepmergeInto } from "deepmerge-ts";
+import { sortAdcApp } from "./CitrixADC";
 import { logger } from "./logger";
-import { AdcApp, AdcConfObj, AdcRegExTree } from "./models";
+import { AdcApp, AdcConfObj, AdcRegExTree, PolicyRef } from "./models";
 import { parseNsOptions } from "./parseAdc";
 
 
@@ -24,100 +25,103 @@ import { parseNsOptions } from "./parseAdc";
  * @param rx 
  * @returns 
  */
-export async function digLbVserver(lbVserver: string, obj: AdcConfObj, rx: AdcRegExTree) {
+export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
     // check app to see if we have an -lbsvserver binding
     // if not, then what???
 
-    let lbApp: AdcApp = {
-        name: '',
-        type: 'lb',
-        protocol: '',
-        ipAddress: '',
-        port: '',
-        lines: []
+    const apps: AdcApp[] = [];
+
+    for await (const vServ of coa.add?.lb?.vserver) {
+        const parent = 'add lb vserver';
+        const originalString = 'add lb vserver ' + vServ;
+        const rxMatch = vServ.match(rx.parents[parent]);
+
+        if (!rxMatch) {
+            return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
+        }
+        const opts = parseNsOptions(rxMatch.groups?.opts, rx);
+
+        const app: AdcApp = {
+            name: rxMatch!.groups!.name,
+            protocol: rxMatch!.groups!.protocol,
+            ipAddress: rxMatch!.groups!.ipAddress,
+            type: 'lb',
+            opts,
+            port: rxMatch!.groups!.port,
+            lines: [originalString]
+        }
+
+        // start with 'bind lb vserver'
+        coa.bind?.lb?.vserver?.filter(el => el.startsWith(app.name))
+            .forEach(x => {
+                const parent = 'bind lb vserver';
+                const originalString = parent + ' ' + x;
+                app.lines.push(originalString);
+                const rxMatch = x.match(rx.parents[parent]);
+
+                if (!rxMatch) {
+                    return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
+                }
+
+                if(!app.bindings) app.bindings = {};
+                if (rxMatch.groups?.service) {
+
+                    const serviceName = rxMatch.groups?.service;
+                    // app.bindings.service.push(rxMatch.groups.service)
+
+                    coa.add?.service?.filter(s => s.startsWith(serviceName))
+                        .forEach(x => {
+                            const parent = 'add service';
+                            const originalString = parent + ' ' + x;
+                            app.lines.push(originalString);
+                            const rxMatch = x.match(rx.parents[parent])
+                            const opts = parseNsOptions(rxMatch.groups?.opts, rx);
+                            if (!rxMatch) {
+                                return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
+                            }
+                            if(!app.bindings.service) {
+                                app.bindings.service = [];
+                            }
+                            // also get server reference under 'add server <name>'
+                            app.bindings.service.push({
+                                name: serviceName,
+                                protocol: rxMatch.groups.protocol,
+                                port: rxMatch.groups.port,
+                                server: rxMatch.groups.server,
+                                opts
+                            })
+                        })
+
+
+                    const sg = digServiceGroup(serviceName, app, coa, rx)
+                    // app.lines.push(...sg.lines);
+                    // if(!app.bindings.serviceGroup && sg.serviceGroup) {
+                    //     app.bindings.serviceGroup = [];
+                    // }
+                    // app.bindings.serviceGroup.push(sg.serviceGroup)
+
+                } else if (rxMatch.groups?.opts) {
+
+                    const opts = parseNsOptions(rxMatch.groups?.opts, rx);
+                    if (opts['-policyName']) {
+                        if(!app.bindings['-policyName']) {
+                            app.bindings['-policyName'] = [];
+                        }
+                        app.bindings['-policyName'].push(opts as unknown as PolicyRef)
+                    }
+
+                }
+
+
+            })
+
+
+
+        apps.push(sortAdcApp(app))
+
     }
+    return apps;
 
-    // start with 'add lb vserver'
-    obj.add?.lb?.vserver?.filter(el => el.startsWith(lbVserver))
-        .forEach(x => {
-            // should only be one add lb vserver with this name...
-            const originalString = 'add lb vserver ' + x;
-            lbApp.lines.push(originalString)
-            const parent = originalString.match(rx.parents['add lb vserver']);
-            if (!parent) {
-                logger.error(`regex "${rx.parents['add lb vserver']}" - failed for line "${originalString}"`, )
-                return;
-            }
-            lbApp.name = lbVserver,
-                lbApp.protocol = parent!.groups!.protocol,
-                lbApp.ipAddress = parent!.groups!.ipAddress,
-                lbApp.port = parent!.groups!.port,
-                // merge in vserver config options
-                deepmergeInto(
-                    lbApp,
-                    parseNsOptions(parent!.groups!.opts, rx)
-                )
-        })
-
-    // dig 'bind lb vserver'
-
-    digBindLbVserver(lbApp, obj, rx)
-
-
-    return lbApp;
-
-
-
-}
-
-
-export function digBindLbVserver(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) {
-
-    // get the app name
-    // const appName = app.name;
-
-    // app.lines = []
-
-    // Q?: can a vserver has multiple service bindings?
-
-    // loop through 'bind lb vserver' for matches to app name
-    obj.bind?.lb?.vserver?.filter(el => el.startsWith(app.name))
-        .forEach(x => {
-
-            const originalString = 'bind lb vserver ' + x;
-            app.lines.push(originalString)
-
-            app.bindings = {};  // start buiding the bingings object
-            app.bindings.service = []   // create the service array
-            app.bindings.serviceGroup = []   // create the service array
-
-            const serviceName = x.split(' ').pop();
-
-            // 'add service <serviceName>'
-            obj.add.service?.filter(s => s.startsWith(serviceName))
-                .forEach(x => {
-                    app.lines.push('add service' + x);
-                    app.bindings.service.push(serviceName)
-                })
-
-            const sg = digServiceGroup(serviceName, obj, rx)
-
-            app.lines.push(...sg.lines);
-            app.bindings.serviceGroup.push(sg.serviceGroup)
-
-            // 'add serviceGroup <serviceName>'
-            // obj.add.serviceGroup.filter(s => s.startsWith(serviceName))
-            //     .forEach(x => {
-            //         app.lines.push('add serviceGroup' + x);
-            //     })
-
-            // // 'bind serviceGroup <serviceName>'
-            // obj.bind.serviceGroup.filter(s => s.startsWith(serviceName))
-            //     .forEach(x => {
-            //         app.lines.push('bind serviceGroup' + x);
-
-            //     })
-        })
 }
 
 /**
@@ -126,55 +130,72 @@ export function digBindLbVserver(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree)
  * @param obj 
  * @param rx 
  */
-export function digServiceGroup(serviceName: string, obj: AdcConfObj, rx: AdcRegExTree) {
+export function digServiceGroup(serviceName: string, app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) {
 
-    const lines = []
-    const serviceGroup: any = {
-        servers: []
-    };
+    // const lines = []
+    const serviceGroup: any = {};
 
     // 'add serviceGroup <serviceName>'
     obj.add?.serviceGroup?.filter(s => s.startsWith(serviceName))
         .forEach(x => {
-            const originalString = 'add serviceGroup ' + x
-            lines.push(originalString);
-            const parent = originalString.match(rx.parents["add serviceGroup"])
-            serviceGroup.name = parent.groups.name;
-            serviceGroup.protocol = parent.groups.protocol;
-            deepmergeInto(
-                serviceGroup,
-                parseNsOptions(parent!.groups!.opts, rx)
-            )
+            const parent = 'add serviceGroup';
+            const originalString = parent + ' ' + x;
+            const rxMatch = x.match(rx.parents[parent])
+            if (!rxMatch) {
+                return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
+            }
+            const opts = parseNsOptions(rxMatch.groups?.opts, rx);
+            app.lines.push(originalString);
+            serviceGroup.name = rxMatch.groups.name;
+            serviceGroup.protocol = rxMatch.groups.protocol;
+            deepmergeInto(serviceGroup, opts)
         })
 
     // 'bind serviceGroup <serviceName>'
     obj.bind?.serviceGroup?.filter(s => s.startsWith(serviceName))
         .forEach(x => {
-            const originalString = 'bind serviceGroup ' + x
-            lines.push(originalString);
-            const parent = originalString.match(rx.parents["bind serviceGroup"])
-            if (parent.groups?.serv) {
+            const parent = 'bind serviceGroup';
+            const originalString = parent + ' ' + x;
+            const rxMatch = x.match(rx.parents[parent])
+            app.lines.push(originalString);
+            if (rxMatch.groups.serv) {
                 
-                serviceGroup.servers.push(parent.groups.serv)
+                if(!serviceGroup.servers ) serviceGroup.servers = []
+                serviceGroup.servers.push(rxMatch.groups.serv)
 
-            } else if (parent.groups?.monitor) {
+            } else if (rxMatch.groups.monitor) {
 
-                const monitorName = parent.groups.monitor.split(' ').pop();
-                
+                const monitorName = rxMatch.groups.monitor.split(' ').pop();
+
                 // get monitor config line
                 obj.add.lb.monitor.filter(m => m.startsWith(monitorName))
-                    .forEach(eM => {
-                        lines.push('add lb monitor ' + eM)
-                        serviceGroup.monitor = monitorName;
+                    .forEach(x => {
+                        const parent = 'add lb monitor';
+                        const originalString = parent + ' ' + x;
+                        app.lines.push(originalString)
+                        const rxMatch = x.match(rx.parents[parent])
+                        if (!rxMatch) {
+                            return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
+                        }
+                        const opts = parseNsOptions(rxMatch.groups.opts, rx);
+                        serviceGroup.monitor = {
+                            name: monitorName
+                        }
+                        deepmergeInto(serviceGroup.monitor, opts)
                     })
 
-            } else if (parent.groups?.opts) {
+            } else if (rxMatch.groups.opts) {
                 deepmergeInto(
                     serviceGroup,
-                    parseNsOptions(parent!.groups!.opts, rx)
+                    parseNsOptions(rxMatch.groups.opts, rx)
                 )
             }
         })
+        
+        if(Object.keys(serviceGroup).length > 0) {
+            if(!app.bindings.serviceGroup) app.bindings.serviceGroup = [];
+            app.bindings.serviceGroup.push(serviceGroup)
+        }
 
-    return { lines, serviceGroup };
+    return;
 }

@@ -16,7 +16,8 @@ import ADC from '../src/CitrixADC'
 
 const events = [];
 
-const testFile = path.join(__dirname, "../example_configs/ns1_v13.1.conf")
+// const testFile = path.join(__dirname, "../example_configs/ns1_v13.1.conf")
+const testFile = path.join(__dirname, "../example_configs/t1.ns.conf")
 
 const parsedFileEvents: any[] = []
 const parsedObjEvents: any[] = []

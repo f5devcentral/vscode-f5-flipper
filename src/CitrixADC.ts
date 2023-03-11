@@ -5,9 +5,9 @@
 import { EventEmitter } from 'events';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { digAddCsVserver } from './digAppsArrys';
-import { digGslbVservers } from './digGslbVserver';
+import { digCsVservers } from './digCsVserver';
 import { digLbVserver } from './digLbVserver';
+import { digGslbVservers } from './digGslbVserver';
 
 // import { RegExTree, TmosRegExTree } from './regex'
 import intLogger from './intLogger';
@@ -273,44 +273,22 @@ export default class ADC extends EventEmitter {
         const startTime = process.hrtime.bigint();
 
 
-        // if we have any 'add cs vserver's
-        if (this.configObjectArry.add?.cs?.vserver) {
-            
-            // dig each 'add cs vserver'
-            for (const app of this.configObjectArry.add.cs.vserver) {
+        // dig each 'add cs vserver'
+        await digCsVservers(this.configObjectArry, this.rx)
+            .then(csApps => apps.push(...csApps as AdcApp[]))
 
-                await digAddCsVserver(app, this.configObjectArry, this.rx)
-                    .then(appCfg => {
-                        apps.push(sortAdcApp(appCfg))
-                    })
-            }
-        } 
-        
-        // if we have any 'add lb vserver's
-        if (this.configObjectArry.add?.lb?.vserver) {
-            
-            // dig each 'add lb vserver', but check for existing?
-            for (const app of this.configObjectArry.add.lb.vserver) {
-
-                const appName = app.split(' ').shift();
-
-                await digLbVserver(appName, this.configObjectArry, this.rx)
-                    .then(appCfg => {
-                        apps.push(sortAdcApp(appCfg))
-                    })
-            }
-        }
+        // dig each 'add lb vserver', but check for existing?
+        await digLbVserver(this.configObjectArry, this.rx)
+            .then(lbApps => apps.push(...lbApps as AdcApp[]))
 
 
-        const gslbApps = await digGslbVservers(this.configObjectArry, this.rx)
-            .then(apps => {
-                return apps.map(app => sortAdcApp(app))
-            });
-        apps.push(...gslbApps)
-        
+        await digGslbVservers(this.configObjectArry, this.rx)
+            .then(gslbApps => apps.push(...gslbApps));
+
+
         // capture app abstraction time
         this.stats.appTime = Number(process.hrtime.bigint() - startTime) / 1000000;
-        
+
         // log a warning if we didn't abstract any apps
         if (apps.length === 0) {
             logger.warn('no "add cs vserver"/"add lb vserver"/"add gslb vserver" objects found - excluding apps information')
@@ -350,7 +328,7 @@ export default class ADC extends EventEmitter {
  * @param app 
  * @returns 
  */
-function sortAdcApp(app: AdcApp): AdcApp {
+export function sortAdcApp(app: AdcApp): AdcApp {
 
     const sorted: AdcApp = {
         name: app.name,

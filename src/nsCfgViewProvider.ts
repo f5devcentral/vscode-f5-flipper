@@ -35,7 +35,6 @@ import { logger } from './logger';
 // import BigipConfig from 'f5-corkscrew/dist/ltm';
 import path from 'path';
 import { AdcConfObj, Explosion, AdcApp } from './models';
-// import {  } from './digAppsArrys';
 import ADC from './CitrixADC';
 
 // remodel everything here like this example:  https://github.com/microsoft/vscode-extension-samples/blob/master/tree-view-sample/src/testView.ts

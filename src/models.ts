@@ -2,26 +2,40 @@
 export type AdcApp = {
     name: string;
     // cs vserver/lb vserver/gslb vserver
-    type: 'cs' | 'lb' | 'gslb' | string;
-    protocol: 'HTTP' | 'SSL' | 'TCP' | string;
+    type: Type;
+    protocol: Protocol;
     ipAddress?: string;
     port?: string
-    opts?: { [k: string]: string };
+    opts?: Opts;
     bindings?: {
         '-lbvserver'?: string[];
-        '-policyName'?: string[];
+        '-policyName'?: PolicyRef[];
         '-domainName'?: string[];
         '-serviceName'?: GslbService[];
-        service?: string[];
+        service?: Service[];
         serviceGroup?: string[];
     };
-    policies?: {
-        name: string;
-    }[];
+    policies?: unknown[];
     lines?: string[];
     // additional apps referenced by this app (ie. cs servers pointing to lb servers)
     apps?: AdcApp[]
 }
+
+export type PolicyRef = {
+    '-policyName': string;
+    opts?: Opts;
+} | string
+export type Service = {
+    name: string;
+    protocol: string;
+    port: string;
+    opts?: Opts
+    server: string;
+}
+
+export type Type = 'cs' | 'lb' | 'gslb' | string;
+export type Protocol = 'HTTP' | 'SSL' | 'TCP' | string;
+export type Opts =  { [k: string]: string | unknown}
 
 export type GslbService = {
     serviceName: string;
