@@ -109,6 +109,13 @@
           "command": "f5-flipper.cfgExplore",
           "group": "F5-Flipper"
         }
+      ],
+      "explorer/context": [
+				{
+					"when": "resourceExtname =~ /\\.(conf|.tgz)/",
+					"command": "f5-flipper.cfgExplore",
+					"group": "F5-Flipper"
+				}
       ]
     }
   },

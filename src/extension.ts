@@ -28,10 +28,6 @@ logger.output = function (log: string) {
 
 export async function activateInternal(context: ExtensionContext) {
 
-    process.on('unhandledRejection', error => {
-        logger.error('--- unhandledRejection ---', error);
-        // ext.telemetry.capture({ unhandledRejection: JSON.stringify(error) });
-    });
 
     logger.info(`Extension/Host details: `, {
         name: context.extension.packageJSON.name,
@@ -56,8 +52,15 @@ export async function activateInternal(context: ExtensionContext) {
     await loadSettings();
 
     // create the telemetry service
-    ext.telemetry = new Telemetry(context);
+	ext.telemetry = new Telemetry(context);
+	// initialize telemetry service
+	await ext.telemetry.init();
 
+    process.on('unhandledRejection', error => {
+        logger.error('--- unhandledRejection ---', error);
+        ext.telemetry.capture({ unhandledRejection: JSON.stringify(error) });
+    });
+    
     const nsCfgProvider = new NsCfgProvider();
     // const cfgView = window.registerTreeDataProvider('cfgTree', cfgProvider);
     const cfgView = window.createTreeView('nsConfigView', {

@@ -13,6 +13,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 - Added initial logic for gslb
   - changed app 'type' to 'protocol' and added a new type for cs/lb/gslb
+- Telemetry working
+- Expose ADC/NS explore via explorer view
 
 ---
 

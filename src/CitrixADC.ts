@@ -32,12 +32,12 @@ import { UnPacker } from './unPackerStream';
 export default class ADC extends EventEmitter {
     /**
      * incoming config files array
-     * ex. [{filename:'config/bigip.conf',size:12345,content:'...'},{...}]
+     * ex. [{filename:'ns.conf',size:12345,content:'...'},{...}]
      */
     public configFiles: ConfigFile[] = [];
     /**
      * tmos config as nested json objects 
-     * - consolidated parant object keys like ltm/apm/sys/...
+     * - consolidated parant object keys like add cs vserver/add lb vserver/add gslb vserver
      */
     // public configObject: AdcConfObj = {};
     public configObjectArry: AdcConfObj = {};
@@ -54,11 +54,11 @@ export default class ADC extends EventEmitter {
      */
     public hostname: string | undefined;
     /**
-     * input file type (.conf/.ucs/.qkview/.tar.gz)
+     * input file type (.conf/.tgz)
      */
     public inputFileType: string;
     /**
-     * tmos version specific regex tree for abstracting applications
+     * ADC version specific regex tree for abstracting applications
      */
     public rx: AdcRegExTree | undefined;
     /**
@@ -68,7 +68,7 @@ export default class ADC extends EventEmitter {
         objectCount: 0,
     };
     /**
-     * bigip license file
+     * ADC/NS license file
      */
     license: ConfigFile;
     /**
@@ -81,8 +81,8 @@ export default class ADC extends EventEmitter {
     }
 
     /**
-     * 
-     * @param file bigip .conf/ucs/qkview/mini_ucs.tar.gz
+     * load and do initial parse of ns config file/archive
+     * @param file ns.conf or ns.tgz
      */
     async loadParseAsync(file: string): Promise<void> {
         const startTime = process.hrtime.bigint();
@@ -203,19 +203,6 @@ export default class ADC extends EventEmitter {
 
 
 
-
-
-    // /**
-    //  * return list of applications
-    //  * 
-    //  * @return array of app names
-    //  * @example ['/Common/app1_80t_vs', '/tenant1/app4_t443_vs']
-    //  */
-    // async appList(): Promise<string[]> {
-    //     // capture all the vservers from 'add lb vserver' and 
-    //     // return Object.keys(this.configObject.ltm?.virtual);
-    // }
-
     /**
      * returns all details from processing
      * 
@@ -316,15 +303,17 @@ export default class ADC extends EventEmitter {
 
 
         const gslbApps = await digGslbVservers(this.configObjectArry, this.rx)
-        const gslbAppsSorted = gslbApps.map(app => sortAdcApp(app))
-        apps.push(...gslbAppsSorted)
+            .then(apps => {
+                return apps.map(app => sortAdcApp(app))
+            });
+        apps.push(...gslbApps)
         
         // capture app abstraction time
         this.stats.appTime = Number(process.hrtime.bigint() - startTime) / 1000000;
         
         // log a warning if we didn't abstract any apps
         if (apps.length === 0) {
-            logger.warn('no "add cs vserver" or "add lb vserver" objects found - excluding apps information')
+            logger.warn('no "add cs vserver"/"add lb vserver"/"add gslb vserver" objects found - excluding apps information')
         }
 
         // return the app array

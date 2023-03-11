@@ -18,30 +18,33 @@ import { ExtensionContext } from 'vscode';
 import { activateInternal, deactivateInternal } from './extension';
 
 // while this may load the code/references, it will be empty
-// import { ext } from './extensionVariables';
-// import { logger } from './logger';
+import { ext } from './extensionVariables';
+import { logger } from './logger';
 
 async function activate(ctx: ExtensionContext) {
     
     // we need to await this to complete so we can gather stats and log as needed
     await activateInternal(ctx);
+    
     perfStats.activationTime = Date.now();
-
     perfStats.activate = (perfStats.activationTime - perfStats.loadStartTime);
 
+    const name = ctx.extension.id;
     // now that the entire extension has loaded, we can actually call the following telemtry and logging functions and they work
-    // ext.telemetry.capture({
-    //     command: "extensionActivation",
-    //     stats: perfStats
-    // });
-    // logger.info(`load stats:  ${JSON.stringify(perfStats)}`);
+    ext.telemetry.capture({
+        command: "extensionActivation",
+        name,
+        stats: perfStats
+    });
+    logger.info(`load extension ${name}, stats:  ${JSON.stringify(perfStats)}`);
 
     return;
 }
 
-async function deactivate(ctx: any) {
+async function deactivate(ctx: ExtensionContext) {
     await deactivateInternal(ctx);
-    console.log(`de-activation complete in ${Math.floor((Date.now() - perfStats.loadStartTime) / 1000 )}ms`);
+    const name = ctx.extension.id;
+    console.log(`de-activation extension ${name} complete in ${Math.floor((Date.now() - perfStats.loadStartTime) / 1000 )}ms`);
     return;
 }
 

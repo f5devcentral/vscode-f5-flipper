@@ -143,7 +143,7 @@ export async function loadSettings() {
 
     const f5Cfg = workspace.getConfiguration('f5');
     
-    ext.settings.timeoutInMilliseconds = f5Cfg.get('f5-flipper.timeoutinmilliseconds')!;
+    ext.settings.timeoutInMilliseconds = f5Cfg.get('timeoutinmilliseconds')!;
     ext.settings.previewColumn = parseColumn(f5Cfg.get('newEditorColumn')!);
     // ext.settings.httpResponseDetails = f5Cfg.get('httpResponseDetails')!;
     ext.settings.preserveEditorFocus = f5Cfg.get('preserveEditorFocus')!;
