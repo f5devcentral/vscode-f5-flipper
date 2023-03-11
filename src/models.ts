@@ -10,7 +10,7 @@ export type AdcApp = {
     bindings?: {
         '-lbvserver'?: string[];
         '-policyName'?: PolicyRef[];
-        '-domainName'?: string[];
+        '-domainName'?: DomainBinding[];
         '-serviceName'?: GslbService[];
         service?: Service[];
         serviceGroup?: string[];
@@ -19,6 +19,10 @@ export type AdcApp = {
     lines?: string[];
     // additional apps referenced by this app (ie. cs servers pointing to lb servers)
     apps?: AdcApp[]
+}
+
+export type DomainBinding = {
+    '-domainName': string;
 }
 
 export type PolicyRef = {

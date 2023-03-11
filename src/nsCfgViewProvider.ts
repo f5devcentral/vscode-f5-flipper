@@ -151,7 +151,13 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
             if(element.label === 'Apps') {
                 this.explosion.config.apps.forEach(app => {
-                    const desc = `${app.type}-${app.ipAddress}:${app.port}`;
+                    const descA = [app.type]
+                    if(app.type === 'gslb') {
+                        descA.push(app.bindings['-domainName'][0]['-domainName'])
+                    } else {
+                        descA.push(`${app.ipAddress}:${app.port}`);
+                    }
+                    const desc = descA.join(' - ');
                     const appYaml = jsYaml.dump(app, { indent: 4 })
                     const toolTip = new MarkdownString().appendCodeblock(appYaml, 'yaml')
                     treeItems.push(new NsCfgApp(

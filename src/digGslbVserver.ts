@@ -1,6 +1,6 @@
 import { deepmergeInto } from "deepmerge-ts";
 import { logger } from "./logger";
-import { AdcApp, AdcConfObj, AdcRegExTree } from "./models";
+import { AdcApp, AdcConfObj, AdcRegExTree, DomainBinding } from "./models";
 import { parseNsOptions } from "./parseAdc";
 import { digGslbService } from "./digGslbService"
 import { sortAdcApp } from "./CitrixADC";
@@ -72,10 +72,9 @@ export async function digGslbVservers(coa: AdcConfObj, rx: AdcRegExTree) {
 
 
                 if (opts['-domainName']) {
-                    deepmergeInto(
-                        app['bindings'],
-                        parseNsOptions(rxMatch.groups.opts, rx)
-                    )
+                    if(!app.bindings['-domainName']) app.bindings['-domainName'] = [];
+                    app.bindings['-domainName'].push(opts as unknown as DomainBinding)
+
                 }
 
                 if (opts['-serviceName']) {
