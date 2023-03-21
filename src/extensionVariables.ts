@@ -143,20 +143,20 @@ export async function loadSettings() {
 
     const f5Cfg = workspace.getConfiguration('f5');
     
-    ext.settings.timeoutInMilliseconds = f5Cfg.get('timeoutinmilliseconds')!;
-    ext.settings.previewColumn = parseColumn(f5Cfg.get('newEditorColumn')!);
+    ext.settings.timeoutInMilliseconds = f5Cfg.get<number>('timeoutinmilliseconds', 0);
+    ext.settings.previewColumn = parseColumn(f5Cfg.get<string>('newEditorColumn', 'two'));
     // ext.settings.httpResponseDetails = f5Cfg.get('httpResponseDetails')!;
-    ext.settings.preserveEditorFocus = f5Cfg.get('preserveEditorFocus')!;
-    ext.settings.newEditorTabForAll = f5Cfg.get('newEditorTabForAll', false);
+    ext.settings.preserveEditorFocus = f5Cfg.get<boolean>('preserveEditorFocus', true);
+    ext.settings.newEditorTabForAll = f5Cfg.get<boolean>('newEditorTabForAll', false);
     // ext.settings.prompts = f5Cfg.get('enablePrompts', false);
     
-    ext.settings.preview = f5Cfg.get('preview')!;
+    ext.settings.preview = f5Cfg.get<boolean>('preview', false);
     // plugin preview setting to view context
     commands.executeCommand('setContext', 'f5-flipper.preview', ext.settings.preview);
 
-    process.env.F5_VSCODE_LOG_LEVEL = f5Cfg.get('logLevel');
+    process.env.F5_VSCODE_LOG_LEVEL = f5Cfg.get<string>('logLevel', 'INFO');
 
-    process.env[ext.teemEnv] = f5Cfg.get('f5.TEEM') || 'true';
+    process.env[ext.teemEnv] = f5Cfg.get<boolean>('f5.TEEM', true).toString();
 
     // process.env.F5_CONX_CORE_REJECT_UNAUTORIZED = f5Cfg.get('rejectUnauthorizedBIGIP')!.toString();
     
