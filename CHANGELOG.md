@@ -9,10 +9,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## [0.2.0] - (03-10-2023)
+## [0.2.0] - (03-12-2023)
 
 - Added initial logic for gslb
   - changed app 'type' to 'protocol' and added a new type for cs/lb/gslb
+- Reworked/extended vserver parsing
 - Telemetry working
 - Expose ADC/NS explore via explorer view
 
