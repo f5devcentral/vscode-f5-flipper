@@ -338,7 +338,7 @@ export function sortAdcApp(app: AdcApp): AdcApp {
         port: app.port,
         opts: app.opts || undefined,
         bindings: app.bindings,
-        policies: app.policies,
+        csPolicies: app.csPolicies,
         lines: app.lines,
         apps: app.apps
     }

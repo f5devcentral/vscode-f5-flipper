@@ -78,6 +78,9 @@ export class RegExTree {
             'add gslb site': /(?<name>\S+) (?<server>\S+) (?<opts>[\S ]+)/,
             'add rewrite action': /(?<name>\S+) (?<opts>[\S ]+)/,
             'add rewrite policy': /(?<name>\S+) (?<opts>[\S ]+)/,
+            'add appflow policy': /(?<name>\S+) (?<rule>[\S]+) (?<action>[\S]+)/,
+            'add appflow action': /(?<name>\S+) (?<opts>[\S ]+)/,
+            'add appflow collector': /(?<name>\S+) (?<opts>[\S ]+)/,
             'set ssl vserver': /(?<name>\S+) (?<opts>[\S ]+)/,
             'set ssl service': /(?<name>\S+) (?<opts>[\S ]+)/,
             'set lb monitor': /(?<name>\S+) (?<opts>[\S ]+)/,
@@ -87,7 +90,7 @@ export class RegExTree {
             'bind service': /(?<opts>[\S ]+)/,
             'bind serviceGroup': /(?<name>\S+) ((?<serv>\S+ \d+)|(?<monitor>-monitorName \S+)|(?<opts>[\S ]+))/,
             'bind lb vserver': /(?<name>\S+) ((?<opts>-[\S ]+)|(?<service>[\S]+))/,
-            'bind cs vserver': /(?<opts>[\S ]+)/,
+            'bind cs vserver': /(?<server>\S+) (?<opts>[\S ]+)/,
             'bind ssl vserver': /(?<opts>[\S ]+)/,
             'bind gslb vserver': /(?<name>\S+) (?<opts>[\S ]+)/,
         }

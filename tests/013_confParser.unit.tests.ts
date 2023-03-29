@@ -13,6 +13,7 @@ import assert from 'assert';
 import fs from 'fs';
 import path from 'path';
 import ADC from '../src/CitrixADC'
+import { Explosion } from '../src/models';
 
 const events = [];
 
@@ -22,10 +23,11 @@ const testFile = path.join(__dirname, "../example_configs/t1.ns.conf")
 const parsedFileEvents: any[] = []
 const parsedObjEvents: any[] = []
 
-describe('NS Conf parser unit tests', function () {
+describe('NS Conf parser functional tests', function () {
 
 
     let adc: ADC;
+    let exp: Explosion;
     let log;
     let err;
 
@@ -44,7 +46,7 @@ describe('NS Conf parser unit tests', function () {
 
 
 
-    it('parse simple v13.1 ns config', async () => {
+    it(`parse test ns config: ${testFile}`, async () => {
 
         adc = new ADC();
 
@@ -71,13 +73,15 @@ describe('NS Conf parser unit tests', function () {
         
         await adc.explode()
         .then( expld => {
-            debugger;
+            exp = expld
         })
         .catch( thisErr => {
             err = thisErr;
             log = adc.logs();
             debugger;
         });
+
+        debugger;
 
     })
 

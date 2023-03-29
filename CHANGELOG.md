@@ -9,6 +9,14 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [0.3.0] - (03-30-2023)
+
+- Updated 'bind cs vserver' regex to include server name, which fixed options parsing
+- extended 'add cs policy' and 'add cs action' parsing
+- added appflow parsing from cs -policyName reference
+
+---
+
 ## [0.2.0] - (03-12-2023)
 
 - Added initial logic for gslb

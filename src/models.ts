@@ -15,31 +15,52 @@ export type AdcApp = {
         service?: Service[];
         serviceGroup?: string[];
     };
-    policies?: unknown[];
+    csPolicies?: unknown[];
+    csPolicyActions?: unknown[];
+    appflows?: unknown[];
     lines?: string[];
     // additional apps referenced by this app (ie. cs servers pointing to lb servers)
-    apps?: AdcApp[]
-}
+    apps?: AdcApp[];
+};
+
+export type Appflow = {
+    name: string;
+    rule: string;
+    action?: AppflowAction[];
+};
+
+export type AppflowAction = {
+    name: string;
+    '-securityInsight'?: string;
+    collectors?: AppflowCollector[] ;
+};
+
+export type AppflowCollector = {
+    name: string;
+    '-IPAddress'?: string;
+    'port'?: string;
+};
 
 export type DomainBinding = {
     '-domainName': string;
-}
+};
 
 export type PolicyRef = {
     '-policyName': string;
     opts?: Opts;
-} | string
+} | string;
+
 export type Service = {
     name: string;
     protocol: string;
     port: string;
-    opts?: Opts
+    opts?: Opts;
     server: string;
-}
+};
 
 export type Type = 'cs' | 'lb' | 'gslb' | string;
 export type Protocol = 'HTTP' | 'SSL' | 'TCP' | string;
-export type Opts =  { [k: string]: string | unknown}
+export type Opts =  { [k: string]: string | unknown};
 
 export type GslbService = {
     serviceName: string;
@@ -47,17 +68,17 @@ export type GslbService = {
     port?: string;
     serverName?: string;
     serverDest?: string;
-}
+};
 
 
 /**
  * defines the structure of the archive file extraction or single bigip.conf
  */
 export type ConfigFile = {
-    fileName: string,
-    size: number,
-    content: string
-}
+    fileName: string;
+    size: number;
+    content: string;
+};
 
 
 // /**
@@ -78,7 +99,7 @@ export type AppMap = {
     vsDest?: string,
     // default pool members (ip:port)
     pool?: string[]
-}
+};
 
 
 /**
@@ -160,6 +181,9 @@ export type AdcRegExTree = {
         'add gslb site': RegExp;
         'add rewrite action': RegExp;
         'add rewrite policy': RegExp;
+        'add appflow policy': RegExp;
+        'add appflow action': RegExp;
+        'add appflow collector': RegExp;
         'set ssl vserver': RegExp;
         'set ssl service': RegExp;
         'set lb monitor': RegExp;
@@ -212,6 +236,11 @@ export type AdcConfObj = {
         };
         route?: string[];
         appfw?: string;
+        appflow?: {
+            policy?: string[];
+            action?: string[];
+            collector?: string[];
+        }
     };
     set?: {
         ns?: {

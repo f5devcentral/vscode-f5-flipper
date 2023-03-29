@@ -167,6 +167,8 @@ export function digServiceGroup(serviceName: string, app: AdcApp, obj: AdcConfOb
 
                 const monitorName = rxMatch.groups.monitor.split(' ').pop();
 
+                //todo: get a list of the default monitor names and add them to the config somehow
+
                 // get monitor config line
                 obj.add.lb.monitor.filter(m => m.startsWith(monitorName))
                     .forEach(x => {
