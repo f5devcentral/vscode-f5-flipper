@@ -2,7 +2,7 @@ import { deepmergeInto } from "deepmerge-ts";
 import { logger } from "./logger";
 import { AdcApp, AdcConfObj, AdcRegExTree, GslbService } from "./models";
 
-import { parseNsOptions } from "./parseAdc";
+import { parseNsOptions } from "./parseAdcUtils";
 
 /**
  * dig 'add gslb service' details by service name

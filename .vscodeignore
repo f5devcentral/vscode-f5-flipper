@@ -1,5 +1,13 @@
 .vscode/**
 .vscode-test/**
+coverage/
+# Code Documentation directory
+code_docs/
+# Local Documentation directory
+docs/
+# NYC Output directory
+.nyc_output/
+
 out/test/**
 # ignore new documentation site
 docs/**

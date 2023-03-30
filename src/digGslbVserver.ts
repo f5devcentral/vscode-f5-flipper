@@ -1,7 +1,7 @@
 import { deepmergeInto } from "deepmerge-ts";
 import { logger } from "./logger";
 import { AdcApp, AdcConfObj, AdcRegExTree, DomainBinding } from "./models";
-import { parseNsOptions } from "./parseAdc";
+import { parseNsOptions } from "./parseAdcUtils";
 import { digGslbService } from "./digGslbService"
 import { sortAdcApp } from "./CitrixADC";
 

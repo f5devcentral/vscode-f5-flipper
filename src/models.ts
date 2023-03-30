@@ -124,17 +124,20 @@ export type Explosion = {
 /**
  * ltm object stats
  *  - child of stats - child of explosion
+ * todo: dynamically build this list via the object params built from the regex tree
  */
 export type ObjStats = {
     csPolicy?: number,
     csAction?: number,
     csVserver?: number,
+    gslbService?: number,
+    gslbVserver?: number,
     lbVserver?: number,
     lbMonitor?: number,
     server?: number,
     service?: number,
     serviceGroup?: number
-    sslCerKey?: number
+    sslCertKey?: number
 }
 
 /**

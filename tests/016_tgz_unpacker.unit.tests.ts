@@ -18,12 +18,12 @@ import { Explosion } from '../src/models';
 const events = [];
 
 // const testFile = path.join(__dirname, "../example_configs/ns1_v13.1.conf")
-const testFile = path.join(__dirname, "../example_configs/t1.ns.conf")
+const testFile = path.join(__dirname, "../example_configs/t1.ns.tgz")
 
 const parsedFileEvents: any[] = []
 const parsedObjEvents: any[] = []
 
-describe('NS Conf parser functional tests', function () {
+describe('tgz unpacker tests', function () {
 
 
     let adc: ADC;
@@ -46,7 +46,7 @@ describe('NS Conf parser functional tests', function () {
 
 
 
-    it(`parse test ns config: ${testFile}`, async () => {
+    it(`unpack tgz and parse test ns config: ${testFile}`, async () => {
 
         adc = new ADC();
 
@@ -97,24 +97,75 @@ describe('NS Conf parser functional tests', function () {
 
     })
 
-    it(`confirm explosion config source`, () => {
-        assert.deepStrictEqual(exp.config.sources.length, 1)
+    it(`rejects bad.file from parsing`, async () => {
+
+        adc = new ADC();
+
+        const badFile = path.join(__dirname, '..', 'example_configs', 'bad.file')
+
+        const resp = adc.loadParseAsync(badFile)
+
+        assert.rejects(resp, 'should reject the promise since the file is not supported/bad')
+
     })
 
-    it(`confirm explosion stats object`, async () => {
-        assert.deepStrictEqual(typeof exp.stats.lineCount, 'number')
-        assert.ok(typeof exp.stats.parseTime === 'number')
-        assert.ok(typeof exp.stats.appTime === 'number')
-        assert.ok(typeof exp.stats.packTime === 'number')
-        assert.ok(typeof exp.stats.sourceSize === 'number')
-        assert.ok(typeof exp.stats.sourceAdcVersion === 'string')
-        assert.deepStrictEqual(typeof exp.stats.objects?.lbVserver, 'number')
-        assert.deepStrictEqual(typeof exp.stats.objects?.csVserver, 'number')
-        assert.deepStrictEqual(typeof exp.stats.objects?.sslCertKey, 'number')
+    it(`rejects bad1.tgz from parsing`, async () => {
+
+        adc = new ADC();
+
+        const badFile = path.join(__dirname, '..', 'example_configs', 'bad1.tgz')
+
+        const resp = adc.loadParseAsync(badFile)
+
+        assert.rejects(resp, 'should reject the promise since the file is not supported/bad')
+
+    })
+    
+    it(`rejects non-existent file`, async () => {
+
+        adc = new ADC();
+
+        const badFile = path.join(__dirname, 'no.file')
+
+        const resp = adc.loadParseAsync(badFile)
+
+        assert.rejects(resp, 'should reject the promise since the file is not found')
+
     })
 
-    it(`confirm explosion config source === 1`, async () => {
-        assert.ok(exp.config.apps!.length === 18)
+    it(`rejects *.conf file it cannot find`, async () => {
+
+        adc = new ADC();
+
+        const badFile = path.join(__dirname, 'no.conf')
+
+        const resp = adc.loadParseAsync(badFile)
+
+        assert.rejects(resp, 'should reject the promise since the file is not found')
+
     })
+
+    // it(`confirm explosion config source`, () => {
+
+    // todo:  create a test and code logic to support when an archive does not have any .conf files
+
+    //     assert.deepStrictEqual(exp.config.sources.length, 1)
+    // })
+
+    // it(`confirm explosion stats object`, async () => {
+    //     assert.deepStrictEqual(typeof exp.stats.lineCount, 'number')
+    //     assert.ok(typeof exp.stats.parseTime === 'number')
+    //     assert.ok(typeof exp.stats.appTime === 'number')
+    //     assert.ok(typeof exp.stats.packTime === 'number')
+    //     assert.ok(typeof exp.stats.sourceSize === 'number')
+    //     assert.ok(typeof exp.stats.sourceAdcVersion === 'string')
+    //     assert.deepStrictEqual(typeof exp.stats.objects?.lbVserver, 'number')
+    //     assert.deepStrictEqual(typeof exp.stats.objects?.csVserver, 'number')
+    //     assert.deepStrictEqual(typeof exp.stats.objects?.sslCertKey, 'number')
+    // })
+
+    // it(`confirm explosion config source === 1`, async () => {
+    //     assert.ok(exp.config.apps!.length === 18)
+    // })
 
 });

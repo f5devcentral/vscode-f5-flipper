@@ -14,7 +14,6 @@ import intLogger from './intLogger';
 import { logger } from './logger';
 import { AdcApp, AdcConfObj, AdcRegExTree, ConfigFile, Explosion, Stats } from './models'
 import { countMainObjects } from './objectCounter';
-import { parseAdcConf } from './parseAdc';
 import { parseAdcConfArrays } from './parseAdcArrys';
 import { RegExTree } from './regex';
 // import { countObjects } from './objCounter';
@@ -248,7 +247,7 @@ export default class ADC extends EventEmitter {
         // capture pack time
         this.stats.packTime = Number(process.hrtime.bigint() - startTime) / 1000000;
 
-        return retObj
+        return retObj;
     }
 
     /**

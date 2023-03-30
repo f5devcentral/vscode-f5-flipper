@@ -2,7 +2,7 @@ import { deepmergeInto } from "deepmerge-ts";
 import { sortAdcApp } from "./CitrixADC";
 import { logger } from "./logger";
 import { AdcApp, AdcConfObj, AdcRegExTree, Appflow, PolicyRef } from "./models";
-import { parseNsOptions } from "./parseAdc";
+import { parseNsOptions } from "./parseAdcUtils";
 
 
 

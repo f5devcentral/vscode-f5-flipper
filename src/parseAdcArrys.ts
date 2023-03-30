@@ -1,7 +1,7 @@
 import { AdcRegExTree } from "./models";
 import { nestedObjValue } from "./objects";
 import { deepmergeInto } from 'deepmerge-ts'
-import { sortNsLines } from "./parseAdc";
+import { sortNsLines } from "./parseAdcUtils";
 
 
 

@@ -162,7 +162,7 @@ export function fileFilter(name: string): boolean {
      * breakind down this bigger regex for explaination
      * added to list of regex's below
      */
-    const allConfs = RegExp('*.conf');
+    // const allConfs = RegExp('*.conf');
     // const allConfs = multilineRegExp([
     //     // base /config directory
     //     /^config/,
@@ -207,7 +207,7 @@ export function fileFilter(name: string): boolean {
      * only one has to pass to return true
      */
     const fileRegexs: RegExp[] = [
-        allConfs,                           // all .conf files (including partitions)
+        /^[\S]+.conf$/,                           // all .conf files (including partitions)
         /^config\/bigip.license$/,          // license file
         /^config\/profile_base.conf$/,      // default profiles
         // fileStoreFilesUcs,                  // certs/keys (ucs)

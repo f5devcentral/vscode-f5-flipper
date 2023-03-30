@@ -1,5 +1,5 @@
-cstalhood
-jalam
+coverage
+.nyc_output
 node_modules
 dist
 tmp
