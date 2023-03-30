@@ -27,44 +27,44 @@ jobs:
       - run: npm run test
         if: runner.os != 'Linux'
         
-  # package-release-publish:
-  #   runs-on: ubuntu-latest
-  #   environment: publishing
-  #   needs: test
-  #   name: Package-Release-Publish
-  #   steps:
+  package-release-publish:
+    runs-on: ubuntu-latest
+    environment: publishing
+    needs: tests
+    name: Package-Release-Publish
+    steps:
 
-  #     - name: Checkout code
-  #       uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-  #     - name: setup node.js ${{ env.NODE_VERSION }}
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: ${{ env.NODE_VERSION }}
+      - name: setup node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
 
-  #     - name: install node deps
-  #       run: npm ci
+      - name: install node deps
+        run: npm ci
 
-  #     - name: install vscode marketplace cli (vsce)
-  #       run: npm install -g vsce
+      - name: install vscode marketplace cli (vsce)
+        run: npm install -g vsce
 
-  #     - name: install open-vsix marketplace cli (ovsx)
-  #       run: npm install -g ovsx
+      - name: install open-vsix marketplace cli (ovsx)
+        run: npm install -g ovsx
 
-  #     # - name: install teem keys
-  #     #   run: echo "${{ secrets.TEEM_KEY }}" >> TEEM_KEY
+      # - name: install teem keys
+      #   run: echo "${{ secrets.TEEM_KEY }}" >> TEEM_KEY
 
-  #     - name: package extension
-  #       run: vsce package
+      - name: package extension
+        run: vsce package
 
-  #     - name: get extension path
-  #       run: echo "VSIX_PATH=$(find . -maxdepth 1 -type f -iname "*.vsix" | head -1)" >> $GITHUB_ENV
+      - name: get extension path
+        run: echo "VSIX_PATH=$(find . -maxdepth 1 -type f -iname "*.vsix" | head -1)" >> $GITHUB_ENV
 
-  #     - name: get extension name
-  #       run: echo "VSIX_NAME=$(basename $(find . -maxdepth 1 -type f -iname "*.vsix" | head -1))" >> $GITHUB_ENV
+      - name: get extension name
+        run: echo "VSIX_NAME=$(basename $(find . -maxdepth 1 -type f -iname "*.vsix" | head -1))" >> $GITHUB_ENV
 
-  #     - name: get extension version
-  #       run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+      - name: get extension version
+        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
       # - name: capture latest release notes
       #   run: |
