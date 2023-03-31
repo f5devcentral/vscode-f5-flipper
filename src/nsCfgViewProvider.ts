@@ -66,7 +66,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
     readonly brkr = '\n\n##################################################\n\n';
 
-    xcDiag: boolean = false;
+    xcDiag: boolean = true;
 
     constructor() {
     }
@@ -92,27 +92,27 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             ext.eventEmitterGlobal.emit('log-info', `f5-flipper.cfgExplore, opening archive`);
 
             await this.adc.loadParseAsync(file)
-                .catch(err => logger.error('makeExplosion', err));
+                .then( async () => {
+                    ext.eventEmitterGlobal.emit('log-info', `f5-flipper.cfgExplore, extracting apps`);
+                    await this.adc.explode()
+                        .then(exp => {
+                            this.explosion = exp;
+                            ext.eventEmitterGlobal.emit('log-info', `f5-flipper.cfgExplore, extraction complete`);
+                            ext.eventEmitterGlobal.emit('log-info', exp.stats);
+                            // ts-todo: add key to telemetry
+                            ext.telemetry.capture({ command: 'flipper-explosion', stats: exp.stats });
+                            this.refresh();
+                        })
+                        // .catch(err => logger.error('makeExplosion-error', err));
 
-
-            ext.eventEmitterGlobal.emit('log-info', `f5-flipper.cfgExplore, extracting apps`);
-            await this.adc.explode()
-                .then(exp => {
-                    this.explosion = exp;
-                    ext.eventEmitterGlobal.emit('log-info', `f5-flipper.cfgExplore, extraction complete`);
-                    ext.eventEmitterGlobal.emit('log-info', exp.stats);
-                    // ts-todo: add key to telemetry
-                    ext.telemetry.capture({ command: 'flipper-explosion', stats: exp.stats });
-                    this.refresh();
                 })
-                .catch(err => logger.error('makeExplosion', err));
+                .catch(err => {
+                    logger.error('makeExplosion-error', err);
+                    
+                });
+
 
         });
-    }
-
-
-    async importExplosion(exp: Explosion) {
-        this.explosion = exp;
     }
 
     async refresh(): Promise<void> {
@@ -164,7 +164,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                         app.name,
                         toolTip,
                         desc,
-                        'xcDiag', '',
+                        'nsApp', '',
                         TreeItemCollapsibleState.None, {
                         command: 'f5-flipper.render',
                         title: '',
@@ -181,7 +181,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                         source.fileName,
                         `size: ${source.size.toString()}`,
                         `lines: ${source.content.split('\n').length.toString()}`,
-                        'xcDiag', '',
+                        'nsApp', '',
                         TreeItemCollapsibleState.None, {
                         command: 'f5-flipper.render',
                         title: '',
@@ -230,7 +230,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                 }
             
             // treeItems.push(new NsCfgApp(
-            //     'XC Diagnostics',
+            //     'Diagnostics',
             //     xcTooltip,
             //     xcDiagStatus,
             //     'xcDiag', icon,
@@ -300,7 +300,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
     }
 
 
-    async render(items: string[], diagTag?: boolean) {
+    async render(items: any, diagTag?: boolean) {
 
         const newEditorColumn = ext.settings.previewColumn;
         const editors = window.visibleTextEditors;
@@ -312,6 +312,26 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         if (Array.isArray(items)) {
 
             docContent = items.join('\n');
+
+        } else if (items.lines && items.name && items.type) {
+            // rough test for the type we need
+
+            // deep copy the object
+            const brkdwn = JSON.parse(JSON.stringify(items))
+            delete brkdwn.lines;    // delete the lines
+            const lines = items.lines;  // capture the lines from the original object
+
+            docContent = [
+                `### ${brkdwn.name} ########## --- ##########\n`,
+                ...lines,
+                '\n######################################################\n',
+                jsYaml.dump(brkdwn, { indent: 4, lineWidth: -1 })
+            ].join('\n')
+
+            // test if this is the full app definition object
+            // then break down to display the lines of ns config in an ns.conf with language
+            // provide the rest of the json breakdown as a hover in a header?
+
 
         } else if (Object(items)) {
             docName = 'app.ns.json'
@@ -325,12 +345,6 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                 viewColumn = el.viewColumn;
             }
         };
-        // old way, not syncronous
-        // editors.forEach(el => {
-        //     if (el.document.fileName === 'app.conf' || el.document.fileName === 'app.json') {
-        //         viewColumn = el.viewColumn;
-        //     }
-        // });
 
         // if vClm has a value assign it, else set column 1
         viewColumn = viewColumn ? viewColumn : newEditorColumn;

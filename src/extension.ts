@@ -14,6 +14,7 @@ import * as os from 'os';
 import { logger } from './logger';
 import { Telemetry } from './telemetry';
 import jsyaml from 'js-yaml';
+import path from 'path';
 
 // turn off console logging
 logger.console = false;
@@ -133,10 +134,16 @@ export async function activateInternal(context: ExtensionContext) {
     }));
 
     
+    context.subscriptions.push(commands.registerCommand('f5-flipper.cfgExploreTest', async (text) => {
+        const testPath = path.join(context.extensionPath, 'example_configs', 't1.ns.conf')
+        commands.executeCommand('f5-flipper.cfgExplore', Uri.file(testPath))
+    }));
+
+
     context.subscriptions.push(commands.registerCommand('f5-flipper.cfgExploreClear', async (text) => {
         ext.telemetry.capture({ command: 'f5-flipper.cfgExploreClear' });
         nsCfgProvider.clear();
-        nsCfgProvider.xcDiag = false;
+        nsCfgProvider.xcDiag = true;
     }));
 
     context.subscriptions.push(commands.registerCommand('f5-flipper.cfgExploreRefresh', async (text) => {
@@ -148,7 +155,7 @@ export async function activateInternal(context: ExtensionContext) {
         // flip switch and refresh details
         if(nsCfgProvider.xcDiag){
             nsCfgProvider.xcDiag = false;
-            ext.xcDiag.enabled = false;
+            // ext.xcDiag.enabled = false;
             console.log('xc diag updatediagnostics disable');
             if(ext.xcDiag.lastDoc) {
                 // clear the last editor diags
@@ -161,7 +168,7 @@ export async function activateInternal(context: ExtensionContext) {
             // if (ext.xcDiag.updateDiagnostic === undefined) {
                 console.log('xc diag updatediagnostics enable');
                 // ext.xcDiag = new XcDiag(context);
-                ext.xcDiag.enabled = true;
+                // ext.xcDiag.enabled = true;
             // }
         }
         nsCfgProvider.refresh();

@@ -14,6 +14,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - Updated 'bind cs vserver' regex to include server name, which fixed options parsing
 - extended 'add cs policy' and 'add cs action' parsing
 - added appflow parsing from cs -policyName reference
+- initial tests and github actions for publishing
+- cleaned up app output
 
 ---
 

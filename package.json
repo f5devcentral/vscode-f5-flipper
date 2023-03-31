@@ -39,14 +39,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/DumpySquare/project-flipper.git"
+    "url": "https://github.com/f5devcentral/vscode-f5-flipper.git"
   },
   "author": "",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/DumpySquare/project-flipper/issues"
+    "url": "https://github.com/f5devcentral/vscode-f5-flipper/issues"
   },
-  "homepage": "https://github.com/DumpySquare/project-flipper#readme",
+  "homepage": "https://github.com/f5devcentral/vscode-f5-flipper#readme",
   "contributes": {
     "viewsContainers": {
       "activitybar": [
@@ -68,7 +68,7 @@
     "viewsWelcome": [
       {
         "view": "nsConfigView",
-        "contents": "Welome to project-flipper!\nThis project aims to explore the process of breaking down, analyzing and abstracting applications from a Citrix NetScaler config/archive (.conf/.tgz)\n- Phase 1: Unpack config\n- Phase 2: Abstract Applications\n- Phase 3: Diagnostics\n- Phase 4: Conversion Outputs (tmos/xc?/nginx?)\nImport a Citrix ADC/NS config/archive to continue.\n[Import .conf/.tgz from local file](command:f5-flipper.cfgExplore)\n[Repo](https://github.com/DumpySquare/project-flipper)"
+        "contents": "Welome to project-flipper!\nThis project aims to explore the process of breaking down, analyzing and abstracting applications from a Citrix NetScaler config/archive (.conf/.tgz)\n- Phase 1: Unpack config\n- Phase 2: Abstract Applications (current)\n- Phase 3: Diagnostics (pending)\n- Phase 4: Conversion Outputs (tmos/xc?/nginx?)\nImport a Citrix ADC/NS config/archive to continue.\n[Import .conf/.tgz from local file](command:f5-flipper.cfgExplore)\n[Load Example/Test NS Config](command:f5-flipper.cfgExploreTest)\n[Repo](https://github.com/f5devcentral/vscode-f5-flipper)"
       }
     ],
     "commands": [

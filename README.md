@@ -7,6 +7,8 @@ This project aims to explore the process of breaking down, analyzing and abstrac
 
 Future goals include conversion outputs for different supported F5 solutions, including BIG-IP TMOS, NGINX and F5 Distributed Cloud (XC)
 
+> It is recommended to install the ns.conf vscode extension by Tim Denholm (timdenholm.netscaler).  This extension provides nice synctax highlighting for the ns config.
+
 ![Project Flipper](project-flipper-dophin.png)
 
 # How to get started
