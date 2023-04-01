@@ -1,3 +1,4 @@
+import { Diagnostic } from "vscode";
 
 export type AdcApp = {
     name: string;
@@ -21,6 +22,7 @@ export type AdcApp = {
     lines?: string[];
     // additional apps referenced by this app (ie. cs servers pointing to lb servers)
     apps?: AdcApp[];
+    diagnostics?: Diagnostic[];
 };
 
 export type Appflow = {

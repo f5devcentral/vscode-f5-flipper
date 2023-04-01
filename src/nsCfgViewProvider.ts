@@ -66,7 +66,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
     readonly brkr = '\n\n##################################################\n\n';
 
-    xcDiag: boolean = true;
+    nsDiag: boolean = true;
 
     constructor() {
     }
@@ -97,6 +97,13 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                     await this.adc.explode()
                         .then(exp => {
                             this.explosion = exp;
+
+                            //loop throught the apps and add diagnostics
+                            this.explosion.config.apps.forEach(app => {
+                                const diags = ext.nsDiag.getDiagnostic(app.lines);
+                                app.diagnostics = diags;
+                            })
+
                             ext.eventEmitterGlobal.emit('log-info', `f5-flipper.cfgExplore, extraction complete`);
                             ext.eventEmitterGlobal.emit('log-info', exp.stats);
                             // ts-todo: add key to telemetry
@@ -116,8 +123,8 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
     }
 
     async refresh(): Promise<void> {
-        // if(ext.xcDiag?.loadRules()) {
-        //     ext.xcDiag.loadRules();
+        // if(ext.nsDiag?.loadRules()) {
+        //     ext.nsDiag.loadRules();
         // }
         this._onDidChangeTreeData.fire(undefined);
     }
@@ -158,8 +165,11 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                         descA.push(`${app.ipAddress}:${app.port}`);
                     }
                     const desc = descA.join(' - ');
-                    const appYaml = jsYaml.dump(app, { indent: 4 })
-                    const toolTip = new MarkdownString().appendCodeblock(appYaml, 'yaml')
+                    const clonedApp = JSON.parse(JSON.stringify(app));
+                    delete clonedApp.lines;
+                    delete clonedApp.diagnostics;
+                    const appYaml = jsYaml.dump(clonedApp, { indent: 4 })
+                    const toolTip = new MarkdownString().appendCodeblock(appYaml, 'yaml');
                     treeItems.push(new NsCfgApp(
                         app.name,
                         toolTip,
@@ -203,43 +213,43 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             treeItems.push(this.viewElement);
 
             // tmos to xc diangostics header/switch
-            const xcDiagStatus = this.xcDiag ? "Enabled" : "Disabled";
-            const icon = xcDiagStatus === "Enabled" ? this.greenCheck : '';
+            const nsDiagStatus = this.nsDiag ? "Enabled" : "Disabled";
+            const icon = nsDiagStatus === "Enabled" ? this.greenCheck : '';
 
-            let xcTooltip: string | MarkdownString = '';
+            let nsTooltip: string | MarkdownString = '';
             // let icon
             
             // if xc diag enabled
-            if (this.xcDiag) {
+            if (this.nsDiag) {
                     // const appsList = this.explosion?.config.apps?.nsApp.forEach((el: AdcApp) => el.lines.join('\n')) || [];
-                    // // const excluded = ext.xcDiag.getDiagnosticExlusion(appsList);
+                    // // const excluded = ext.nsDiag.getDiagnosticExlusion(appsList);
                     // // const defaultRedirect = new RegExp('\/Common\/_sys_https_redirect', 'gm');
                     // // const nnn = defaultRedirect.exec(appsList.join('\n'));
 
                     // // const mmm = appsList.join('\n').match(/\/Common\/_sys_https_redirect/g) || [];
 
-                    // // const diags = ext.xcDiag.getDiagnostic(appsList);
+                    // // const diags = ext.nsDiag.getDiagnostic(appsList);
 
                     // const stats = { 
                     //     totalApps: appsList.length,
                     //     '_sys_https_redirect': mmm.length, 
-                    //     stats: ext.xcDiag.getDiagStats(diags) };
+                    //     stats: ext.nsDiag.getDiagStats(diags) };
 
                     // const diagStatsYml = jsYaml.dump(stats, { indent: 4 });
                     // xcTooltip = new MarkdownString().appendCodeblock(diagStatsYml, 'yaml');
                 }
             
-            // treeItems.push(new NsCfgApp(
-            //     'Diagnostics',
-            //     xcTooltip,
-            //     xcDiagStatus,
-            //     'xcDiag', icon,
-            //     TreeItemCollapsibleState.None, {
-            //     command: 'f5-flipper.cfgExplore-xcDiagSwitch',
-            //     title: '',
-            //     arguments: []
-            // }
-            // ));
+            treeItems.push(new NsCfgApp(
+                'Diagnostics',
+                nsTooltip,
+                nsDiagStatus,
+                'nsDiag', icon,
+                TreeItemCollapsibleState.None, {
+                command: 'f5-flipper.cfgExplore-nsDiagSwitch',
+                title: '',
+                arguments: []
+            }
+            ));
 
 
             // sources parent folder
@@ -324,8 +334,8 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             docContent = [
                 `### ${brkdwn.name} ########## --- ##########\n`,
                 ...lines,
-                '\n######################################################\n',
-                jsYaml.dump(brkdwn, { indent: 4, lineWidth: -1 })
+                // '\n######################################################\n',
+                // jsYaml.dump(brkdwn, { indent: 4, lineWidth: -1 })
             ].join('\n')
 
             // test if this is the full app definition object
@@ -361,9 +371,9 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                         edit.replace(new Range(startPosition, endPosition), docContent);
                         commands.executeCommand("cursorTop");
                     });
-                    if(diagTag && this.xcDiag) {
+                    if(diagTag && this.nsDiag) {
                         // if we got a text block with diagnostic tag AND xc diagnostics are enabled, then update the document with diagnosics
-                        // ext.xcDiag.updateDiagnostic(a);
+                        // ext.nsDiag.updateDiagnostic(a);
                     }
                 });
             });

@@ -15,6 +15,8 @@ import { logger } from './logger';
 import { Telemetry } from './telemetry';
 import jsyaml from 'js-yaml';
 import path from 'path';
+import { NsDiag } from './nsDiag';
+import { Hovers } from './hovers';
 
 // turn off console logging
 logger.console = false;
@@ -62,10 +64,14 @@ export async function activateInternal(context: ExtensionContext) {
         ext.telemetry.capture({ unhandledRejection: JSON.stringify(error) });
     });
     
-    const nsCfgProvider = new NsCfgProvider();
+    new Hovers(context, ext.eventEmitterGlobal);
+
+    ext.nsDiag = new NsDiag(context);  // move to settings/vars
+    
+    ext.nsCfgProvider = new NsCfgProvider();
     // const cfgView = window.registerTreeDataProvider('cfgTree', cfgProvider);
     const cfgView = window.createTreeView('nsConfigView', {
-        treeDataProvider: nsCfgProvider,
+        treeDataProvider: ext.nsCfgProvider,
         showCollapseAll: true,
         canSelectMany: true
     });
@@ -126,7 +132,7 @@ export async function activateInternal(context: ExtensionContext) {
 
         logger.info(`f5-flipper.cfgExplore: exploding config @ ${filePath}`);
 
-        nsCfgProvider.makeExplosion(filePath);
+        ext.nsCfgProvider.makeExplosion(filePath);
 
         await new Promise(resolve => { setTimeout(resolve, 2000); });
         commands.executeCommand('nsConfigView.focus');
@@ -142,36 +148,38 @@ export async function activateInternal(context: ExtensionContext) {
 
     context.subscriptions.push(commands.registerCommand('f5-flipper.cfgExploreClear', async (text) => {
         ext.telemetry.capture({ command: 'f5-flipper.cfgExploreClear' });
-        nsCfgProvider.clear();
-        nsCfgProvider.xcDiag = true;
+        ext.nsCfgProvider.clear();
+        ext.nsCfgProvider.nsDiag = true;
     }));
 
     context.subscriptions.push(commands.registerCommand('f5-flipper.cfgExploreRefresh', async (text) => {
-        nsCfgProvider.refresh();
+        ext.nsCfgProvider.refresh();
     }));
 
-    context.subscriptions.push(commands.registerCommand('f5-flipper.cfgExplore-xcDiagSwitch', async (text) => {
+    context.subscriptions.push(commands.registerCommand('f5-flipper.cfgExplore-nsDiagSwitch', async (text) => {
+        
         
         // flip switch and refresh details
-        if(nsCfgProvider.xcDiag){
-            nsCfgProvider.xcDiag = false;
-            // ext.xcDiag.enabled = false;
-            console.log('xc diag updatediagnostics disable');
-            if(ext.xcDiag.lastDoc) {
+        if(ext.nsCfgProvider.nsDiag){
+            ext.nsCfgProvider.nsDiag = false;
+            // ext.nsDiag.enabled = false;
+            console.log('ns diag updatediagnostics disable');
+            logger.info('disabling diagnostics')
+            if(ext.nsDiag.lastDoc) {
                 // clear the last editor diags
-                ext.xcDiag.updateDiagnostic(ext.xcDiag.lastDoc);
+                ext.nsDiag.updateDiagnostic(ext.nsDiag.lastDoc);
             }
         } else {
-            nsCfgProvider.xcDiag = true;
+            ext.nsCfgProvider.nsDiag = true;
+            logger.info('enabling diagnostics')
             
             // was having errors about functions undefined, so, make sure everything is loaded as we turn this on
-            // if (ext.xcDiag.updateDiagnostic === undefined) {
-                console.log('xc diag updatediagnostics enable');
-                // ext.xcDiag = new XcDiag(context);
-                // ext.xcDiag.enabled = true;
+            // if (ext.nsDiag.updateDiagnostic === undefined) {
+                console.log('ns diag updatediagnostics enable');
+                // ext.nsDiag.enabled = true;
             // }
         }
-        nsCfgProvider.refresh();
+        ext.nsCfgProvider.refresh();
     }));
 
     
@@ -207,7 +215,7 @@ export async function activateInternal(context: ExtensionContext) {
         }
 
         // provide the text and "IF" xc diagnostics "CAN" be applied
-        nsCfgProvider.render(text, diagTag);
+        ext.nsCfgProvider.render(text, diagTag);
     }));
 
 
@@ -229,19 +237,19 @@ export async function activateInternal(context: ExtensionContext) {
 
         // build report header
         const reportHeader = {
-            hostname: nsCfgProvider.explosion.hostname,
-            id: nsCfgProvider.explosion.id,
-            inputFileType: nsCfgProvider.explosion.inputFileType,
-            dateTime: nsCfgProvider.explosion.dateTime,
-            stats: nsCfgProvider.explosion.stats,
-            sources: nsCfgProvider.explosion.config.sources.map(el => {
+            hostname: ext.nsCfgProvider.explosion.hostname,
+            id: ext.nsCfgProvider.explosion.id,
+            inputFileType: ext.nsCfgProvider.explosion.inputFileType,
+            dateTime: ext.nsCfgProvider.explosion.dateTime,
+            stats: ext.nsCfgProvider.explosion.stats,
+            sources: ext.nsCfgProvider.explosion.config.sources.map(el => {
                 return { fileName: el.fileName, size: el.size }
             })
         }
 
         // build apps
         const reportApps = []
-        for (const app of nsCfgProvider.explosion.config.apps) {
+        for (const app of ext.nsCfgProvider.explosion.config.apps) {
             const appCopy = JSON.parse(JSON.stringify(app))
             delete appCopy.lines;
             reportApps.push(

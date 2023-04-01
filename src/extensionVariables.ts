@@ -32,7 +32,8 @@ import { EventEmitter } from "events";
 
 import { AtcVersions, AtcVersionsClient, ExtHttp } from 'f5-conx-core';
 import { Telemetry } from './telemetry';
-import { XcDiag } from './xcDiag';
+import { NsDiag } from './nsDiag';
+import { NsCfgProvider } from './nsCfgViewProvider';
 
 
 /**
@@ -43,7 +44,8 @@ export namespace ext {
     export let context: ExtensionContext;
     export let extHttp: ExtHttp;
     export let telemetry: Telemetry;
-    export let xcDiag: XcDiag;
+    export let nsDiag: NsDiag;
+    export let nsCfgProvider: NsCfgProvider;
     export let eventEmitterGlobal: EventEmitter;
     export let connectBar: StatusBarItem;
     // export let panel: TextDocumentView;

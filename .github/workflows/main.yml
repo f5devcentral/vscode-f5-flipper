@@ -27,6 +27,7 @@ jobs:
       - run: npm run test
         if: runner.os != 'Linux'
         
+
   package-release-publish:
     runs-on: ubuntu-latest
     environment: publishing
@@ -66,6 +67,7 @@ jobs:
       - name: get extension version
         run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
+      # https://github.com/marketplace/actions/changelog-reader
       # - name: capture latest release notes
       #   run: |
       #     echo "RELEASE_NOTE<<EOF" >> $GITHUB_ENV
