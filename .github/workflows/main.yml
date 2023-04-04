@@ -68,32 +68,35 @@ jobs:
         run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
       # https://github.com/marketplace/actions/changelog-reader
-      # - name: capture latest release notes
-      #   run: |
-      #     echo "RELEASE_NOTE<<EOF" >> $GITHUB_ENV
-      #     echo "$(node src/scripts/changelog.js)" >> $GITHUB_ENV
-      #     echo "" >> $GITHUB_ENV
-      #     echo "See [CHANGE LOG](https://github.com/f5devcentral/vscode-f5-flipper/blob/main/README.md) for full details and history." >> $GITHUB_ENV
-      #     echo "" >> $GITHUB_ENV
-      #     echo 'EOF' >> $GITHUB_ENV
-        
-      # - name: create upload artifacts
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     path: ${{ env.VSIX_PATH }}
-      #     name: ${{ env.VSIX_NAME }}
+      - name: Get Changelog Entry
+        id: changelog_reader
+        uses: mindsers/changelog-reader-action@v2
+        with:
+          validation_level: warn
+          version: ${{ env.PACKAGE_VERSION }}
+          path: ./CHANGELOG.md
 
-      # - name: create github release
-      #   uses: actions/create-release@v1
-      #   id: create_release
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     tag_name: v${{ env.PACKAGE_VERSION }}
-      #     release_name: ${{ env.VSIX_NAME }}
-      #     body: "${{env.RELEASE_NOTE}}"
-      #     draft: false
-      #     prerelease: false
+        
+      - name: create upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: ${{ env.VSIX_PATH }}
+          name: ${{ env.VSIX_NAME }}
+
+      - name: create github release
+        uses: ncipollo/release-action@v1
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag: v${{ env.PACKAGE_VERSION }}
+          name: ${{ env.VSIX_NAME }}
+          body: "${{ steps.changelog_reader.outputs.changes }}"
+          artifacts: ${{ env.VSIX_NAME }}
+          draft: false
+          prerelease: false
+
+
       
       # - name: upload releases
       #   uses: actions/upload-release-asset@v1
