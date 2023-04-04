@@ -1,349 +1,349 @@
 [
     {
-        "code": "1360",
-        "severity": "Information",
-        "title": "Virtual References iRules",
-        "message": "Virtual Server references iRule(s), review iRules for compatibility",
-        "regex": "rules {"
-    },
-    {
-        "code": "8e2d",
-        "severity": "Information",
-        "title": "iRule object",
-        "message": "iRule object found in config, review for compatibility",
-        "regex": "ltm rule "
-    },
-    {
-        "code": "e3d6",
+        "code": "f62e",
         "severity": "Warning",
-        "title": "Virtual References Local Traffic Policy(s)",
-        "message": "Virtual Server references Local Traffic Policy(s), review policies for compatibility",
-        "regex": "policies {"
+        "title": "XC-Wildcard port on virtual not supported in XC",
+        "message": "XC-Multiport LBs are not supported yet",
+        "regex": "(?<=add (?:cs|lb) vserver [\\S]+ [\\S]+ [\\d.]+ )(0)"
     },
     {
-        "code": "f297",
+        "code": "62ff",
         "severity": "Warning",
-        "title": "Local Traffic Policy(s) object",
-        "message": "Local Traffic Policy(s) found in config, review policies for compatibility",
-        "regex": "ltm policy "
+        "title": "XC-Wildcard VIP not supported",
+        "message": "XC-Wildcard VIPs not supported",
+        "regex": "(?<=add (?:cs|lb) vserver [\\S]+ [\\S]+ )(0.0.0.0)(?= \\d{1,5})"
     },
     {
-        "code": "6cf2",
-        "severity": "Error",
-        "title": "Access Policy object",
-        "message": "Access Policy(s) found in config, XC does not support Access Solutions",
-        "regex": "apm profile access "
+        "code": "72fb",
+        "severity": "Information",
+        "title": "AppFlow reference detected",
+        "message": "AppFlow, similar to sflow, has been detected on this app (add more details about appflow/sflow)",
+        "regex": "add appflow (?:policy|action|collector)"
     },
     {
-        "code": "1219",
+        "code": "cb78",
         "severity": "Error",
-        "title": "FTP not supported",
+        "title": "XC-FTP not supported?",
         "message": "so, look for tcp ports 21/22",
         "regex": "ftp"
     },
     {
-        "code": "429b",
+        "code": "a2ea",
         "severity": "Error",
         "title": "App with match across services",
         "message": "XC cannot match across services, like ftp, control on tcp/21, data on tcp/22",
         "regex": "match-across-(pools|services|virtuals) enabled"
     },
     {
-        "code": "0776",
+        "code": "6a1e",
         "severity": "Warning",
         "title": "Static NAT not supported",
         "message": "XC can nat, but uses a range of sources -- refine the regex ",
         "regex": "snat"
     },
     {
-        "code": "094d",
+        "code": "2245",
         "severity": "Warning",
         "title": "snat pool object detected",
         "message": "NATs are supported, but not statics",
         "regex": "ltm snatpool"
     },
     {
-        "code": "e66b",
+        "code": "3a67",
         "severity": "Error",
         "title": "Supporting APM profile detected",
         "message": "While not a direct APM profile, these profiles on the VS indicate that an APM profile is applied",
         "regex": "(/Common/websso { }|/Common/rba { })"
     },
     {
-        "code": "b2b9",
+        "code": "4987",
         "severity": "Error",
         "title": "no classmatch allowed in iRule",
         "message": "not really XC but will cause problems",
         "regex": "classmatch"
     },
     {
-        "code": "589b",
-        "severity": "Warning",
-        "title": "Wildcard port on virtual not supported in XC",
-        "message": "Multiport LBs are not supported yet",
-        "regex": "destination [/\\w\\.]+:0"
-    },
-    {
-        "code": "74f7",
-        "severity": "Error",
-        "title": "Wildcard VIP not supported",
-        "message": "Wildcard VIPs not supported",
-        "regex": "destination [/\\w\\.]+0.0.0.0:\\d"
-    },
-    {
-        "code": "d633",
+        "code": "5a5a",
         "severity": "Error",
         "title": "iRule stream profile detected",
         "message": "F5 TMOS stream profile functionality not supported",
         "regex": "stream::"
     },
     {
-        "code": "05ab",
+        "code": "0780",
         "severity": "Warning",
         "title": "XC reserved ports",
         "message": "Http failure response: 400 Bad Request \nFor tcp_loadbalancer dude/test configuration for child object advertise_policy ves-io-tcp-loadbalancer-test-df9979789 is wrong - 8443 is a reserved port, list of reserved ports 28000 - 32767 (kubernetes),28000 - 32767 (volterra),2379,9090,9999,18091,22222,23790,23791,1067,2380,8005,18092,9153,10250,10252,10259,500,8007,8443,10251,18095,23801,5355,8507,9007,68,323,23802,8444,8505,10249,10257,22,4500,8087,18093,53,6443,10256",
         "regex": "/(?=.*destination)(:(8443|2379|9090|9999|18091|22222|23790|23791|1067|2380|8005|18092|9153|10250|10252|10259|500|8007|10251|18095|23801|5355|8507|9007|68|323|23802|8444|8505|10249|10257|22|4500|8087|18093|53|6443|10256))/si"
     },
     {
-        "code": "0049",
+        "code": "d2bf",
         "severity": "Error",
         "title": "XC UDP Unsupported",
-        "message": "XC does not currently support UDP",
+        "message": "XC does not currently support UDP *** does ns support udp? ***",
         "regex": "ip-protocol udp"
     },
     {
-        "code": "2671",
+        "code": "a188",
         "severity": "Information",
         "title": "Default Redirect iRule Detected",
         "message": "The default http->https redirect irule has been detected.",
         "regex": "/Common/_sys_https_redirect"
     },
     {
-        "code": "9929",
+        "code": "5617",
+        "severity": "Information",
+        "title": "",
+        "message": "",
+        "regex": ""
+    },
+    {
+        "code": "4818",
+        "severity": "Warning",
+        "title": "",
+        "message": "",
+        "regex": ""
+    },
+    {
+        "code": "681f",
+        "severity": "Warning",
+        "title": "",
+        "message": "",
+        "regex": ""
+    },
+    {
+        "code": "3955",
+        "severity": "Error",
+        "title": "",
+        "message": "",
+        "regex": ""
+    },
+    {
+        "code": "f6e2",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "5cf0",
+        "code": "b02f",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "659b",
+        "code": "b3c7",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "b432",
+        "code": "fd5c",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "c5dc",
+        "code": "df8b",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "86d2",
+        "code": "57ef",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "f4a6",
+        "code": "0f93",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "016c",
+        "code": "0a0a",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "7efa",
+        "code": "e90c",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "fcd6",
+        "code": "5ca0",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "6944",
+        "code": "81b2",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "78e9",
+        "code": "016e",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "f13c",
+        "code": "232e",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "b013",
+        "code": "33a5",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "757b",
+        "code": "e1ca",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "95ed",
+        "code": "940f",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "fc18",
+        "code": "79ee",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "edcb",
+        "code": "9f4b",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "62a1",
+        "code": "70c1",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "baf6",
+        "code": "4c7b",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "6fac",
+        "code": "b3d3",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "a834",
+        "code": "849c",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "812d",
+        "code": "b164",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "7f5e",
+        "code": "06cf",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "77e2",
+        "code": "a0f3",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "8dca",
+        "code": "ae47",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "c855",
+        "code": "4680",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "ce1a",
+        "code": "bc0c",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "e371",
+        "code": "251f",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "db44",
+        "code": "1e73",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "03f6",
+        "code": "dd4d",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "8e0f",
+        "code": "9981",
         "severity": "Hint",
         "title": "",
         "message": "",
         "regex": ""
     },
     {
-        "code": "523b",
+        "code": "3790",
         "severity": "Hint",
         "title": "",
         "message": "",

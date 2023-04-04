@@ -22,7 +22,7 @@ export type AdcApp = {
     lines?: string[];
     // additional apps referenced by this app (ie. cs servers pointing to lb servers)
     apps?: AdcApp[];
-    diagnostics?: Diagnostic[];
+    diagnostics?: Diagnostic[] | string[];
 };
 
 export type Appflow = {

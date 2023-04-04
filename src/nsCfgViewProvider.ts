@@ -25,6 +25,8 @@ import {
     commands,
     MarkdownString,
     ThemeIcon,
+    Diagnostic,
+    DiagnosticSeverity,
 } from 'vscode';
 import jsYaml from 'js-yaml';
 
@@ -62,9 +64,9 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
     viewElement: NsCfgApp | undefined;
     adc: ADC | undefined;
     parsedFileEvents: any = [];
-    parsedObjEvents: any = [];
+    // parsedObjEvents: any = [];
 
-    readonly brkr = '\n\n##################################################\n\n';
+    // readonly brkr = '\n\n##################################################\n\n';
 
     nsDiag: boolean = true;
 
@@ -92,17 +94,11 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             ext.eventEmitterGlobal.emit('log-info', `f5-flipper.cfgExplore, opening archive`);
 
             await this.adc.loadParseAsync(file)
-                .then( async () => {
+                .then(async () => {
                     ext.eventEmitterGlobal.emit('log-info', `f5-flipper.cfgExplore, extracting apps`);
                     await this.adc.explode()
                         .then(exp => {
                             this.explosion = exp;
-
-                            //loop throught the apps and add diagnostics
-                            this.explosion.config.apps.forEach(app => {
-                                const diags = ext.nsDiag.getDiagnostic(app.lines);
-                                app.diagnostics = diags;
-                            })
 
                             ext.eventEmitterGlobal.emit('log-info', `f5-flipper.cfgExplore, extraction complete`);
                             ext.eventEmitterGlobal.emit('log-info', exp.stats);
@@ -110,12 +106,12 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                             ext.telemetry.capture({ command: 'flipper-explosion', stats: exp.stats });
                             this.refresh();
                         })
-                        // .catch(err => logger.error('makeExplosion-error', err));
+                    // .catch(err => logger.error('makeExplosion-error', err));
 
                 })
                 .catch(err => {
                     logger.error('makeExplosion-error', err);
-                    
+
                 });
 
 
@@ -123,9 +119,23 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
     }
 
     async refresh(): Promise<void> {
-        // if(ext.nsDiag?.loadRules()) {
-        //     ext.nsDiag.loadRules();
-        // }
+
+        logger.info('refreshing ns diagnostic rules and tree view')
+
+        // update diagnostics rules
+        ext.nsDiag.loadRules();
+
+        //loop throught the apps and add/refresh diagnostics
+        this.explosion.config.apps.forEach(app => {
+            const diags = ext.nsDiag.getDiagnostic(app.lines);
+            console.log(`updating diags for ${app.name}`)
+            app.diagnostics = diags;
+        })
+
+        // if we have a current config in view, refresh it also
+        // --needed? or should we listen to onDidChangeEditor
+
+        // refresh the tree view
         this._onDidChangeTreeData.fire(undefined);
     }
 
@@ -133,7 +143,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         this.adc = undefined;
         this.explosion = undefined;
         this.parsedFileEvents.length = 0;
-        this.parsedObjEvents.length = 0;
+        // this.parsedObjEvents.length = 0;
         this.refresh();
     }
 
@@ -156,10 +166,10 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         if (element) {
 
 
-            if(element.label === 'Apps') {
+            if (element.label === 'Apps') {
                 this.explosion.config.apps.forEach(app => {
                     const descA = [app.type]
-                    if(app.type === 'gslb') {
+                    if (app.type === 'gslb') {
                         descA.push(app.bindings['-domainName'][0]['-domainName'])
                     } else {
                         descA.push(`${app.ipAddress}:${app.port}`);
@@ -170,11 +180,23 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                     delete clonedApp.diagnostics;
                     const appYaml = jsYaml.dump(clonedApp, { indent: 4 })
                     const toolTip = new MarkdownString().appendCodeblock(appYaml, 'yaml');
+
+                    //if diag enabled, figure out icon
+                    let icon = '';
+                    if(ext.nsDiag.enabled) {
+                        // todo: add diag stats to tooltip
+                        const stats = ext.nsDiag.getDiagStats(app.diagnostics as Diagnostic[]);
+
+                        icon = stats?.Error ? this.redDot
+                        : stats?.Warning ? this.orangeDot
+                            : stats?.Information ? this.yellowDot : this.greenDot;
+                    }
+
                     treeItems.push(new NsCfgApp(
                         app.name,
                         toolTip,
                         desc,
-                        'nsApp', '',
+                        'nsApp', icon,
                         TreeItemCollapsibleState.None, {
                         command: 'f5-flipper.render',
                         title: '',
@@ -182,7 +204,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                     }
                     ));
                 })
-            } else if ( element.label === 'Sources') {
+            } else if (element.label === 'Sources') {
 
                 this.explosion.config.sources.forEach(source => {
                     // const appYaml = jsYaml.dump(app, { indent: 4 })
@@ -218,27 +240,27 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
             let nsTooltip: string | MarkdownString = '';
             // let icon
-            
+
             // if xc diag enabled
-            if (this.nsDiag) {
-                    // const appsList = this.explosion?.config.apps?.nsApp.forEach((el: AdcApp) => el.lines.join('\n')) || [];
-                    // // const excluded = ext.nsDiag.getDiagnosticExlusion(appsList);
-                    // // const defaultRedirect = new RegExp('\/Common\/_sys_https_redirect', 'gm');
-                    // // const nnn = defaultRedirect.exec(appsList.join('\n'));
+            if (ext.nsDiag.enabled) {
+                // const appsList = this.explosion?.config.apps?.nsApp.forEach((el: AdcApp) => el.lines.join('\n')) || [];
+                // // const excluded = ext.nsDiag.getDiagnosticExlusion(appsList);
+                // // const defaultRedirect = new RegExp('\/Common\/_sys_https_redirect', 'gm');
+                // // const nnn = defaultRedirect.exec(appsList.join('\n'));
 
-                    // // const mmm = appsList.join('\n').match(/\/Common\/_sys_https_redirect/g) || [];
+                
 
-                    // // const diags = ext.nsDiag.getDiagnostic(appsList);
+                // const stats = ext.nsDiag.getDiagStats(app.diagnostics as Diagnostic[]);
 
-                    // const stats = { 
-                    //     totalApps: appsList.length,
-                    //     '_sys_https_redirect': mmm.length, 
-                    //     stats: ext.nsDiag.getDiagStats(diags) };
+                // const stats = { 
+                //     totalApps: appsList.length,
+                //     '_sys_https_redirect': mmm.length, 
+                //     stats: ext.nsDiag.getDiagStats(diags) };
 
-                    // const diagStatsYml = jsYaml.dump(stats, { indent: 4 });
-                    // xcTooltip = new MarkdownString().appendCodeblock(diagStatsYml, 'yaml');
-                }
-            
+                // const diagStatsYml = jsYaml.dump(stats, { indent: 4 });
+                // xcTooltip = new MarkdownString().appendCodeblock(diagStatsYml, 'yaml');
+            }
+
             treeItems.push(new NsCfgApp(
                 'Diagnostics',
                 nsTooltip,
@@ -371,9 +393,9 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                         edit.replace(new Range(startPosition, endPosition), docContent);
                         commands.executeCommand("cursorTop");
                     });
-                    if(diagTag && this.nsDiag) {
+                    if (diagTag && ext.nsDiag.enabled) {
                         // if we got a text block with diagnostic tag AND xc diagnostics are enabled, then update the document with diagnosics
-                        // ext.nsDiag.updateDiagnostic(a);
+                        ext.nsDiag.updateDiagnostic(a);
                     }
                 });
             });
@@ -409,4 +431,41 @@ export class NsCfgApp extends TreeItem {
     ) {
         super(label, collapsibleState);
     }
+}
+
+
+
+
+/**
+ * Slim down and sort diags array for report
+ * Error > Warning > Information
+ * 
+ * example: ["Warning-094d: NATs are supported, but not statics", "Information-1360: Virtual Server references iRule(s), review iRules for compatibility"]
+
+ * 
+ * @param d VSCode Diagnostics array
+ * @returns 
+ */
+export function slimDiags(d: Diagnostic[]): string[]{
+
+    // slim down the diagnostics to a single line
+    const slimDiags = d.map(d => {
+        const sev = DiagnosticSeverity[d.severity];
+        // const line = d.range[0].line;    // look into adding line info to original diag object creation
+        return `${sev}-${d.code}: ${d.message}`;
+    });
+
+    // sort the lines by severity
+    return slimDiags.sort((a, b) => {
+
+        // the order of these sevs will set the order of the diagnostics lines
+        const sevs = ['Error','Warning','Information'];
+        
+        const aVerb = a.split('-')[0];
+        const bVerb = b.split('-')[0];
+        const aIndex = sevs.indexOf(aVerb);
+        const bIndex = sevs.indexOf(bVerb);
+
+        return aIndex - bIndex;
+    });
 }

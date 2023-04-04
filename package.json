@@ -3,7 +3,7 @@
   "displayName": "F5 Flipper",
   "description": "Breaking down Citrix NetScaler ADC configs",
   "publisher": "F5DevCentral",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "keywords": [
     "F5",
     "F5Networks",
@@ -21,7 +21,8 @@
     "theme": "light"
   },
   "activationEvents": [
-    "onCommand:f5-flipper.cfgExplore"
+    "onCommand:f5-flipper.cfgExplore",
+    "onView:f5-ns-container"
   ],
   "main": "./out/extLoader.js",
   "scripts": {
@@ -87,6 +88,12 @@
         "command": "f5-flipper.cfgExploreClear",
         "title": "Clear",
         "category": "F5-Flipper"
+      },
+      {
+        "command": "f5-flipper.diagRulesOpen",
+        "title": "Citrix NS/ADC diagnostics: Open Rules",
+        "category": "F5-Flipper",
+        "icon": "$(edit)"
       }
     ],
     "menus": {
@@ -102,7 +109,12 @@
           "command": "f5-flipper.report",
           "when": "view == nsConfigView && viewItem == nsReport",
           "group": "inline"
-        }
+        },
+				{
+					"command": "f5-flipper.diagRulesOpen",
+					"group": "inline",
+					"when": "view == nsConfigView && viewItem == nsDiag"
+				}
       ],
       "editor/context": [
         {

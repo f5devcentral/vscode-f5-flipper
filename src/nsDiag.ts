@@ -221,7 +221,7 @@ export class NsDiag {
 
     updateDiagnostic(doc: TextDocument) {
 
-        if (doc.fileName === 'app.conf') {
+        if (doc.fileName === 'app.ns.conf') {
 
             // clear current diags in this class
             this.diagXC.clear();

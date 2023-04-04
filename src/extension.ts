@@ -5,9 +5,10 @@ import {
     window,
     Uri,
     workspace,
-    TextDocument
+    TextDocument,
+    Diagnostic
 } from 'vscode';
-import { NsCfgProvider } from './nsCfgViewProvider';
+import { NsCfgProvider, slimDiags } from './nsCfgViewProvider';
 import { ext, initSettings, loadSettings } from './extensionVariables';
 import fs from 'fs';
 import * as os from 'os';
@@ -156,6 +157,22 @@ export async function activateInternal(context: ExtensionContext) {
         ext.nsCfgProvider.refresh();
     }));
 
+    context.subscriptions.push(commands.registerCommand('f5-flipper.diagRulesOpen', async () => {
+		ext.telemetry.capture({ command: 'f5-flipper.diagRulesOpen' });
+		ext.nsDiag.openRules();
+	}));
+
+    // watch for fileSave events
+    workspace.onDidSaveTextDocument((document: TextDocument) => {
+        const fileName = Uri.file(document.fileName);
+
+        // if this is our diagnostics rules file, then refresh the rules/tree when the file is saved. :)
+        if (fileName.path === '/home/ted/vscode-f5-flipper/diagnostics.json') {
+            // do work
+            ext.nsCfgProvider.refresh();
+        }
+    });
+
     context.subscriptions.push(commands.registerCommand('f5-flipper.cfgExplore-nsDiagSwitch', async (text) => {
         
         
@@ -252,6 +269,15 @@ export async function activateInternal(context: ExtensionContext) {
         for (const app of ext.nsCfgProvider.explosion.config.apps) {
             const appCopy = JSON.parse(JSON.stringify(app))
             delete appCopy.lines;
+            // const diags = [];
+
+            if(ext.nsDiag.enabled) {
+                //rebuild each diag as simple, casting as needed
+                appCopy.diagnostics = slimDiags(appCopy.diagnostics as Diagnostic[])
+            } else {
+                // diagnostics are not enabled, so removed them from the report
+                delete appCopy.diagnostics;
+            }
             reportApps.push(
                 brkr,
                 jsyaml.dump(appCopy, { indent: 4 }),
