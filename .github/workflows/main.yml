@@ -9,23 +9,23 @@ env:
 
 jobs:
 
-  # tests:
-  #   runs-on: ${{ matrix.os }}
-  #   strategy:
-  #     matrix:
-  #       os: [macos-latest, windows-latest, ubuntu-latest]
-  #   name: Test on ${{ matrix.os }}
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: actions/setup-node@v3
-  #       with:
-  #         node-version: ${{ env.NODE_VERSION }}
+  tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+    name: Test on ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
 
-  #     - run: npm install
-  #     - run: xvfb-run -a npm run test
-  #       if: runner.os == 'Linux'
-  #     - run: npm run test
-  #       if: runner.os != 'Linux'
+      - run: npm install
+      - run: xvfb-run -a npm run test
+        if: runner.os == 'Linux'
+      - run: npm run test
+        if: runner.os != 'Linux'
         
 
   package-release-publish:
@@ -33,7 +33,7 @@ jobs:
     permissions:
       contents: write
     environment: publishing
-    # needs: tests
+    needs: tests
     name: Package-Release-Publish
     steps:
 
@@ -98,23 +98,11 @@ jobs:
           prerelease: false
 
 
-      
-      # - name: upload releases
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     PUBLISH_TOKEN: ${{ secrets.MARKETPLACE_PUBLISH_KEY }}
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: ${{ env.VSIX_PATH }}
-      #     asset_name: ${{ env.VSIX_NAME }}
-      #     asset_content_type: application/zip
+      - name: publish to marketplace
+        run: vsce publish -i ${{ env.VSIX_PATH }} -p ${{ secrets.MARKETPLACE_PUBLISH_KEY }}
 
-      # - name: publish to marketplace
-      #   run: vsce publish -i ${{ env.VSIX_PATH }} -p ${{ secrets.MARKETPLACE_PUBLISH_KEY }}
-
-      # - name: publish to open-vsix
-      #   run: ovsx publish ${{ env.VSIX_PATH }} -p ${{ secrets.OPEN_VSX_TOKEN }}
+      - name: publish to open-vsix
+        run: ovsx publish ${{ env.VSIX_PATH }} -p ${{ secrets.OPEN_VSX_TOKEN }}
 
 
 
