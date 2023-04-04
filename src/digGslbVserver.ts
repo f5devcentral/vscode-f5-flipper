@@ -13,7 +13,6 @@ export async function digGslbVservers(coa: AdcConfObj, rx: AdcRegExTree) {
 
     const apps: AdcApp[] = [];
 
-    // dig 'add gslb vserver '
 
     coa.add?.gslb?.vserver.forEach(vServ => {
         const parent = 'add gslb vserver';
@@ -21,6 +20,7 @@ export async function digGslbVservers(coa: AdcConfObj, rx: AdcRegExTree) {
         const rxMatch = vServ.match(rx.parents[parent])
 
         if (!rxMatch) {
+            /* istanbul ignore next */
             return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
         }
 
@@ -47,6 +47,7 @@ export async function digGslbVservers(coa: AdcConfObj, rx: AdcRegExTree) {
 
                 const rxMatch = x.match(rx.parents[parent])
                 if (!rxMatch) {
+                    /* istanbul ignore next */
                     return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
                 }
 

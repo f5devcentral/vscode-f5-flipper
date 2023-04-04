@@ -3,9 +3,22 @@
 
 [BACK TO MAIN README](README.md)
 
-All notable changes to "project-flipper" will be documented in this file.
+All notable changes to "vscode-f5-flipper" will be documented in this file.
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file
+
+---
+
+## [0.4.0] - (04-05-2023)
+
+- enabled diagnostics
+  - started updating rule set
+  - stop-light/icons
+  - rule editing and refresh functions working
+  - diagnostics stats
+- more tests work and code coverage >75%
+  - code clean up
+- extended report with diags/stats
 
 ---
 

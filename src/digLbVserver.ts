@@ -31,12 +31,13 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
 
     const apps: AdcApp[] = [];
 
-    for await (const vServ of coa.add?.lb?.vserver) {
+    coa.add?.lb?.vserver.forEach(vServ => {
         const parent = 'add lb vserver';
         const originalString = 'add lb vserver ' + vServ;
         const rxMatch = vServ.match(rx.parents[parent]);
 
         if (!rxMatch) {
+            /* istanbul ignore next */
             return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
         }
         const opts = parseNsOptions(rxMatch.groups?.opts, rx);
@@ -60,6 +61,7 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
                 const rxMatch = x.match(rx.parents[parent]);
 
                 if (!rxMatch) {
+                    /* istanbul ignore next */
                     return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
                 }
 
@@ -77,6 +79,7 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
                             const rxMatch = x.match(rx.parents[parent])
                             const opts = parseNsOptions(rxMatch.groups?.opts, rx);
                             if (!rxMatch) {
+                                /* istanbul ignore next */
                                 return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
                             }
                             if(!app.bindings.service) {
@@ -119,7 +122,7 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
 
         apps.push(sortAdcApp(app))
 
-    }
+    })
     return apps;
 
 }
@@ -142,6 +145,7 @@ export function digServiceGroup(serviceName: string, app: AdcApp, obj: AdcConfOb
             const originalString = parent + ' ' + x;
             const rxMatch = x.match(rx.parents[parent])
             if (!rxMatch) {
+                /* istanbul ignore next */
                 return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
             }
             const opts = parseNsOptions(rxMatch.groups?.opts, rx);
@@ -157,6 +161,12 @@ export function digServiceGroup(serviceName: string, app: AdcApp, obj: AdcConfOb
             const parent = 'bind serviceGroup';
             const originalString = parent + ' ' + x;
             const rxMatch = x.match(rx.parents[parent])
+            
+            if (!rxMatch) {
+                /* istanbul ignore next */
+                return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
+            }
+
             app.lines.push(originalString);
             if (rxMatch.groups.serv) {
                 
@@ -177,6 +187,7 @@ export function digServiceGroup(serviceName: string, app: AdcApp, obj: AdcConfOb
                         app.lines.push(originalString)
                         const rxMatch = x.match(rx.parents[parent])
                         if (!rxMatch) {
+                            /* istanbul ignore next */
                             return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
                         }
                         const opts = parseNsOptions(rxMatch.groups.opts, rx);

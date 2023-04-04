@@ -120,7 +120,7 @@ describe('tgz unpacker tests', function () {
         assert.rejects(resp, 'should reject the promise since the file is not supported/bad')
 
     })
-    
+
     it(`rejects non-existent file`, async () => {
 
         adc = new ADC();
@@ -145,27 +145,42 @@ describe('tgz unpacker tests', function () {
 
     })
 
-    // it(`confirm explosion config source`, () => {
+    it(`rejects .conf file with no ns config`, async () => {
 
-    // todo:  create a test and code logic to support when an archive does not have any .conf files
+        adc = new ADC();
 
-    //     assert.deepStrictEqual(exp.config.sources.length, 1)
-    // })
+        const badFile = path.join(__dirname, '..', 'example_configs', 'noApps.ns.conf')
 
-    // it(`confirm explosion stats object`, async () => {
-    //     assert.deepStrictEqual(typeof exp.stats.lineCount, 'number')
-    //     assert.ok(typeof exp.stats.parseTime === 'number')
-    //     assert.ok(typeof exp.stats.appTime === 'number')
-    //     assert.ok(typeof exp.stats.packTime === 'number')
-    //     assert.ok(typeof exp.stats.sourceSize === 'number')
-    //     assert.ok(typeof exp.stats.sourceAdcVersion === 'string')
-    //     assert.deepStrictEqual(typeof exp.stats.objects?.lbVserver, 'number')
-    //     assert.deepStrictEqual(typeof exp.stats.objects?.csVserver, 'number')
-    //     assert.deepStrictEqual(typeof exp.stats.objects?.sslCertKey, 'number')
-    // })
+        const resp = adc.loadParseAsync(badFile)
+            .then(async x => {
+                exp = await adc.explode();
+                const z = x;
+            })
+            .catch(e => {
+                err = e;
+                return e;
+            })
 
-    // it(`confirm explosion config source === 1`, async () => {
-    //     assert.ok(exp.config.apps!.length === 18)
-    // })
+        assert.rejects(resp, 'should reject the promise since the file is not found')
+
+    })
+
+    it(`rejects .conf file with no ns config and no ns version`, async () => {
+
+        adc = new ADC();
+
+        const badFile = path.join(__dirname, '..', 'example_configs', 'noAppsNoVersion.ns.conf')
+
+        const resp = adc.loadParseAsync(badFile)
+            .catch(e => {
+                err = e;
+                return e;
+            })
+
+        assert.rejects(resp, 'should reject the promise since the file is not found')
+
+    })
+
+
 
 });

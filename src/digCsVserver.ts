@@ -19,9 +19,7 @@ export async function digCsVservers(coa: AdcConfObj, rx: AdcRegExTree) {
 
     const apps: AdcApp[] = [];
 
-    // start with 'add cs server', build details
-
-    for await (const vServ of coa.add?.cs?.vserver) {
+    coa.add?.cs?.vserver.forEach( vServ => {
         const parent = 'add cs vserver';
         const originalString = parent + ' ' + vServ;
 
@@ -29,6 +27,7 @@ export async function digCsVservers(coa: AdcConfObj, rx: AdcRegExTree) {
         const opts = parseNsOptions(rxMatch.groups?.opts, rx)
 
         if (!rxMatch) {
+            /* istanbul ignore next */
             return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
         }
 
@@ -72,52 +71,41 @@ export async function digCsVservers(coa: AdcConfObj, rx: AdcRegExTree) {
 
             })
 
-            digAddCsPolicys(app, coa, rx);
-            // digAddLbVserver()
-            apps.push(sortAdcApp(app))
-    }
+        digAddCsPolicys(app, coa, rx);
+        apps.push(sortAdcApp(app))
+    })
 
 
-    // digAddLbVservers()
-
-    // digAddCsVservers()
-
-    // find -policyName from 'add cs bind's
-
-    const xxx = 'debugger!'
     return apps;
-    // }
 }
 
 
-// // dig 'bind cs vservers'
-// export function digBindCsVservers(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) {
 
 
-// }
 
 export function digAddCsPolicys(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) {
 
     // loop through each policy attached to this app
     app.bindings["-policyName"].forEach(policy => {
-        
+
         // filter out all the policies with this name
-        obj.add.cs.policy?.filter(x => x.startsWith(policy['-policyName']))
+        obj.add?.cs?.policy?.filter(x => x.startsWith(policy['-policyName']))
             .forEach(x => {
                 const parent = 'add cs policy';
                 const originalString = parent + ' ' + x;
                 app.lines.push(originalString);
                 const rxMatch = x.match(rx.parents[parent]);
-                
+
                 if (!rxMatch) {
+                    /* istanbul ignore next */
                     return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
                 }
-                
+
                 const opts = parseNsOptions(rxMatch.groups.opts, rx)
-                
+
                 // add the policy name to it's details
                 opts.name = rxMatch.groups.name;
-                if(!app.csPolicies) app.csPolicies = [];
+                if (!app.csPolicies) app.csPolicies = [];
                 app.csPolicies.push(opts)
 
                 if (opts['-action']) {
@@ -130,19 +118,20 @@ export function digAddCsPolicys(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) 
                             app.lines.push(originalString)
                             const rxMatch = x.match(rx.parents[parent]);
                             if (!rxMatch) {
+                                /* istanbul ignore next */
                                 return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
                             }
                             const opts = parseNsOptions(rxMatch.groups.opts, rx)
-                            if(!app.csPolicyActions) app.csPolicyActions = []
+                            if (!app.csPolicyActions) app.csPolicyActions = []
                             app.csPolicyActions.push(opts)
                         })
                 }
             })
 
-            //todo:  dig appflow referenced by -policyName
-            // 'add appflow policy <name>' -> 'add appflow action <name>' -> 'add appflow collector <name>'
+        //todo:  dig appflow referenced by -policyName
+        // 'add appflow policy <name>' -> 'add appflow action <name>' -> 'add appflow collector <name>'
 
-            obj.add.appflow.policy?.filter(x => x.startsWith(policy['-policyName']))
+        obj.add?.appflow?.policy?.filter(x => x.startsWith(policy['-policyName']))
             .forEach(x => {
                 //https://developer-docs.citrix.com/projects/netscaler-command-reference/en/12.0/appflow/appflow-policy/appflow-policy/#add-appflow-policy
                 //add appflow policy <name> <rule> <action> [-undefAction <string>] [-comment <string>]
@@ -159,11 +148,12 @@ export function digAddCsPolicys(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) 
                 const afName = rxMatch.groups.name;
                 const afRule = rxMatch.groups.rule;
                 const afAction = rxMatch.groups.action;
-                
+
                 if (!rxMatch) {
+                    /* istanbul ignore next */
                     return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
                 }
-                
+
                 // const opts = parseNsOptions(rxMatch.groups.opts, rx)
 
                 const appflow: Appflow = {
@@ -176,17 +166,18 @@ export function digAddCsPolicys(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) 
 
                 if (rxMatch.groups?.action) {
                     // 'add appflow action <name> '
-                    obj.add.appflow.action.filter(el => el.startsWith(afAction))
+                    obj.add?.appflow?.action?.filter(el => el.startsWith(afAction))
                         .forEach(x => {
                             const parent = 'add appflow action';
                             const originalString = parent + ' ' + x;
                             app.lines.push(originalString)
                             const rxMatch = x.match(rx.parents[parent]);
                             if (!rxMatch) {
+                                /* istanbul ignore next */
                                 return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
                             }
                             const opts = parseNsOptions(rxMatch.groups.opts, rx)
-                            if(opts['-collectors']) {
+                            if (opts['-collectors']) {
                                 const collectorName = opts['-collectors'];
                                 obj.add.appflow.collector.filter(el => el.startsWith(collectorName))
                                     .forEach(x => {
@@ -195,7 +186,7 @@ export function digAddCsPolicys(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) 
                                         app.lines.push(originalString)
                                     })
                             }
-                            if(!app.csPolicyActions) app.csPolicyActions = []
+                            if (!app.csPolicyActions) app.csPolicyActions = []
                             // app.csPolicyActions.push(opts)
                         })
                 }

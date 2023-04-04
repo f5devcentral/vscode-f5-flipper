@@ -113,16 +113,16 @@ export class RegExTree {
          *  this should change a little as this matures and the regex madness gets cleaned up
          */
 
-        // full tmos version without decimals
-        if(x > 19000) {
-            logger.error('>v19.0.0.0 tmos detected - this should never happen!!!')
-            // this.regexTree.vs.fbPersist = /new-fallBackPersist-regex/;
-            // this.regexTree.vs.pool.obj = /new-pool-regex/;
-        }
-        if(x < 12000){
-            logger.error('<v12.0.0.0 tmos detected - have not tested this yet!!!')
-            // other regex tree changes specific to v12.0.0.0
-        }
+        // // full tmos version without decimals
+        // if(x > 19000) {
+        //     logger.error('>v19.0.0.0 tmos detected - this should never happen!!!')
+        //     // this.regexTree.vs.fbPersist = /new-fallBackPersist-regex/;
+        //     // this.regexTree.vs.pool.obj = /new-pool-regex/;
+        // }
+        // if(x < 12000){
+        //     logger.error('<v12.0.0.0 tmos detected - have not tested this yet!!!')
+        //     // other regex tree changes specific to v12.0.0.0
+        // }
         return this.regexTree;
     }
 
@@ -131,14 +131,14 @@ export class RegExTree {
 
 
 
-/**
- * combines multi-line commented regex final regex
- * @param regs regex pieces in array
- * @param opts regex options (g/m/s/i/y/u/s)
- */
-export function multilineRegExp(regs: RegExp[], opts: string): RegExp {
-    return new RegExp(regs.map(reg => reg.source).join(''), opts);
-}
+// /**
+//  * combines multi-line commented regex final regex
+//  * @param regs regex pieces in array
+//  * @param opts regex options (g/m/s/i/y/u/s)
+//  */
+// export function multilineRegExp(regs: RegExp[], opts: string): RegExp {
+//     return new RegExp(regs.map(reg => reg.source).join(''), opts);
+// }
 
 
 
@@ -186,5 +186,3 @@ function removeVersionDecimals(ver: string): number {
     return parseInt(ver.replace(/\./g, ''));
 }
 
-// const regexTree = new RegExTree();
-// export default regexTree;

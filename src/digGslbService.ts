@@ -27,8 +27,8 @@ export function digGslbService(serviceName: string, configObjectArry: AdcConfObj
             const opts = rxMatch.groups?.opts;
 
             if (!rxMatch) {
-                logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`,)
-                return;
+                /* istanbul ignore next */
+                return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
             }
 
             lines.push(originalString)
@@ -76,7 +76,4 @@ export function digGslbService(serviceName: string, configObjectArry: AdcConfObj
 
     return { gslbService, lines};
 
-    // dig 'set gslb vserver '? not found in configs at this time
-
-    // dig 'bind gslb vserver '
 }

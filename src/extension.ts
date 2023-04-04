@@ -94,8 +94,7 @@ export async function activateInternal(context: ExtensionContext) {
         if (!item) {
             // no input means we need to browse for a local file
             item = await window.showOpenDialog({
-                canSelectMany: false,
-                defaultUri: Uri.file('/home/ted/project-flipper/example_configs/ns1_v13.1.conf')
+                canSelectMany: false
             });
 
             // if we got a file from the showOpenDialog, it comes in an array, even though we told it to only allow single item selection -> return the single array item
@@ -247,21 +246,30 @@ export async function activateInternal(context: ExtensionContext) {
             '',
             'Please visit the following repo for any questions, issues or enhancements',
             '',
-            'https://github.com/DumpySquare/project-flipper',
+            'https://github.com/f5devcentral/vscode-f5-flipper',
             brkr
         ]
 
 
         // build report header
-        const reportHeader = {
+        const reportHeader: any = {
             hostname: ext.nsCfgProvider.explosion.hostname,
+            repo: context.extension.packageJSON.repository.url,
+            issues: context.extension.packageJSON.bugs.url,
+            extensionVersion: context.extension.packageJSON.version,
             id: ext.nsCfgProvider.explosion.id,
             inputFileType: ext.nsCfgProvider.explosion.inputFileType,
             dateTime: ext.nsCfgProvider.explosion.dateTime,
             stats: ext.nsCfgProvider.explosion.stats,
+            appCount: ext.nsCfgProvider.explosion.config.apps.length,
             sources: ext.nsCfgProvider.explosion.config.sources.map(el => {
                 return { fileName: el.fileName, size: el.size }
-            })
+            }),
+        }
+        
+        if(ext.nsDiag.enabled) {
+            reportHeader.diagStats = ext.nsCfgProvider.diagStats;
+            reportHeader.diags = ext.nsCfgProvider.diags;
         }
 
         // build apps
@@ -282,7 +290,7 @@ export async function activateInternal(context: ExtensionContext) {
                 brkr,
                 jsyaml.dump(appCopy, { indent: 4 }),
                 '',
-                '--- Original Application config lines',
+                '--- Original Application config lines', '',
                 ...app.lines, '', '')
         }
 

@@ -2,6 +2,13 @@
 import { inspect } from "util";
 
 
+/**
+ * this internal logger was intented to log key details of the config exloration (explosion/apps) process.
+ * 
+ * However, it hardly seems necessary since everything is integrated just into vscode.
+ * will leave here for now, but may remove completely
+ */
+
  /**
   * logger class to log information to OUTPUT console of vscode window
   * prefer to use logger.debug, but feel free to explore others

@@ -56,6 +56,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
     greenDot = ext.context.asAbsolutePath(path.join("images", "greenDot.svg"));
     greenCheck = ext.context.asAbsolutePath(path.join("images", "greenCheck.svg"));
 
+    nsDiag: boolean = true;
     explosion: Explosion | undefined;
     confObj: AdcConfObj | undefined;
     /**
@@ -64,11 +65,22 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
     viewElement: NsCfgApp | undefined;
     adc: ADC | undefined;
     parsedFileEvents: any = [];
-    // parsedObjEvents: any = [];
 
-    // readonly brkr = '\n\n##################################################\n\n';
+    diagStats = {
+        defaultRedirects: 0,
+        Green: undefined,
+        Information: undefined,
+        Warning: undefined,
+        Error: undefined,
+    };
 
-    nsDiag: boolean = true;
+    diags = {
+        defaultRedirects: [],
+        Green: [],
+        Information: [],
+        Warning: [],
+        Error: [],
+    };
 
     constructor() {
     }
@@ -183,13 +195,13 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
                     //if diag enabled, figure out icon
                     let icon = '';
-                    if(ext.nsDiag.enabled) {
+                    if (ext.nsDiag.enabled) {
                         // todo: add diag stats to tooltip
                         const stats = ext.nsDiag.getDiagStats(app.diagnostics as Diagnostic[]);
 
                         icon = stats?.Error ? this.redDot
-                        : stats?.Warning ? this.orangeDot
-                            : stats?.Information ? this.yellowDot : this.greenDot;
+                            : stats?.Warning ? this.orangeDot
+                                : stats?.Information ? this.yellowDot : this.greenDot;
                     }
 
                     treeItems.push(new NsCfgApp(
@@ -234,32 +246,77 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             this.viewElement = new NsCfgApp(title, expStatsYmlToolTip, desc, 'nsReport', '', TreeItemCollapsibleState.None);
             treeItems.push(this.viewElement);
 
-            // tmos to xc diangostics header/switch
+            // ns diangostics header/switch
             const nsDiagStatus = this.nsDiag ? "Enabled" : "Disabled";
             const icon = nsDiagStatus === "Enabled" ? this.greenCheck : '';
 
             let nsTooltip: string | MarkdownString = '';
-            // let icon
 
-            // if xc diag enabled
+            // if ns diag enabled
             if (ext.nsDiag.enabled) {
-                // const appsList = this.explosion?.config.apps?.nsApp.forEach((el: AdcApp) => el.lines.join('\n')) || [];
-                // // const excluded = ext.nsDiag.getDiagnosticExlusion(appsList);
-                // // const defaultRedirect = new RegExp('\/Common\/_sys_https_redirect', 'gm');
-                // // const nnn = defaultRedirect.exec(appsList.join('\n'));
 
-                
+                // build diag stats
+                this.explosion.config.apps.forEach(app => {
 
-                // const stats = ext.nsDiag.getDiagStats(app.diagnostics as Diagnostic[]);
+                    const stats = ext.nsDiag.getDiagStats(app.diagnostics as Diagnostic[]);
 
-                // const stats = { 
-                //     totalApps: appsList.length,
-                //     '_sys_https_redirect': mmm.length, 
-                //     stats: ext.nsDiag.getDiagStats(diags) };
+                    // figure out app diag status green/yellow/orange/red
+                    const diagStatus = stats?.Error ? 'Error'
+                        : stats?.Warning ? 'Warning'
+                            : stats?.Information ? 'Information' : 'Green';
 
-                // const diagStatsYml = jsYaml.dump(stats, { indent: 4 });
-                // xcTooltip = new MarkdownString().appendCodeblock(diagStatsYml, 'yaml');
+
+                    // push app diags to high level report
+                    if (diagStatus === 'Error') {
+
+                        // start or increment high level stats
+                        typeof this.diagStats?.Error === 'number' ?
+                            this.diagStats.Error = this.diagStats.Error + 1 :
+                            this.diagStats.Error = 1;
+
+                        // add appName/diags 
+                        this.diags!.Error!.push({
+                            appName: app.name,
+                            diagnostics: slimDiags(app.diagnostics as Diagnostic[])
+                        });
+
+                    } else if (diagStatus === 'Warning') {
+
+                        typeof this.diagStats?.Warning === 'number' ?
+                            this.diagStats.Warning = this.diagStats.Warning + 1 :
+                            this.diagStats!.Warning = 1;
+
+                        this.diags!.Warning!.push({
+                            appName: app.name,
+                            diagnostics: slimDiags(app.diagnostics as Diagnostic[])
+                        });
+
+                    } else if (diagStatus === 'Information') {
+
+                        typeof this.diagStats?.Information === 'number' ?
+                            this.diagStats.Information = this.diagStats.Information + 1 :
+                            this.diagStats!.Information = 1;
+
+                        this.diags!.Information!.push({
+                            appName: app.name,
+                            diagnostics: slimDiags(app.diagnostics as Diagnostic[])
+                        });
+
+                    } else if (diagStatus === 'Green') {
+
+                        typeof this.diagStats?.Green === 'number' ?
+                            this.diagStats.Green = this.diagStats.Green + 1 :
+                            this.diagStats!.Green = 1;
+
+                        this.diags!.Green!.push(app.name);
+
+                    }
+
+                })
             }
+
+            const diagStatsYml = jsYaml.dump(this.diagStats, { indent: 4 });
+            nsTooltip = new MarkdownString().appendCodeblock(diagStatsYml, 'yaml');
 
             treeItems.push(new NsCfgApp(
                 'Diagnostics',
@@ -446,7 +503,7 @@ export class NsCfgApp extends TreeItem {
  * @param d VSCode Diagnostics array
  * @returns 
  */
-export function slimDiags(d: Diagnostic[]): string[]{
+export function slimDiags(d: Diagnostic[]): string[] {
 
     // slim down the diagnostics to a single line
     const slimDiags = d.map(d => {
@@ -459,8 +516,8 @@ export function slimDiags(d: Diagnostic[]): string[]{
     return slimDiags.sort((a, b) => {
 
         // the order of these sevs will set the order of the diagnostics lines
-        const sevs = ['Error','Warning','Information'];
-        
+        const sevs = ['Error', 'Warning', 'Information'];
+
         const aVerb = a.split('-')[0];
         const bVerb = b.split('-')[0];
         const aIndex = sevs.indexOf(aVerb);

@@ -8,17 +8,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { digCsVservers } from './digCsVserver';
 import { digLbVserver } from './digLbVserver';
 import { digGslbVservers } from './digGslbVserver';
-
-// import { RegExTree, TmosRegExTree } from './regex'
 import intLogger from './intLogger';
 import { logger } from './logger';
 import { AdcApp, AdcConfObj, AdcRegExTree, ConfigFile, Explosion, Stats } from './models'
 import { countMainObjects } from './objectCounter';
 import { parseAdcConfArrays } from './parseAdcArrys';
 import { RegExTree } from './regex';
-// import { countObjects } from './objCounter';
-// import { ConfigFile } from './models';
-// import { digVsConfig, getHostname } from './digConfigs';
 import { UnPacker } from './unPackerStream';
 
 
@@ -66,14 +61,6 @@ export default class ADC extends EventEmitter {
     private stats: Stats = {
         objectCount: 0,
     };
-    /**
-     * ADC/NS license file
-     */
-    license: ConfigFile;
-    /**
-     * adc file store files, which include certs/keys/external_monitors/...
-     */
-    fileStore: ConfigFile[] = [];
 
     constructor() {
         super();
@@ -142,22 +129,13 @@ export default class ADC extends EventEmitter {
         // push the raw config files to storage array
         this.configFiles.push(conf)
 
-        if (this.rx) {
-            // have an RX tree already so asyncronously test the file version matches
-            this.setAdcVersion(conf)
-        } else {
-            // no RX tree set yet, so wait for this to finish
-            await this.setAdcVersion(conf)
-        }
+        // build rx tree based on ns version
+        await this.setAdcVersion(conf)
 
-        // array of unused/unparsed objects
-        const orphans: string[] = [];
-
-        // this.configObject = await parseAdcConf(config, this.rx!);
         this.configObjectArry = await parseAdcConfArrays(config, this.rx!);
 
         // get hostname from configObjectArry, assign to parent class for easy access
-        if (this.configObjectArry.set.ns.hostName.length > 0) {
+        if (this.configObjectArry.set?.ns?.hostName.length > 0) {
             // there should always be only one in this array
             this.hostname = this.configObjectArry.set.ns.hostName[0];
         }
@@ -176,25 +154,17 @@ export default class ADC extends EventEmitter {
      * @param x config-file object
      */
     async setAdcVersion(x: ConfigFile): Promise<void> {
-        if (this.rx) {
-            // rex tree already assigned, lets confirm subsequent file tmos version match
-            if (this.adcVersion === this.getAdcVersion(x.content, this.rx.adcVersion)[0]) {
-                // do nothing, current file version matches existing files tmos verion
-            } else {
-                const err = `Parsing [${x.fileName}], adc version of this file does not match previous file [${this.adcVersion}]`;
-                intLogger.error(err)
-                // throw new Error(err);
-            }
-        } else {
 
-            // first time through - build everything
-            const rex = new RegExTree();  // instantiate regex tree
-            [this.adcVersion, this.adcBuild] = this.getAdcVersion(x.content, rex.adcVersionBaseReg);  // get adc version
-            intLogger.info(`Recieved .conf file of version: ${this.adcVersion}`)
+        // instantiate regex tree
+        const rex = new RegExTree();
+        
+        // get adc version
+        [this.adcVersion, this.adcBuild] = this.getAdcVersion(x.content, rex.adcVersionBaseReg);
+        
+        intLogger.info(`Recieved .conf file of version: ${this.adcVersion}`)
 
-            // assign regex tree for particular version
-            this.rx = rex.get(this.adcVersion)
-        }
+        // assign regex tree for particular version
+        this.rx = rex.get(this.adcVersion)
     }
 
 
@@ -209,17 +179,9 @@ export default class ADC extends EventEmitter {
      */
     async explode(): Promise<Explosion> {
 
-        // if config has not been parsed yet...
-        // if (!this.configObject.ltm?.virtual) {
-        //     await this.parse(); // parse config files
-        // }
-
         const apps = await this.apps();   // extract apps before pack timer...
 
         const startTime = process.hrtime.bigint();  // start pack timer
-
-        // // extract DO classes (base information expanded)
-        // const doClasses = await digDoConfig(this.configObject);
 
         // build return object
         const retObj = {
@@ -237,11 +199,6 @@ export default class ADC extends EventEmitter {
         if (apps.length > 0) {
             // add virtual servers (apps), if found
             retObj.config['apps'] = apps;
-        }
-
-        if (this.fileStore.length > 0) {
-            // add files from file store
-            retObj['fileStore'] = this.fileStore;
         }
 
         // capture pack time
@@ -266,7 +223,7 @@ export default class ADC extends EventEmitter {
     async apps() {
 
         // setup our array to hold the apps
-        const apps: AdcApp[] = []
+        const apps: AdcApp[] = [];
 
         // start our timer for abstracting apps
         const startTime = process.hrtime.bigint();
@@ -290,7 +247,10 @@ export default class ADC extends EventEmitter {
 
         // log a warning if we didn't abstract any apps
         if (apps.length === 0) {
-            logger.warn('no "add cs vserver"/"add lb vserver"/"add gslb vserver" objects found - excluding apps information')
+            const msg = 'no "add cs vserver"/"add lb vserver"/"add gslb vserver" objects found - excluding apps information';
+            logger.error(msg)
+            // do we want to just log or toss on error if we have no apps?
+            throw new Error(msg)
         }
 
         // return the app array
@@ -343,24 +303,3 @@ export function sortAdcApp(app: AdcApp): AdcApp {
     }
     return sorted;
 }
-
-// /**
-//  * standardize line endings to linux
-//  * "\r\n" and "\r" to "\n"
-//  * @param config config as string
-//  * @returns config
-//  */
-// function standardizeLineReturns (config: string){
-//     const regex = /(\r\n|\r)/g;
-//     return config.replace(regex, "\n");
-// }
-
-// /**
-//  * Reverse string
-//  * @param str string to reverse
-//  */
-// function reverse(str: string){
-//     return [...str].reverse().join('');
-//   }
-
-
