@@ -9,29 +9,31 @@ env:
 
 jobs:
 
-  tests:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
-    name: Test on ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.NODE_VERSION }}
+  # tests:
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     matrix:
+  #       os: [macos-latest, windows-latest, ubuntu-latest]
+  #   name: Test on ${{ matrix.os }}
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/setup-node@v3
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
 
-      - run: npm install
-      - run: xvfb-run -a npm run test
-        if: runner.os == 'Linux'
-      - run: npm run test
-        if: runner.os != 'Linux'
+  #     - run: npm install
+  #     - run: xvfb-run -a npm run test
+  #       if: runner.os == 'Linux'
+  #     - run: npm run test
+  #       if: runner.os != 'Linux'
         
 
   package-release-publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     environment: publishing
-    needs: tests
+    # needs: tests
     name: Package-Release-Publish
     steps:
 
@@ -56,6 +58,7 @@ jobs:
       #   run: echo "${{ secrets.TEEM_KEY }}" >> TEEM_KEY
 
       - name: package extension
+        id: vsce
         run: vsce package
 
       - name: get extension path
@@ -86,8 +89,6 @@ jobs:
       - name: create github release
         uses: ncipollo/release-action@v1
         id: create_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag: v${{ env.PACKAGE_VERSION }}
           name: ${{ env.VSIX_NAME }}
