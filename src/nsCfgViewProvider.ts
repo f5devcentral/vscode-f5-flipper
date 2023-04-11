@@ -137,12 +137,14 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         // update diagnostics rules
         ext.nsDiag.loadRules();
 
-        //loop throught the apps and add/refresh diagnostics
-        this.explosion.config.apps.forEach(app => {
-            const diags = ext.nsDiag.getDiagnostic(app.lines);
-            console.log(`updating diags for ${app.name}`)
-            app.diagnostics = diags;
-        })
+        if(this.explosion) {
+            //loop throught the apps and add/refresh diagnostics
+            this.explosion.config.apps.forEach(app => {
+                const diags = ext.nsDiag.getDiagnostic(app.lines);
+                // console.log(`updating diags for ${app.name}`)
+                app.diagnostics = diags;
+            })
+        }
 
         // if we have a current config in view, refresh it also
         // --needed? or should we listen to onDidChangeEditor
