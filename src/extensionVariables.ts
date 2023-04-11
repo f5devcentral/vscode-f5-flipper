@@ -23,14 +23,12 @@ import {
     StatusBarItem,
     workspace,
     ViewColumn,
-    commands,
-    window
+    commands
 } from "vscode";
 import { logger } from "./logger";
-// import { TextDocumentView } from './editorViews/editorView';
 import { EventEmitter } from "events";
 
-import { AtcVersions, AtcVersionsClient, ExtHttp } from 'f5-conx-core';
+import { ExtHttp } from 'f5-conx-core';
 import { Telemetry } from './telemetry';
 import { NsDiag } from './nsDiag';
 import { NsCfgProvider } from './nsCfgViewProvider';
@@ -48,7 +46,6 @@ export namespace ext {
     export let nsCfgProvider: NsCfgProvider;
     export let eventEmitterGlobal: EventEmitter;
     export let connectBar: StatusBarItem;
-    // export let panel: TextDocumentView;
     export let cacheDir: string;
     export let teemEnv = 'F5_VSCODE_TEEM';
     export let teemAgent: string;
@@ -62,7 +59,6 @@ export namespace ext {
         export let newEditorTabForAll: boolean;
         export let logLevel: string;
         export let preview: boolean;
-        export let proxy: ProxyCfg | undefined;
         export let prompts: boolean;
     }
 }
@@ -104,21 +100,6 @@ export async function initSettings(context: ExtensionContext) {
         .on('log-info', msg => logger.info(msg))
         .on('log-warn', msg => logger.warn(msg))
         .on('log-error', msg => logger.error(msg))
-        // .on('failedAuth', async msg => {
-        //     window.showErrorMessage('Failed Authentication - Please check password');
-        //     logger.error('Failed Authentication Event!', ext.f5Client?.device, msg);
-        //     await ext.f5Client?.clearPassword(ext.f5Client?.device.device);
-        //     commands.executeCommand('f5-flipper.disconnect');
-        // });
-
-
-    // create the atc versions client with external connectivity and event emittier
-    // const atcVersionClient = new AtcVersionsClient({
-    //     extHttp: ext.extHttp,
-    //     cachePath: ext.cacheDir,
-    //     eventEmitter: ext.eventEmitterGlobal
-    // });
-
 
 
     if (!fs.existsSync(ext.cacheDir)) {
@@ -129,11 +110,7 @@ export async function initSettings(context: ExtensionContext) {
         logger.debug(`existing cache directory detected: ${ext.cacheDir}`);
     };
 
-    // // get atc release information
-    // await atcVersionClient.getAtcReleasesInfo()
-    //     .then(versions => {
-    //         ext.atcVersions = versions;
-    //     });
+
 }
 
 
@@ -160,37 +137,12 @@ export async function loadSettings() {
 
     process.env[ext.teemEnv] = f5Cfg.get<boolean>('f5.TEEM', true).toString();
 
-    // process.env.F5_CONX_CORE_REJECT_UNAUTORIZED = f5Cfg.get('rejectUnauthorizedBIGIP')!.toString();
-    
-    // // get cookie config from vscode and place in env
-    // const cookie = f5Cfg.get('cookie')!.toString();
-    // if (cookie) {
-    //     process.env.F5_CONX_CORE_COOKIES = cookie;
-    // } else {
-    //     // clear if not found
-    //     delete process.env.F5_CONX_CORE_COOKIES;
-    // }
     
     logger.info('------ Environment Variables ------');
     // log envs
     Object.entries(process.env)
         .filter(el => el[0].startsWith('F5_'))
         .forEach(el => logger.info(`${el[0]}=${el[1]}`));
-
-    // // move to this env format, remove above when conx supports dynamic env assignment at instantiation
-    // Object.entries(process.env)
-    //     .filter(el => el[0].startsWith('F5_VSCODE_'))
-    //     .forEach(el => logger.info(`${el[0]}=${el[1]}`));
-
-    // if(process.env.NODE_TLS_REJECT_UNAUTHORIZED) {
-    //     logger.info(`NODE_TLS_REJECT_UNAUTHORIZED=${process.env.NODE_TLS_REJECT_UNAUTHORIZED}`);
-    // }
-
-    // // reload device hosts view
-    // if(ext.hostsTreeProvider) {
-    //     // we have to make sure this has been populated after initial extension loading
-    //     ext.hostsTreeProvider.refresh();
-    // }
 
 }
 
@@ -205,24 +157,3 @@ function parseColumn(value: string): ViewColumn {
             return ViewColumn.Beside;
     }
 }
-
-
-
-type ProxyCfg = {
-    host?: string,
-    port?: number,
-    protocol?: string,
-    auth?: {
-        username?: string,
-        password?: string
-    }
-};
-
-
-/*
-// external links - for testing and future use
-https://raw.githubusercontent.com/F5Networks/f5-appsvcs-extension/master/schema/latest/as3-schema.json
-https://raw.githubusercontent.com/F5Networks/f5-declarative-onboarding/master/src/schema/latest/base.schema.json
-https://raw.githubusercontent.com/F5Networks/f5-telemetry-streaming/master/src/schema/latest/base_schema.json
-https://raw.githubusercontent.com/F5Networks/f5-cloud-failover-extension/master/src/nodejs/schema/base_schema.json
-*/

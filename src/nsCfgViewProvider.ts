@@ -115,7 +115,13 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                             ext.eventEmitterGlobal.emit('log-info', `f5-flipper.cfgExplore, extraction complete`);
                             ext.eventEmitterGlobal.emit('log-info', exp.stats);
                             // ts-todo: add key to telemetry
-                            ext.telemetry.capture({ command: 'flipper-explosion', stats: exp.stats });
+                            ext.telemetry.capture({
+                                command: 'flipper-explosion',
+                                inputFileType: ext.nsCfgProvider.explosion.inputFileType,
+                                dateTime: ext.nsCfgProvider.explosion.dateTime,
+                                appCount: ext.nsCfgProvider.explosion.config.apps.length,
+                                stats: exp.stats
+                            });
                             this.refresh();
                         })
                     // .catch(err => logger.error('makeExplosion-error', err));
@@ -137,7 +143,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         // update diagnostics rules
         ext.nsDiag.loadRules();
 
-        if(this.explosion) {
+        if (this.explosion) {
             //loop throught the apps and add/refresh diagnostics
             this.explosion.config.apps.forEach(app => {
                 const diags = ext.nsDiag.getDiagnostic(app.lines);
@@ -347,44 +353,12 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             }
             ));
 
-            // // split off the partition names and count the number of unique occurances
-            // this.partCounts = this.explosion?.config?.apps?.map(item => item.name.split('/')[1])
-            //     // @ts-expect-error
-            //     .reduce((acc, curr) => (acc[curr] = (acc[curr] || 0) + 1, acc), {});
-
-            // this.partitions = [...new Set(this.explosion?.config?.apps?.map(item => item.name.split('/')[1]))];
-
-            // get all the apps configs
-            // const allApps = this.explosion?.config.apps?.map((el: AdcApp) => el.configs.join('\n').concat(this.brkr));
-
             const appsTotal = this.explosion?.config.apps ? this.explosion.config.apps.length.toString() : '';
-            // const baseTotal = this.explosion?.config.base ? this.explosion.config.base.length.toString() : '';
-            // const doTotal = this.explosion?.config.doClasses ? this.explosion.config.doClasses.length.toString() : '';
-            // const logTotal = this.explosion?.logs ? this.explosion.logs.length.toString() : '';
-
-            // treeItems.push(new CfgApp('Partitions', 'Click for All apps', this.partitions.length.toString(), '', '', TreeItemCollapsibleState.Collapsed,
-            //     { command: 'f5-flipper.cfgExplore-show', title: '', arguments: ['allApps'] }));
 
             if (this.explosion?.config?.apps) {
                 treeItems.push(new NsCfgApp('Apps', '', appsTotal, '', '', TreeItemCollapsibleState.Expanded,
                     { command: 'f5-flipper.cfgExplore-show', title: '', arguments: [] }));
             }
-
-
-            // if (this.bigipConfig?.fileStore && this.bigipConfig?.fileStore.length > 0) {
-            //     const allFileStore = this.bigipConfig.fileStore.filter((el: ConfigFile) => {
-            //         // only return the certs and keys for now
-            //         if (el.fileName.includes('/certificate_d/') || el.fileName.includes('/certificate_key_d/')) {
-            //             return true;
-            //         }
-            //     })
-            //         .map((el: ConfigFile) => `\n###  ${el.fileName}\n${el.content}\n\n`);
-
-            //     treeItems.push(new CfgApp('FileStore', '', this.bigipConfig.fileStore.length.toString(), '', '', TreeItemCollapsibleState.None,
-            //         { command: 'f5-flipper.cfgExplore-show', title: '', arguments: [allFileStore.join('\n')] }));
-            // }
-
-
 
         }
         return Promise.resolve(treeItems);
