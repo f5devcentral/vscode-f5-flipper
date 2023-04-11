@@ -366,7 +366,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             //     { command: 'f5-flipper.cfgExplore-show', title: '', arguments: ['allApps'] }));
 
             if (this.explosion?.config?.apps) {
-                treeItems.push(new NsCfgApp('Apps', '', appsTotal, '', '', TreeItemCollapsibleState.Collapsed,
+                treeItems.push(new NsCfgApp('Apps', '', appsTotal, '', '', TreeItemCollapsibleState.Expanded,
                     { command: 'f5-flipper.cfgExplore-show', title: '', arguments: [] }));
             }
 
