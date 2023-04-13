@@ -9,7 +9,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## [1.0.0] - (04-15-2023)
+## [1.0.0] - (04-13-2023)
 
 - General Availability release
   - phase 1 - unpack/parse config (complete)
@@ -26,6 +26,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 - [BUG] cfg explore clear button produces error #1
 - [RFE] default to expanded apps after config import #2
 - [RFE] setup issue/bug/enhancement templates #8
+- [RFE] remove internal commands from command palette #10
+- [RFE] setup dev flag for early release features #3
+- [RFE] save button codeLens for the diagnostic rules #12
 
 ---
 

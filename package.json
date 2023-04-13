@@ -90,18 +90,28 @@
         "command": "f5-flipper.report",
         "title": "Flipper Report",
         "category": "F5-Flipper",
-        "icon": "$(output)"
+        "icon": "$(output)",
+        "enablement": "view == nsConfigView"
       },
       {
         "command": "f5-flipper.cfgExploreClear",
         "title": "Clear",
-        "category": "F5-Flipper"
+        "category": "F5-Flipper",
+        "enablement": "view == nsConfigView"
+      },
+      {
+        "command": "f5-flipper.viewJson",
+        "title": "JSON Output",
+        "category": "F5-Flipper",
+        "icon": "$(json)",
+        "enablement": "view == nsConfigView"
       },
       {
         "command": "f5-flipper.diagRulesOpen",
         "title": "Citrix NS/ADC diagnostics: Open Rules",
         "category": "F5-Flipper",
-        "icon": "$(edit)"
+        "icon": "$(edit)",
+        "enablement": "view == nsConfigView"
       }
     ],
     "menus": {
@@ -116,6 +126,11 @@
         {
           "command": "f5-flipper.report",
           "when": "view == nsConfigView && viewItem == nsReport",
+          "group": "inline"
+        },
+        {
+          "command": "f5-flipper.viewJson",
+          "when": "view == nsConfigView && viewItem == nsApp",
           "group": "inline"
         },
 				{

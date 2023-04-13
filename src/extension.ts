@@ -6,7 +6,8 @@ import {
     Uri,
     workspace,
     TextDocument,
-    Diagnostic
+    Diagnostic,
+    languages
 } from 'vscode';
 import { NsCfgProvider, slimDiags } from './nsCfgViewProvider';
 import { ext, initSettings, loadSettings } from './extensionVariables';
@@ -18,6 +19,7 @@ import jsyaml from 'js-yaml';
 import path from 'path';
 import { NsDiag } from './nsDiag';
 import { Hovers } from './hovers';
+import { NsCodeLensProvider } from './codeLens';
 
 // turn off console logging
 logger.console = false;
@@ -56,19 +58,19 @@ export async function activateInternal(context: ExtensionContext) {
     await loadSettings();
 
     // create the telemetry service
-	ext.telemetry = new Telemetry(context);
-	// initialize telemetry service
-	await ext.telemetry.init();
+    ext.telemetry = new Telemetry(context);
+    // initialize telemetry service
+    await ext.telemetry.init();
 
     process.on('unhandledRejection', error => {
         logger.error('--- unhandledRejection ---', error);
         ext.telemetry.capture({ unhandledRejection: JSON.stringify(error) });
     });
-    
+
     new Hovers(context, ext.eventEmitterGlobal);
 
     ext.nsDiag = new NsDiag(context);  // move to settings/vars
-    
+
     ext.nsCfgProvider = new NsCfgProvider();
     // const cfgView = window.registerTreeDataProvider('cfgTree', cfgProvider);
     const cfgView = window.createTreeView('nsConfigView', {
@@ -77,7 +79,14 @@ export async function activateInternal(context: ExtensionContext) {
         canSelectMany: true
     });
 
+    // setup logic to only enable this for dev flag
+    ext.nsCodeLens = new NsCodeLensProvider()
 
+    languages.registerCodeLensProvider({
+        language: 'json',
+    },
+        ext.nsCodeLens
+    );
 
     /**
      * this command is exposed via right click in editor so user does not have to connect to F5
@@ -139,7 +148,7 @@ export async function activateInternal(context: ExtensionContext) {
 
     }));
 
-    
+
     context.subscriptions.push(commands.registerCommand('f5-flipper.cfgExploreTest', async (text) => {
         const testPath = path.join(context.extensionPath, 'example_configs', 't1.ns.conf')
         commands.executeCommand('f5-flipper.cfgExplore', Uri.file(testPath))
@@ -157,81 +166,62 @@ export async function activateInternal(context: ExtensionContext) {
     }));
 
     context.subscriptions.push(commands.registerCommand('f5-flipper.diagRulesOpen', async () => {
-		ext.telemetry.capture({ command: 'f5-flipper.diagRulesOpen' });
-		ext.nsDiag.openRules();
-	}));
+        ext.telemetry.capture({ command: 'f5-flipper.diagRulesOpen' });
+        ext.nsDiag.openRules();
+    }));
+
+
+    context.subscriptions.push(commands.registerCommand('f5-flipper.viewJson', async (x) => {
+        ext.telemetry.capture({ command: 'f5-flipper.viewJson' });
+        const appName = x.label;
+
+        const app = ext.nsCfgProvider.explosion.config.apps.find(a => a.name === appName)
+
+        ext.nsCfgProvider.render(app, 'full')
+    }));
 
     // watch for fileSave events
     workspace.onDidSaveTextDocument((document: TextDocument) => {
-        const fileName = Uri.file(document.fileName);
+
+        const justFileName = path.parse(document.fileName).base;
 
         // if this is our diagnostics rules file, then refresh the rules/tree when the file is saved. :)
-        if (fileName.path === '/home/ted/vscode-f5-flipper/diagnostics.json') {
-            // do work
+        if (justFileName === 'diagnostics.json') {
+            // refresh the view and all the diagnostics
             ext.nsCfgProvider.refresh();
         }
     });
 
     context.subscriptions.push(commands.registerCommand('f5-flipper.cfgExplore-nsDiagSwitch', async (text) => {
-        
-        
+
+
         // flip switch and refresh details
-        if(ext.nsCfgProvider.nsDiag){
+        if (ext.nsCfgProvider.nsDiag) {
             ext.nsCfgProvider.nsDiag = false;
-            // ext.nsDiag.enabled = false;
+            ext.nsDiag.enabled = false;
             console.log('ns diag updatediagnostics disable');
             logger.info('disabling diagnostics')
-            if(ext.nsDiag.lastDoc) {
+            if (ext.nsDiag.lastDoc) {
                 // clear the last editor diags
                 ext.nsDiag.updateDiagnostic(ext.nsDiag.lastDoc);
             }
         } else {
             ext.nsCfgProvider.nsDiag = true;
             logger.info('enabling diagnostics')
-            
+
             // was having errors about functions undefined, so, make sure everything is loaded as we turn this on
             // if (ext.nsDiag.updateDiagnostic === undefined) {
-                console.log('ns diag updatediagnostics enable');
-                // ext.nsDiag.enabled = true;
+            console.log('ns diag updatediagnostics enable');
+            ext.nsDiag.enabled = true;
             // }
         }
         ext.nsCfgProvider.refresh();
     }));
 
-    
+
     context.subscriptions.push(commands.registerCommand('f5-flipper.render', async (text) => {
-        const x = cfgView?.selection;
-        let full: string[] = [];
-        // let text2;
-        if (Array.isArray(x) && x.length > 1) {
-            // got multi-select array, push all necessary details to a single object
 
-            x.forEach((el) => {
-                const y = el.command?.arguments;
-                if (y) {
-                    full.push(y[0].join('\n'));
-                    full.push('\n\n#############################################\n\n');
-                }
-            });
-            text = full;
-
-            // } else if (Array.isArray(x) && x.length === 1) {
-            // 	return window.showWarningMessage('Select multiple apps with "Control" key');
-        } else if (typeof text === 'string') {
-            // just text, convert to single array with render
-            text = [text];
-        }
-
-        // todo: add logic to catch single right click
-
-        let diagTag = false;
-        const y = x[0];
-        if (x[0]?.contextValue === 'cfgPartition' || x[0]?.contextValue === 'cfgAppItem') {
-            diagTag = true;
-        }
-
-        // provide the text and "IF" xc diagnostics "CAN" be applied
-        ext.nsCfgProvider.render(text, diagTag);
+        ext.nsCfgProvider.render(text, 'lines');
     }));
 
 
@@ -266,8 +256,8 @@ export async function activateInternal(context: ExtensionContext) {
                 return { fileName: el.fileName, size: el.size }
             }),
         }
-        
-        if(ext.nsDiag.enabled) {
+
+        if (ext.nsDiag.enabled) {
             reportHeader.diagStats = ext.nsCfgProvider.diagStats;
             reportHeader.diags = ext.nsCfgProvider.diags;
         }
@@ -279,7 +269,7 @@ export async function activateInternal(context: ExtensionContext) {
             delete appCopy.lines;
             // const diags = [];
 
-            if(ext.nsDiag.enabled) {
+            if (ext.nsDiag.enabled) {
                 //rebuild each diag as simple, casting as needed
                 appCopy.diagnostics = slimDiags(appCopy.diagnostics as Diagnostic[])
             } else {
@@ -301,13 +291,13 @@ export async function activateInternal(context: ExtensionContext) {
             reportApps.join('\n')
         ].join('')
 
-        var vDoc: Uri = Uri.parse("untitled:" + 'CitrixADC_Report.txt');
+        var vDoc: Uri = Uri.parse("untitled:" + 'CitrixADC_Report.yml');
         return await workspace.openTextDocument({ language: 'yaml', content })
-        .then( async (doc) => {
-            await window.showTextDocument(doc);
-            // this.documents.push(doc);  // add the document to this class doc list
-            return doc;
-        });
+            .then(async (doc) => {
+                await window.showTextDocument(doc);
+                // this.documents.push(doc);  // add the document to this class doc list
+                return doc;
+            });
     }));
 
     // context.subscriptions.push(disposable);

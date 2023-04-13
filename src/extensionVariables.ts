@@ -32,6 +32,7 @@ import { ExtHttp } from 'f5-conx-core';
 import { Telemetry } from './telemetry';
 import { NsDiag } from './nsDiag';
 import { NsCfgProvider } from './nsCfgViewProvider';
+import { NsCodeLensProvider } from './codeLens';
 
 
 /**
@@ -44,6 +45,7 @@ export namespace ext {
     export let telemetry: Telemetry;
     export let nsDiag: NsDiag;
     export let nsCfgProvider: NsCfgProvider;
+    export let nsCodeLens: NsCodeLensProvider;
     export let eventEmitterGlobal: EventEmitter;
     export let connectBar: StatusBarItem;
     export let cacheDir: string;

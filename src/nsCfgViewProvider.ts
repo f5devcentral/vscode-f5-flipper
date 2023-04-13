@@ -56,16 +56,31 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
     greenDot = ext.context.asAbsolutePath(path.join("images", "greenDot.svg"));
     greenCheck = ext.context.asAbsolutePath(path.join("images", "greenCheck.svg"));
 
+    /**
+     * switch to globally enable/disable diagnostics
+     */
     nsDiag: boolean = true;
+    /**
+     * full output from the ns config explore (explosion)
+     */
     explosion: Explosion | undefined;
     confObj: AdcConfObj | undefined;
     /**
      * trying to use this to make the view in focus after initialization
      */
     viewElement: NsCfgApp | undefined;
+    /**
+     * parent core flipper class that unpacks/parses and explodes the config
+     */
     adc: ADC | undefined;
+    /**
+     * events from the ADC parsed files to show in UI/OUTPUT
+     */
     parsedFileEvents: any = [];
 
+    /**
+     * high level diagnostics stats
+     */
     diagStats = {
         defaultRedirects: 0,
         Green: undefined,
@@ -74,6 +89,9 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         Error: undefined,
     };
 
+    /**
+     * lists of apps in each diagnostic level
+     */
     diags = {
         defaultRedirects: [],
         Green: [],
@@ -85,6 +103,10 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
     constructor() {
     }
 
+    /**
+     * 
+     * @param file file path to explode Citix ADC/NS config
+     */
     async makeExplosion(file: string) {
 
         window.withProgress({
@@ -144,11 +166,19 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         ext.nsDiag.loadRules();
 
         if (this.explosion) {
-            //loop throught the apps and add/refresh diagnostics
+
+            //loop throught the apps and update diagnostics
             this.explosion.config.apps.forEach(app => {
-                const diags = ext.nsDiag.getDiagnostic(app.lines);
-                // console.log(`updating diags for ${app.name}`)
-                app.diagnostics = diags;
+                if(this.nsDiag) {
+                    
+                    const diags = ext.nsDiag.getDiagnostic(app.lines);
+                    app.diagnostics = diags;
+
+                } else {
+
+                    //remove all the diagnostics
+                    delete app.diagnostics
+                }
             })
         }
 
@@ -163,7 +193,6 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         this.adc = undefined;
         this.explosion = undefined;
         this.parsedFileEvents.length = 0;
-        // this.parsedObjEvents.length = 0;
         this.refresh();
     }
 
@@ -177,10 +206,13 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
     async getChildren(element?: NsCfgApp): Promise<NsCfgApp[]> {
 
+        // if there is no config currently being explored
         if (!this.explosion) {
+            // this will cause the view to show the welcome markdown defined in the package.json
             return Promise.resolve([]);
         }
 
+        // list of view items to display in the UI
         var treeItems: NsCfgApp[] = [];
 
         if (element) {
@@ -365,7 +397,9 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
     }
 
 
-    async render(items: any, diagTag?: boolean) {
+    
+
+    async render(items: any, output: "lines" | "full") {
 
         const newEditorColumn = ext.settings.previewColumn;
         const editors = window.visibleTextEditors;
@@ -378,6 +412,11 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
             docContent = items.join('\n');
 
+        } else if (output === 'full') {
+
+            docContent = JSON.stringify(items, undefined, 4);
+            docName = 'app.ns.json'
+
         } else if (items.lines && items.name && items.type) {
             // rough test for the type we need
 
@@ -387,7 +426,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             const lines = items.lines;  // capture the lines from the original object
 
             docContent = [
-                `### ${brkdwn.name} ########## --- ##########\n`,
+                `### ${brkdwn.name} ########## - Hover for more details - ##########\n`,
                 ...lines,
                 // '\n######################################################\n',
                 // jsYaml.dump(brkdwn, { indent: 4, lineWidth: -1 })
@@ -411,25 +450,17 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             }
         };
 
-        // if vClm has a value assign it, else set column 1
-        viewColumn = viewColumn ? viewColumn : newEditorColumn;
-
-
 
         var vDoc: Uri = Uri.parse("untitled:" + docName);
         workspace.openTextDocument(vDoc)
             .then((a: TextDocument) => {
-                window.showTextDocument(a, viewColumn, false).then(async e => {
+                window.showTextDocument(a, undefined, false).then(async e => {
                     await e.edit(edit => {
                         const startPosition = new Position(0, 0);
                         const endPosition = a.lineAt(a.lineCount - 1).range.end;
                         edit.replace(new Range(startPosition, endPosition), docContent);
                         commands.executeCommand("cursorTop");
                     });
-                    if (diagTag && ext.nsDiag.enabled) {
-                        // if we got a text block with diagnostic tag AND xc diagnostics are enabled, then update the document with diagnosics
-                        ext.nsDiag.updateDiagnostic(a);
-                    }
                 });
             });
     }
