@@ -25,6 +25,9 @@ export async function countMainObjects(cfgObj: AdcConfObj): Promise<ObjStats> {
     'add ssl certKey'
     ]
 
+    // todo: capture the above list from the rx tree and filter on just the adds
+    //  this will make it dynamic and update as parsing gets extended
+
     // also look into doing this:
     //  https://dev.to/tipsy_dev/advanced-typescript-reinventing-lodash-get-4fhe
 

@@ -3,7 +3,7 @@
   "displayName": "F5 Flipper",
   "description": "Breaking down Citrix NetScaler ADC configs",
   "publisher": "F5DevCentral",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "keywords": [
     "F5",
     "F5Networks",
@@ -49,6 +49,14 @@
   },
   "homepage": "https://github.com/f5devcentral/vscode-f5-flipper#readme",
   "contributes": {
+    "configuration": {
+      "f5.TEEM": {
+        "type": "boolean",
+        "default": true,
+        "scope": "resource",
+        "description": "F5 TEEM - anonymous usage analytics"
+      }
+    },
     "viewsContainers": {
       "activitybar": [
         {
@@ -82,18 +90,28 @@
         "command": "f5-flipper.report",
         "title": "Flipper Report",
         "category": "F5-Flipper",
-        "icon": "$(output)"
+        "icon": "$(output)",
+        "enablement": "view == nsConfigView"
       },
       {
         "command": "f5-flipper.cfgExploreClear",
         "title": "Clear",
-        "category": "F5-Flipper"
+        "category": "F5-Flipper",
+        "enablement": "view == nsConfigView"
+      },
+      {
+        "command": "f5-flipper.viewJson",
+        "title": "JSON Output",
+        "category": "F5-Flipper",
+        "icon": "$(json)",
+        "enablement": "view == nsConfigView"
       },
       {
         "command": "f5-flipper.diagRulesOpen",
         "title": "Citrix NS/ADC diagnostics: Open Rules",
         "category": "F5-Flipper",
-        "icon": "$(edit)"
+        "icon": "$(edit)",
+        "enablement": "view == nsConfigView"
       }
     ],
     "menus": {
@@ -108,6 +126,11 @@
         {
           "command": "f5-flipper.report",
           "when": "view == nsConfigView && viewItem == nsReport",
+          "group": "inline"
+        },
+        {
+          "command": "f5-flipper.viewJson",
+          "when": "view == nsConfigView && viewItem == nsApp",
           "group": "inline"
         },
 				{

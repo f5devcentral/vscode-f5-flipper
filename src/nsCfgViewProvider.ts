@@ -56,16 +56,31 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
     greenDot = ext.context.asAbsolutePath(path.join("images", "greenDot.svg"));
     greenCheck = ext.context.asAbsolutePath(path.join("images", "greenCheck.svg"));
 
+    /**
+     * switch to globally enable/disable diagnostics
+     */
     nsDiag: boolean = true;
+    /**
+     * full output from the ns config explore (explosion)
+     */
     explosion: Explosion | undefined;
     confObj: AdcConfObj | undefined;
     /**
      * trying to use this to make the view in focus after initialization
      */
     viewElement: NsCfgApp | undefined;
+    /**
+     * parent core flipper class that unpacks/parses and explodes the config
+     */
     adc: ADC | undefined;
+    /**
+     * events from the ADC parsed files to show in UI/OUTPUT
+     */
     parsedFileEvents: any = [];
 
+    /**
+     * high level diagnostics stats
+     */
     diagStats = {
         defaultRedirects: 0,
         Green: undefined,
@@ -74,6 +89,9 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         Error: undefined,
     };
 
+    /**
+     * lists of apps in each diagnostic level
+     */
     diags = {
         defaultRedirects: [],
         Green: [],
@@ -85,6 +103,10 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
     constructor() {
     }
 
+    /**
+     * 
+     * @param file file path to explode Citix ADC/NS config
+     */
     async makeExplosion(file: string) {
 
         window.withProgress({
@@ -115,7 +137,13 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                             ext.eventEmitterGlobal.emit('log-info', `f5-flipper.cfgExplore, extraction complete`);
                             ext.eventEmitterGlobal.emit('log-info', exp.stats);
                             // ts-todo: add key to telemetry
-                            ext.telemetry.capture({ command: 'flipper-explosion', stats: exp.stats });
+                            ext.telemetry.capture({
+                                command: 'flipper-explosion',
+                                inputFileType: ext.nsCfgProvider.explosion.inputFileType,
+                                dateTime: ext.nsCfgProvider.explosion.dateTime,
+                                appCount: ext.nsCfgProvider.explosion.config.apps.length,
+                                stats: exp.stats
+                            });
                             this.refresh();
                         })
                     // .catch(err => logger.error('makeExplosion-error', err));
@@ -137,12 +165,22 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         // update diagnostics rules
         ext.nsDiag.loadRules();
 
-        //loop throught the apps and add/refresh diagnostics
-        this.explosion.config.apps.forEach(app => {
-            const diags = ext.nsDiag.getDiagnostic(app.lines);
-            console.log(`updating diags for ${app.name}`)
-            app.diagnostics = diags;
-        })
+        if (this.explosion) {
+
+            //loop throught the apps and update diagnostics
+            this.explosion.config.apps.forEach(app => {
+                if(this.nsDiag) {
+                    
+                    const diags = ext.nsDiag.getDiagnostic(app.lines);
+                    app.diagnostics = diags;
+
+                } else {
+
+                    //remove all the diagnostics
+                    delete app.diagnostics
+                }
+            })
+        }
 
         // if we have a current config in view, refresh it also
         // --needed? or should we listen to onDidChangeEditor
@@ -155,7 +193,6 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         this.adc = undefined;
         this.explosion = undefined;
         this.parsedFileEvents.length = 0;
-        // this.parsedObjEvents.length = 0;
         this.refresh();
     }
 
@@ -169,10 +206,13 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
     async getChildren(element?: NsCfgApp): Promise<NsCfgApp[]> {
 
+        // if there is no config currently being explored
         if (!this.explosion) {
+            // this will cause the view to show the welcome markdown defined in the package.json
             return Promise.resolve([]);
         }
 
+        // list of view items to display in the UI
         var treeItems: NsCfgApp[] = [];
 
         if (element) {
@@ -345,51 +385,21 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             }
             ));
 
-            // // split off the partition names and count the number of unique occurances
-            // this.partCounts = this.explosion?.config?.apps?.map(item => item.name.split('/')[1])
-            //     // @ts-expect-error
-            //     .reduce((acc, curr) => (acc[curr] = (acc[curr] || 0) + 1, acc), {});
-
-            // this.partitions = [...new Set(this.explosion?.config?.apps?.map(item => item.name.split('/')[1]))];
-
-            // get all the apps configs
-            // const allApps = this.explosion?.config.apps?.map((el: AdcApp) => el.configs.join('\n').concat(this.brkr));
-
             const appsTotal = this.explosion?.config.apps ? this.explosion.config.apps.length.toString() : '';
-            // const baseTotal = this.explosion?.config.base ? this.explosion.config.base.length.toString() : '';
-            // const doTotal = this.explosion?.config.doClasses ? this.explosion.config.doClasses.length.toString() : '';
-            // const logTotal = this.explosion?.logs ? this.explosion.logs.length.toString() : '';
-
-            // treeItems.push(new CfgApp('Partitions', 'Click for All apps', this.partitions.length.toString(), '', '', TreeItemCollapsibleState.Collapsed,
-            //     { command: 'f5-flipper.cfgExplore-show', title: '', arguments: ['allApps'] }));
 
             if (this.explosion?.config?.apps) {
-                treeItems.push(new NsCfgApp('Apps', '', appsTotal, '', '', TreeItemCollapsibleState.Collapsed,
+                treeItems.push(new NsCfgApp('Apps', '', appsTotal, '', '', TreeItemCollapsibleState.Expanded,
                     { command: 'f5-flipper.cfgExplore-show', title: '', arguments: [] }));
             }
-
-
-            // if (this.bigipConfig?.fileStore && this.bigipConfig?.fileStore.length > 0) {
-            //     const allFileStore = this.bigipConfig.fileStore.filter((el: ConfigFile) => {
-            //         // only return the certs and keys for now
-            //         if (el.fileName.includes('/certificate_d/') || el.fileName.includes('/certificate_key_d/')) {
-            //             return true;
-            //         }
-            //     })
-            //         .map((el: ConfigFile) => `\n###  ${el.fileName}\n${el.content}\n\n`);
-
-            //     treeItems.push(new CfgApp('FileStore', '', this.bigipConfig.fileStore.length.toString(), '', '', TreeItemCollapsibleState.None,
-            //         { command: 'f5-flipper.cfgExplore-show', title: '', arguments: [allFileStore.join('\n')] }));
-            // }
-
-
 
         }
         return Promise.resolve(treeItems);
     }
 
 
-    async render(items: any, diagTag?: boolean) {
+    
+
+    async render(items: any, output: "lines" | "full") {
 
         const newEditorColumn = ext.settings.previewColumn;
         const editors = window.visibleTextEditors;
@@ -402,6 +412,11 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
             docContent = items.join('\n');
 
+        } else if (output === 'full') {
+
+            docContent = JSON.stringify(items, undefined, 4);
+            docName = 'app.ns.json'
+
         } else if (items.lines && items.name && items.type) {
             // rough test for the type we need
 
@@ -411,7 +426,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             const lines = items.lines;  // capture the lines from the original object
 
             docContent = [
-                `### ${brkdwn.name} ########## --- ##########\n`,
+                `### ${brkdwn.name} ########## - Hover for more details - ##########\n`,
                 ...lines,
                 // '\n######################################################\n',
                 // jsYaml.dump(brkdwn, { indent: 4, lineWidth: -1 })
@@ -435,25 +450,17 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             }
         };
 
-        // if vClm has a value assign it, else set column 1
-        viewColumn = viewColumn ? viewColumn : newEditorColumn;
-
-
 
         var vDoc: Uri = Uri.parse("untitled:" + docName);
         workspace.openTextDocument(vDoc)
             .then((a: TextDocument) => {
-                window.showTextDocument(a, viewColumn, false).then(async e => {
+                window.showTextDocument(a, undefined, false).then(async e => {
                     await e.edit(edit => {
                         const startPosition = new Position(0, 0);
                         const endPosition = a.lineAt(a.lineCount - 1).range.end;
                         edit.replace(new Range(startPosition, endPosition), docContent);
                         commands.executeCommand("cursorTop");
                     });
-                    if (diagTag && ext.nsDiag.enabled) {
-                        // if we got a text block with diagnostic tag AND xc diagnostics are enabled, then update the document with diagnosics
-                        ext.nsDiag.updateDiagnostic(a);
-                    }
                 });
             });
     }

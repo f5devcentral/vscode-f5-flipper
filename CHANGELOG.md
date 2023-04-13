@@ -9,6 +9,29 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.0.0] - (04-13-2023)
+
+- General Availability release
+  - phase 1 - unpack/parse config (complete)
+  - phase 2 - abstract apps (~80%-complete)
+  - phase 3 - analyze apps (diagnostics) (~10%-complete)
+    - rule system in place, need to develop rules
+  - phase 4 - provide conversion output to XC/TMOS/NGINX (pending)
+  - Need feedback on phases 2/3 before we can really be ready to provide conversions
+- README updates
+  - project breakdown
+  - contribution requests
+  - roadmap
+  - architecture
+- [BUG] cfg explore clear button produces error #1
+- [RFE] default to expanded apps after config import #2
+- [RFE] setup issue/bug/enhancement templates #8
+- [RFE] remove internal commands from command palette #10
+- [RFE] setup dev flag for early release features #3
+- [RFE] save button codeLens for the diagnostic rules #12
+
+---
+
 ## [0.4.0] - (04-05-2023)
 
 - enabled diagnostics
