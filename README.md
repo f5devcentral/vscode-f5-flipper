@@ -169,6 +169,10 @@ Add walking details...
 # Notes
 
 - All of the 'add' operations need to happen before the 'bind' operations
+- NS WAF was barely used and is not on the roadmap for abstraction or conversion
+  - the recommendation would be to just apply a simple modern waf policy
+- 'appflow' is a mechanism for capturing application telemetry
+  - XC has this built in, TS for TMOS and N+ Promethius endpoints
 - order config lines by the following to make sure things are parsed in order
   - add -> set -> bind -> link -> enable -> disable
 - .conf are the main config files, like tmos
