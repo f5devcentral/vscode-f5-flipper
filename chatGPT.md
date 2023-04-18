@@ -3,6 +3,8 @@
 
 Let's see what chatGPT has to say about our goal
 
+I asked it the following questions
+
 ## Can you provide a full featured example netscaler config?
 
 >Sure! Here's an example configuration of a full-featured NetScaler setup:
