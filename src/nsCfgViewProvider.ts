@@ -256,6 +256,24 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                     }
                     ));
                 })
+
+                // prep for a future flag
+                if(true) {
+                    // sort tree items based on app IP, descending to put all the 0.0.0.0 at the bottom
+                    treeItems = treeItems.sort((a, b) => {
+                        const x = a.label.toLowerCase();
+                        const y = b.label.toLowerCase();
+                        const xIp = this.explosion.config.apps.find(f => f.name === x).ipAddress;
+                        const yIp = this.explosion.config.apps.find(f => f.name === y).ipAddress;
+                        if (xIp > yIp) {
+                            return -1;
+                        } else {
+                            return 1;
+                        }
+                    });
+                }
+                treeItems;
+                
             } else if (element.label === 'Sources') {
 
                 this.explosion.config.sources.forEach(source => {
@@ -471,7 +489,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 /**
  * sort tree items by label
  */
-function sortTreeItems(treeItems: NsCfgApp[]) {
+function sortTreeItems(treeItems: NsCfgApp[], ) {
     return treeItems.sort((a, b) => {
         const x = a.label.toLowerCase();
         const y = b.label.toLowerCase();
