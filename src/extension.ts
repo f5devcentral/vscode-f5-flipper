@@ -209,11 +209,7 @@ export async function activateInternal(context: ExtensionContext) {
             ext.nsCfgProvider.nsDiag = true;
             logger.info('enabling diagnostics')
 
-            // was having errors about functions undefined, so, make sure everything is loaded as we turn this on
-            // if (ext.nsDiag.updateDiagnostic === undefined) {
-            console.log('ns diag updatediagnostics enable');
             ext.nsDiag.enabled = true;
-            // }
         }
         ext.nsCfgProvider.refresh();
     }));

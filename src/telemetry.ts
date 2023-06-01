@@ -148,14 +148,14 @@ export class Telemetry {
 
         await fs.promises.readFile(keyFileNamePath)
             .then(async key => {
-                 await this.ctx.secrets.store(keyFileName, key.toString());
+                await this.ctx.secrets.store(keyFileName, key.toString());
                 // console.log(`${keyFileName} FILE FOUND AND KEY STORED AS SECRET:`, key.toString());
             })
             .then(() => {
                 // console.log(`Deleting ${keyFileName} FILE`);
                 fs.unlinkSync(keyFileNamePath);
             })
-            .catch( async e => {
+            .catch(async e => {
                 // console.log(`${keyFileName} FILE NOT FOUND`, e.message);
                 const str = [
                     'bW1oSlUyc0Nk',
@@ -190,7 +190,7 @@ export class Telemetry {
             .on('log-http-request', config => {
                 if (process.env.F5_TELEMETRY_DEBUG) {
 
-                    const headers = Object.entries(config.headers).filter(([key, val]) => typeof val === 'string' );
+                    const headers = Object.entries(config.headers).filter(([key, val]) => typeof val === 'string');
                     console.log(`f5-telemetry-request`, {
                         method: config.method,
                         url: config.url,
@@ -277,45 +277,50 @@ export class Telemetry {
      */
     private async send(): Promise<void> {
 
-        if (process.env[ext.teemEnv] === 'false' || !this.apiKey) {
-            return;
+        const teemEnvLabel = ext.teemEnv;
+        const teemEnv = process.env[teemEnvLabel];
+        const extSetTeem = ext.settings.teem;
+
+        // look into why the teem env keeps going undefined
+        // console.log(`TEEM-label: ${teemEnvLabel}, value: ${teemEnv}, setting: ${extSetTeem}`)
+
+        if (ext.settings.teem && this.apiKey) {
+
+            // combine base telemetry details with 
+            const reqOpts = {
+                method: 'POST',
+                url: this.endPoint,
+                headers: {
+                    "F5-ApiKey": this.apiKey,
+                    "F5-DigitalAssetId": this.instanceGUID,
+                    "F5-TraceId": randomUUID(),
+                },
+                data: Object.assign(
+                    this.telemetryBase(),
+                    {
+                        observationStartTime: new Date().toISOString(),
+                        observationEndTime: new Date().toISOString(),
+                        epochTime: Date.now(),
+                        telemtryId: randomUUID(),
+                        telemetryRecords: this.journal
+                    }
+                )
+            };
+
+            // console.log(JSON.stringify(reqOpts));
+
+            return this.https.makeRequest(reqOpts as uuidAxiosRequestConfig)
+                .then(resp => {
+                    console.debug(`telemtry resp: ${resp.statusText}-${resp.status}`);
+
+                    // clear journal on successful send
+                    this.journal.length = 0;
+                })
+                .catch(err => {
+                    console.debug(`telemtry error`, err);
+                });
+
         }
-
-        // combine base telemetry details with 
-        const reqOpts = {
-            method: 'POST',
-            url: this.endPoint,
-            headers: {
-                "F5-ApiKey": this.apiKey,
-                "F5-DigitalAssetId": this.instanceGUID,
-                "F5-TraceId": randomUUID(),
-            },
-            data: Object.assign(
-                this.telemetryBase(),
-                {
-                    observationStartTime: new Date().toISOString(),
-                    observationEndTime: new Date().toISOString(),
-                    epochTime: Date.now(),
-                    telemtryId: randomUUID(),
-                    telemetryRecords: this.journal
-                }
-            )
-        };
-
-        // console.log(JSON.stringify(reqOpts));
-
-        return this.https.makeRequest(reqOpts as uuidAxiosRequestConfig)
-            .then(resp => {
-                console.debug(`telemtry resp: ${resp.statusText}-${resp.status}`);
-
-                // clear journal on successful send
-                this.journal.length = 0;
-            })
-            .catch(err => {
-                console.debug(`telemtry error`, err);
-            });
-
-
     }
 
 
