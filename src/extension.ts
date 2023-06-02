@@ -150,7 +150,7 @@ export async function activateInternal(context: ExtensionContext) {
 
 
     context.subscriptions.push(commands.registerCommand('f5-flipper.cfgExploreTest', async (text) => {
-        const testPath = path.join(context.extensionPath, 'example_configs', 't1.ns.conf')
+        const testPath = path.join(context.extensionPath, 'f5_flipper_test.tgz')
         commands.executeCommand('f5-flipper.cfgExplore', Uri.file(testPath))
     }));
 

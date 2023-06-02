@@ -67,7 +67,7 @@ export class RegExTree {
             'add lb vserver': /(?<name>\S+) (?<protocol>\S+) (?<ipAddress>[\d.]+) (?<port>(\d+|\*)) (?<opts>[\S ]+)/,
             'add lb monitor': /(?<name>\S+) (?<protocol>\S+) (?<opts>[\S ]+)/,
             'add ssl certKey': /(?<name>\S+) (?<opts>[\S ]+)/,
-            'add server': /(?<name>\S+) (?<ip>[\d.]+) (?<opts>[\S ]+)/,
+            'add server': /(?<name>\S+) (?<dest>\S+) ?(?<opts>[\S ]+)?/,
             'add service': /(?<name>\S+) (?<server>\S+) (?<protocol>\S+) (?<port>(\d+|\*)) (?<opts>[\S ]+)/,
             'add serviceGroup': /(?<name>\S+) (?<protocol>\S+) (?<opts>[\S ]+)/,
             'add cs vserver': /(?<name>\S+) (?<protocol>\S+) (?<ipAddress>[\d.]+) (?<port>(\d+|\*)) (?<opts>[\S ]+)/,
@@ -91,7 +91,7 @@ export class RegExTree {
             'bind serviceGroup': /(?<name>\S+) ((?<serv>\S+ \d+)|(?<monitor>-monitorName \S+)|(?<opts>[\S ]+))/,
             'bind lb vserver': /(?<name>\S+) ((?<opts>-[\S ]+)|(?<service>[\S]+))/,
             'bind cs vserver': /(?<server>\S+) (?<opts>[\S ]+)/,
-            'bind ssl vserver': /(?<opts>[\S ]+)/,
+            'bind ssl vserver': /(?<server>\S+) (?<opts>[\S ]+)/,
             'bind gslb vserver': /(?<name>\S+) (?<opts>[\S ]+)/,
         }
     }

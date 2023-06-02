@@ -18,7 +18,7 @@ import { Explosion } from '../src/models';
 const events = [];
 
 // const testFile = path.join(__dirname, "../example_configs/ns1_v13.1.conf")
-const testFile = path.join(__dirname, "../example_configs/t1.ns.conf")
+const testFile = path.join(__dirname, 'artifacts', 'apps', 't1.ns.conf')
 
 const parsedFileEvents: any[] = []
 const parsedObjEvents: any[] = []
@@ -113,8 +113,8 @@ describe('NS Conf parser functional tests', function () {
         assert.deepStrictEqual(typeof exp.stats.objects?.sslCertKey, 'number')
     })
 
-    it(`confirm explosion config source === 1`, async () => {
-        assert.ok(exp.config.apps!.length === 18)
+    it(`confirm number of explosion apps`, async () => {
+        assert.ok(exp.config.apps!.length === 15)
     })
 
 });
