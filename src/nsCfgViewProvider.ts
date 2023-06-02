@@ -283,7 +283,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                         source.fileName,
                         `size: ${source.size.toString()}`,
                         `lines: ${source.content.split('\n').length.toString()}`,
-                        'nsApp', '',
+                        'nsFile', '',
                         TreeItemCollapsibleState.None, {
                         command: 'f5-flipper.render',
                         title: '',
@@ -429,6 +429,10 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         if (Array.isArray(items)) {
 
             docContent = items.join('\n');
+            
+        } else if (output === 'lines') {
+            
+            docContent = items
 
         } else if (output === 'full') {
 
