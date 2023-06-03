@@ -406,7 +406,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             const appsTotal = this.explosion?.config.apps ? this.explosion.config.apps.length.toString() : '';
 
             if (this.explosion?.config?.apps) {
-                treeItems.push(new NsCfgApp('Apps', '', appsTotal, '', '', TreeItemCollapsibleState.Expanded,
+                treeItems.push(new NsCfgApp('Apps', '', appsTotal, 'appsHeader', '', TreeItemCollapsibleState.Expanded,
                     { command: 'f5-flipper.cfgExplore-show', title: '', arguments: [] }));
             }
 
@@ -430,10 +430,6 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
             docContent = items.join('\n');
             
-        } else if (output === 'lines') {
-            
-            docContent = items
-
         } else if (output === 'full') {
 
             docContent = JSON.stringify(items, undefined, 4);
@@ -458,6 +454,9 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             // then break down to display the lines of ns config in an ns.conf with language
             // provide the rest of the json breakdown as a hover in a header?
 
+        } else if (output === 'lines') {
+            
+            docContent = items
 
         } else if (Object(items)) {
             docName = 'app.ns.json'
