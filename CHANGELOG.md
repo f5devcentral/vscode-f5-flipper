@@ -22,7 +22,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## [1.1.0] - (05-01-2023)
+## [1.1.0] - (06-03-2023)
 
 ### Added
 
