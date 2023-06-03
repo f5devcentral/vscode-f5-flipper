@@ -169,6 +169,8 @@ Add walking details...
 # Notes
 
 - All of the 'add' operations need to happen before the 'bind' operations
+- the 0.0.0.0:0 in the Netscaler World mean Non-Addressable, the only way to access it is to go through a Content Switching VServer
+- **add service** is a single destination definition
 - NS WAF was barely used and is not on the roadmap for abstraction or conversion
   - the recommendation would be to just apply a simple modern waf policy
 - 'appflow' is a mechanism for capturing application telemetry
@@ -243,6 +245,33 @@ Product | Version | Language | NSC* | EOS* | EOM* | EOL*
 NetScaler Firmware | 13.1 (GA: 15-Sep-21) | EN | N/A | N/A | 15-Sep-25 | 15-Sep-26
 NetScaler Firmware | 13.0 (GA: 15-May-19) | EN | N/A | N/A | 15-Jul-23 | 15-Jul-24
 NetScaler Firmware | 12.1 (GA: 25-May-18) | EN | N/A | N/A | 30-May-22 | 30-May-23
+
+
+### How to Upload a Collector File from a NetScaler Appliance to cis.citrix.com Website Directly Without Retrieving it from the Appliance
+
+https://support.citrix.com/article/CTX135876/how-to-upload-a-collector-file-from-a-netscaler-appliance-to-ciscitrixcom-website-directly-without-retrieving-it-from-the-appliance
+
+### File Synchronization in NetScaler High Availability Setup
+
+https://support.citrix.com/article/CTX138748/file-synchronization-in-netscaler-high-availability-setup
+
+### How to obtain nsconf file from NetScaler
+
+https://support.citrix.com/article/CTX222891/how-to-obtain-nsconf-file-from-netscaler
+
+### NetScaler : How to copy config from Old Device to New Device
+
+https://support.citrix.com/article/CTX216729/netscaler-how-to-copy-config-from-old-device-to-new-device
+
+### Custome Monitors Configured on NetScaler missing after an upgrade
+
+https://support.citrix.com/article/CTX206715/custom-monitors-configured-on-netscaler-missing-after-an-upgrade
+
+### Citrix Gateway Virtual Servers
+
+https://docs.netscaler.com/en-us/citrix-gateway/current-release/install-citrix-gateway/configure-citrix-gateway-settings/create-gateway-virtual-servers.html
+
+
 
 # Items to consider
 

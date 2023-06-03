@@ -94,6 +94,12 @@
         "enablement": "view == nsConfigView"
       },
       {
+        "command": "f5-flipper.csv",
+        "title": "CSV",
+        "category": "F5-Flipper",
+        "enablement": "view == nsConfigView"
+      },
+      {
         "command": "f5-flipper.cfgExploreClear",
         "title": "Clear",
         "category": "F5-Flipper",
@@ -126,6 +132,11 @@
         {
           "command": "f5-flipper.report",
           "when": "view == nsConfigView && viewItem == nsReport",
+          "group": "inline"
+        },
+        {
+          "command": "f5-flipper.csv",
+          "when": "view == nsConfigView && viewItem == appsHeader",
           "group": "inline"
         },
         {

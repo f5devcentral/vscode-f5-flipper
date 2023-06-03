@@ -221,6 +221,21 @@ export async function activateInternal(context: ExtensionContext) {
     }));
 
 
+    context.subscriptions.push(commands.registerCommand('f5-flipper.csv', async (text) => {
+
+        const lines = ext.nsCfgProvider.explosion.config.apps.map( x => {
+            const name = x.name;
+            const type = x.type;
+            const protocol = x.protocol;
+            const ip = x.ipAddress;
+            const port = x.port;
+            return [name, type, protocol, ip, port].join(',')
+        })
+
+        ext.nsCfgProvider.render(lines.join('\n'), 'lines');
+    }));
+
+
     context.subscriptions.push(commands.registerCommand('f5-flipper.report', async (text) => {
         ext.telemetry.capture({ command: 'f5-flipper.report' });
 

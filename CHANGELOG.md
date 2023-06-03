@@ -9,6 +9,44 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- fast templates?
+
+### Changed
+
+### Fixed
+
+
+---
+
+## [1.1.0] - (05-01-2023)
+
+### Added
+
+- vscode peacock color scheme for development
+- [RFE] Add binding information for Service Groups #14
+- [BUG] Flipper does not add bind ssl certkey items to the virtual server application. #16
+- [RFE] Export Apps list as CSV #15
+
+### Changed
+
+- README updates
+  - more Citrix links/documentation
+  - ChatGPT reference
+  - Items to consider for migration
+  - more notes
+- TEEM/Telemetry tweaks
+- [RFE] Group or sort Apps category by virtual IP address #17
+
+### Fixed
+
+- [BUG] source files display as single line/string #18
+
+---
+
 ## [1.0.0] - (04-13-2023)
 
 - General Availability release
