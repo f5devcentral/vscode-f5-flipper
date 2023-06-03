@@ -14,11 +14,13 @@ import fs from 'fs';
 import path from 'path';
 import ADC from '../src/CitrixADC'
 import { Explosion } from '../src/models';
+import { archiveMake } from './archiveBuilder';
 
 const events = [];
 
 // const testFile = path.join(__dirname, "../example_configs/ns1_v13.1.conf")
-const testFile = path.join(__dirname, "../example_configs/t1.ns.tgz")
+// const testFile = path.join(__dirname, "./artifacts/t1.ns.tgz")
+let testFile: string;
 
 const parsedFileEvents: any[] = []
 const parsedObjEvents: any[] = []
@@ -31,9 +33,10 @@ describe('tgz unpacker tests', function () {
     let log;
     let err;
 
-    before(function () {
+    before(async function () {
         // log test file name - makes it easer for troubleshooting
         console.log('       file:', __filename)
+        testFile = await archiveMake() as string;
         // clear the events arrays
         parsedFileEvents.length = 0
         parsedObjEvents.length = 0
@@ -101,7 +104,7 @@ describe('tgz unpacker tests', function () {
 
         adc = new ADC();
 
-        const badFile = path.join(__dirname, '..', 'example_configs', 'bad.file')
+        const badFile = path.join(__dirname, 'artifacts', 'bad.file')
 
         const resp = adc.loadParseAsync(badFile)
 
@@ -113,7 +116,7 @@ describe('tgz unpacker tests', function () {
 
         adc = new ADC();
 
-        const badFile = path.join(__dirname, '..', 'example_configs', 'bad1.tgz')
+        const badFile = path.join(__dirname, 'artifacts', 'bad1.tgz')
 
         const resp = adc.loadParseAsync(badFile)
 
@@ -149,7 +152,7 @@ describe('tgz unpacker tests', function () {
 
         adc = new ADC();
 
-        const badFile = path.join(__dirname, '..', 'example_configs', 'noApps.ns.conf')
+        const badFile = path.join(__dirname, 'artifacts', 'noApps.ns.conf')
 
         const resp = adc.loadParseAsync(badFile)
             .then(async x => {
@@ -169,7 +172,7 @@ describe('tgz unpacker tests', function () {
 
         adc = new ADC();
 
-        const badFile = path.join(__dirname, '..', 'example_configs', 'noAppsNoVersion.ns.conf')
+        const badFile = path.join(__dirname, 'artifacts', 'noAppsNoVersion.ns.conf')
 
         const resp = adc.loadParseAsync(badFile)
             .catch(e => {

@@ -132,7 +132,7 @@ export default class ADC extends EventEmitter {
         // build rx tree based on ns version
         await this.setAdcVersion(conf)
 
-        this.configObjectArry = await parseAdcConfArrays(config, this.rx!);
+        await parseAdcConfArrays(config, this.configObjectArry, this.rx!)
 
         // get hostname from configObjectArry, assign to parent class for easy access
         if (this.configObjectArry.set?.ns?.hostName.length > 0) {

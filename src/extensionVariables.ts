@@ -62,6 +62,7 @@ export namespace ext {
         export let logLevel: string;
         export let preview: boolean;
         export let prompts: boolean;
+        export let teem: boolean;
     }
 }
 
@@ -137,7 +138,15 @@ export async function loadSettings() {
 
     process.env.F5_VSCODE_LOG_LEVEL = f5Cfg.get<string>('logLevel', 'INFO');
 
-    process.env[ext.teemEnv] = f5Cfg.get<boolean>('f5.TEEM', true).toString();
+    const tenv = f5Cfg.get<boolean>('TEEM', true).toString();
+    if(tenv === 'true') {
+        ext.settings.teem = true;
+    } else {
+        ext.settings.teem = false;
+    }
+    // console.log('tenv', tenv);
+    // for some reason the env for teem setting keeps going undefined
+    process.env[ext.teemEnv] = tenv;
 
     
     logger.info('------ Environment Variables ------');

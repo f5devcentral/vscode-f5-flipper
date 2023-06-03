@@ -256,6 +256,24 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                     }
                     ));
                 })
+
+                // prep for a future flag
+                if(true) {
+                    // sort tree items based on app IP, descending to put all the 0.0.0.0 at the bottom
+                    treeItems = treeItems.sort((a, b) => {
+                        const x = a.label.toLowerCase();
+                        const y = b.label.toLowerCase();
+                        const xIp = this.explosion.config.apps.find(f => f.name === x).ipAddress;
+                        const yIp = this.explosion.config.apps.find(f => f.name === y).ipAddress;
+                        if (xIp > yIp) {
+                            return -1;
+                        } else {
+                            return 1;
+                        }
+                    });
+                }
+                treeItems;
+                
             } else if (element.label === 'Sources') {
 
                 this.explosion.config.sources.forEach(source => {
@@ -265,7 +283,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                         source.fileName,
                         `size: ${source.size.toString()}`,
                         `lines: ${source.content.split('\n').length.toString()}`,
-                        'nsApp', '',
+                        'nsFile', '',
                         TreeItemCollapsibleState.None, {
                         command: 'f5-flipper.render',
                         title: '',
@@ -388,7 +406,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             const appsTotal = this.explosion?.config.apps ? this.explosion.config.apps.length.toString() : '';
 
             if (this.explosion?.config?.apps) {
-                treeItems.push(new NsCfgApp('Apps', '', appsTotal, '', '', TreeItemCollapsibleState.Expanded,
+                treeItems.push(new NsCfgApp('Apps', '', appsTotal, 'appsHeader', '', TreeItemCollapsibleState.Expanded,
                     { command: 'f5-flipper.cfgExplore-show', title: '', arguments: [] }));
             }
 
@@ -411,7 +429,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         if (Array.isArray(items)) {
 
             docContent = items.join('\n');
-
+            
         } else if (output === 'full') {
 
             docContent = JSON.stringify(items, undefined, 4);
@@ -436,6 +454,9 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             // then break down to display the lines of ns config in an ns.conf with language
             // provide the rest of the json breakdown as a hover in a header?
 
+        } else if (output === 'lines') {
+            
+            docContent = items
 
         } else if (Object(items)) {
             docName = 'app.ns.json'
@@ -471,7 +492,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 /**
  * sort tree items by label
  */
-function sortTreeItems(treeItems: NsCfgApp[]) {
+function sortTreeItems(treeItems: NsCfgApp[], ) {
     return treeItems.sort((a, b) => {
         const x = a.label.toLowerCase();
         const y = b.label.toLowerCase();

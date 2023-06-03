@@ -150,7 +150,7 @@ export async function activateInternal(context: ExtensionContext) {
 
 
     context.subscriptions.push(commands.registerCommand('f5-flipper.cfgExploreTest', async (text) => {
-        const testPath = path.join(context.extensionPath, 'example_configs', 't1.ns.conf')
+        const testPath = path.join(context.extensionPath, 'f5_flipper_test.tgz')
         commands.executeCommand('f5-flipper.cfgExplore', Uri.file(testPath))
     }));
 
@@ -209,11 +209,7 @@ export async function activateInternal(context: ExtensionContext) {
             ext.nsCfgProvider.nsDiag = true;
             logger.info('enabling diagnostics')
 
-            // was having errors about functions undefined, so, make sure everything is loaded as we turn this on
-            // if (ext.nsDiag.updateDiagnostic === undefined) {
-            console.log('ns diag updatediagnostics enable');
             ext.nsDiag.enabled = true;
-            // }
         }
         ext.nsCfgProvider.refresh();
     }));
@@ -222,6 +218,21 @@ export async function activateInternal(context: ExtensionContext) {
     context.subscriptions.push(commands.registerCommand('f5-flipper.render', async (text) => {
 
         ext.nsCfgProvider.render(text, 'lines');
+    }));
+
+
+    context.subscriptions.push(commands.registerCommand('f5-flipper.csv', async (text) => {
+
+        const lines = ext.nsCfgProvider.explosion.config.apps.map( x => {
+            const name = x.name;
+            const type = x.type;
+            const protocol = x.protocol;
+            const ip = x.ipAddress;
+            const port = x.port;
+            return [name, type, protocol, ip, port].join(',')
+        })
+
+        ext.nsCfgProvider.render(lines.join('\n'), 'lines');
     }));
 
 

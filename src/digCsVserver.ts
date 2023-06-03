@@ -3,6 +3,7 @@ import { sortAdcApp } from "./CitrixADC";
 import { logger } from "./logger";
 import { AdcApp, AdcConfObj, AdcRegExTree, Appflow, PolicyRef } from "./models";
 import { parseNsOptions } from "./parseAdcUtils";
+import { digSslBinding } from "./digLbVserver";
 
 
 
@@ -19,7 +20,8 @@ export async function digCsVservers(coa: AdcConfObj, rx: AdcRegExTree) {
 
     const apps: AdcApp[] = [];
 
-    coa.add?.cs?.vserver.forEach( vServ => {
+    for await (const vServ of coa.add?.cs?.vserver) {
+
         const parent = 'add cs vserver';
         const originalString = parent + ' ' + vServ;
 
@@ -47,9 +49,10 @@ export async function digCsVservers(coa: AdcConfObj, rx: AdcRegExTree) {
         }
 
         // dig 'bind cs vservers'
-        //      filter all the 'bind cs vservers' with the app name
-        coa.bind?.cs?.vserver?.filter(el => el.startsWith(app.name))
-            .forEach(x => {
+        for await (const x of coa.bind?.cs?.vserver) {
+
+            if( x.startsWith(app.name)) {
+
                 const parent = 'bind cs vserver';
                 const originalString = parent + ' ' + x;
                 app.lines.push(originalString);
@@ -68,22 +71,18 @@ export async function digCsVservers(coa: AdcConfObj, rx: AdcRegExTree) {
                     app.bindings["-lbvserver"].push(opts['-lbvserver'])
 
                 }
+            }
+        } 
 
-            })
-
-        digAddCsPolicys(app, coa, rx);
+        await digAddCsPolicys(app, coa, rx);
+        await digSslBinding(app, coa, rx);
         apps.push(sortAdcApp(app))
-    })
-
+    }
 
     return apps;
 }
 
-
-
-
-
-export function digAddCsPolicys(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) {
+export async function digAddCsPolicys(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) {
 
     // loop through each policy attached to this app
     app.bindings["-policyName"].forEach(policy => {

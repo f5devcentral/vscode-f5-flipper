@@ -169,6 +169,12 @@ Add walking details...
 # Notes
 
 - All of the 'add' operations need to happen before the 'bind' operations
+- the 0.0.0.0:0 in the Netscaler World mean Non-Addressable, the only way to access it is to go through a Content Switching VServer
+- **add service** is a single destination definition
+- NS WAF was barely used and is not on the roadmap for abstraction or conversion
+  - the recommendation would be to just apply a simple modern waf policy
+- 'appflow' is a mechanism for capturing application telemetry
+  - XC has this built in, TS for TMOS and N+ Promethius endpoints
 - order config lines by the following to make sure things are parsed in order
   - add -> set -> bind -> link -> enable -> disable
 - .conf are the main config files, like tmos
@@ -241,7 +247,89 @@ NetScaler Firmware | 13.0 (GA: 15-May-19) | EN | N/A | N/A | 15-Jul-23 | 15-Jul-
 NetScaler Firmware | 12.1 (GA: 25-May-18) | EN | N/A | N/A | 30-May-22 | 30-May-23
 
 
+### How to Upload a Collector File from a NetScaler Appliance to cis.citrix.com Website Directly Without Retrieving it from the Appliance
+
+https://support.citrix.com/article/CTX135876/how-to-upload-a-collector-file-from-a-netscaler-appliance-to-ciscitrixcom-website-directly-without-retrieving-it-from-the-appliance
+
+### File Synchronization in NetScaler High Availability Setup
+
+https://support.citrix.com/article/CTX138748/file-synchronization-in-netscaler-high-availability-setup
+
+### How to obtain nsconf file from NetScaler
+
+https://support.citrix.com/article/CTX222891/how-to-obtain-nsconf-file-from-netscaler
+
+### NetScaler : How to copy config from Old Device to New Device
+
+https://support.citrix.com/article/CTX216729/netscaler-how-to-copy-config-from-old-device-to-new-device
+
+### Custome Monitors Configured on NetScaler missing after an upgrade
+
+https://support.citrix.com/article/CTX206715/custom-monitors-configured-on-netscaler-missing-after-an-upgrade
+
+### Citrix Gateway Virtual Servers
+
+https://docs.netscaler.com/en-us/citrix-gateway/current-release/install-citrix-gateway/configure-citrix-gateway-settings/create-gateway-virtual-servers.html
 
 
 
+# Items to consider
+
+Below are some questions and items to consider when looking to migrate.
+
+- What are the business goals with the current NS deployment?
+  - What key features solve the business need?
+    - Remote VPN?
+    - load balancing?
+    - Authentication?
+    - GSLB?
+    - Citrix ICA integration?
+      - StoreFront?
+      - Single application delivery
+      - Full RDP/VDI?
+    - Content switching/serving?
+    - Caching?
+    - SSL offloading?
+    - Simple solution integration with other technology offerings
+      - ica analytics?
+      - Deep Citrix application delivery integration?
+        - cost?
+- What struggles does the current solution present?
+  - Lacking features?
+    - Advanced authentication options?
+    - Advanced load balancing options?
+    - Advanced GSLB options?
+  - Lacking cloud support?
+  - Lacking modern architecture integrations (ex. SaaS/k8s)?
+  - Costs?
+  - Hardware options?
+- Has the business needs changed since this solution has been deployed?
+  - If yes, how so?
+- Does the business prefer Cap-Ex or Opp-Ex?
+- How many people currently manage the existing NS infrastructure?
+  - Is this their only focus?
+  - Are they open to retooling?
+- What is the automation strategy?
+- What is the DR/Backup strategy?
+
+## links
+
+https://support.citrix.com/article/CTX476864/notice-of-change-announcement-for-perpetual-citrix-adc-eos
+https://www.citrix.com/support/product-lifecycle/product-matrix.html
+
+
+https://www.techtarget.com/searchenterprisedesktop/news/252529104/Thousands-of-Citrix-Tibco-employees-laid-off-following-merger
+https://www.reuters.com/business/finance/banks-brave-junk-debt-jitters-with-38-bln-citrix-bond-sale-2023-04-03/
+https://www.theregister.com/2023/03/03/citrix_universal_license/
+
+
+# ChatGPT
+
+As I started this journey, and knowing very little about NetScaler, I decided to ask ChatGPT and see just how much help it would be.
+
+So, while none of the configs it produced were a straight copy/paste into the respective technologies, it did get most of the way.  Enought to provide a ton of value and help me quickly understand what I was working with. 
+
+Here is a document outlining the conversation
+
+https://github.com/f5devcentral/vscode-f5-flipper/blob/main/chatGPT.md
 

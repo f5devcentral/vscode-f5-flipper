@@ -3,7 +3,7 @@
   "displayName": "F5 Flipper",
   "description": "Breaking down Citrix NetScaler ADC configs",
   "publisher": "F5DevCentral",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "keywords": [
     "F5",
     "F5Networks",
@@ -94,6 +94,12 @@
         "enablement": "view == nsConfigView"
       },
       {
+        "command": "f5-flipper.csv",
+        "title": "CSV",
+        "category": "F5-Flipper",
+        "enablement": "view == nsConfigView"
+      },
+      {
         "command": "f5-flipper.cfgExploreClear",
         "title": "Clear",
         "category": "F5-Flipper",
@@ -129,15 +135,20 @@
           "group": "inline"
         },
         {
+          "command": "f5-flipper.csv",
+          "when": "view == nsConfigView && viewItem == appsHeader",
+          "group": "inline"
+        },
+        {
           "command": "f5-flipper.viewJson",
           "when": "view == nsConfigView && viewItem == nsApp",
           "group": "inline"
         },
-				{
-					"command": "f5-flipper.diagRulesOpen",
-					"group": "inline",
-					"when": "view == nsConfigView && viewItem == nsDiag"
-				}
+        {
+          "command": "f5-flipper.diagRulesOpen",
+          "group": "inline",
+          "when": "view == nsConfigView && viewItem == nsDiag"
+        }
       ],
       "editor/context": [
         {
@@ -146,11 +157,11 @@
         }
       ],
       "explorer/context": [
-				{
-					"when": "resourceExtname =~ /\\.(conf|.tgz)/",
-					"command": "f5-flipper.cfgExplore",
-					"group": "F5-Flipper"
-				}
+        {
+          "when": "resourceExtname =~ /\\.(conf|.tgz)/",
+          "command": "f5-flipper.cfgExplore",
+          "group": "F5-Flipper"
+        }
       ]
     }
   },
@@ -187,8 +198,10 @@
   "dependencies": {
     "deepmerge-ts": "^4.3.0",
     "f5-conx-core": "^0.17.2",
+    "glob": "^10.2.6",
     "js-yaml": "^4.1.0",
     "lodash.get": "^4.4.2",
+    "tar": "^6.1.15",
     "tar-stream": "^3.0.0",
     "uuid": "^9.0.0"
   }
