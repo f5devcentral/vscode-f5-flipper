@@ -15,6 +15,11 @@ export type AdcApp = {
         '-serviceName'?: GslbService[];
         service?: Service[];
         serviceGroup?: string[];
+        certs?: {
+            '-certKeyName'?: string;
+            '-cert'?: string;
+            '-key'?: string;
+        }[];
     };
     csPolicies?: unknown[];
     csPolicyActions?: unknown[];
