@@ -114,7 +114,7 @@ describe('NS Conf parser functional tests', function () {
     })
 
     it(`confirm number of explosion apps`, async () => {
-        assert.ok(exp.config.apps!.length === 15)
+        assert.ok(exp.config.apps!.length === 18)
     })
 
 });

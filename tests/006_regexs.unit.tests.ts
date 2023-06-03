@@ -58,7 +58,7 @@ describe('tgz unpacker tests', function () {
 
         const misses = rxMatches.filter(x => x === undefined)
 
-        assert.ok(misses.length > 0, 'should not have any rx misses');
+        assert.ok(misses.length === 0, 'should not have any rx misses');
     })
 
 
