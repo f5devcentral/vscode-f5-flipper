@@ -1,4 +1,4 @@
-import { AdcRegExTree } from "./models";
+import { AdcRegExTree, AdcConfObj } from "./models";
 import { nestedObjValue } from "./objects";
 import { deepmergeInto } from 'deepmerge-ts'
 import { sortNsLines } from "./parseAdcUtils";
@@ -7,27 +7,27 @@ import { sortNsLines } from "./parseAdcUtils";
 
 
 
-export async function parseAdcConfArrays(config: string[], rx: AdcRegExTree) {
+export async function parseAdcConfArrays(config: string[], cfgObj: AdcConfObj, rx: AdcRegExTree) {
 
 
-    const cfgObj = {}
-    let cfgObj2: any = {}
-    let item: string;
+    // const cfgObj = {}
+    // let cfgObj2: any = {}
+    // let item: string;
 
     sortNsLines(config, rx)
 
     // loop through each line and parse
 
-    config.forEach(line => {
+    Promise.all(config.map(line => {
 
-        // pass all comments
+        // pass all comments and empty lines
         if (line.startsWith('#')) return;
         if (line === '') return;
 
         // grab all the keys from the parents rx list
         const parents = Object.keys(rx.parents)
 
-        // filter out the config items that have a regex
+        // filter out the config item that have a regex
         const m1 = parents.filter(el => {
             return line.match(el + ' ')
         })[0];
@@ -51,8 +51,8 @@ export async function parseAdcConfArrays(config: string[], rx: AdcRegExTree) {
         deepmergeInto(cfgObj, tmpObj)
 
         const a = 'debugger!'
-    })
+    }))
 
-    return cfgObj;
+    // return cfgObj;
 }
 
