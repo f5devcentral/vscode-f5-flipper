@@ -169,8 +169,8 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
             //loop throught the apps and update diagnostics
             this.explosion.config.apps.forEach(app => {
-                if(this.nsDiag) {
-                    
+                if (this.nsDiag) {
+
                     const diags = ext.nsDiag.getDiagnostic(app.lines);
                     app.diagnostics = diags;
 
@@ -219,19 +219,67 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
 
             if (element.label === 'Apps') {
-                this.explosion.config.apps.forEach(app => {
-                    const descA = [app.type]
-                    if (app.type === 'gslb') {
-                        descA.push(app.bindings['-domainName'][0]['-domainName'])
-                    } else {
+                this.explosion.config.apps.filter(x => x.type === 'cs' || x.type === 'lb')
+                    .forEach(app => {
+                        const descA = [app.type]
                         descA.push(`${app.ipAddress}:${app.port}`);
-                    }
-                    const desc = descA.join(' - ');
+                        const desc = descA.join(' - ');
+                        const clonedApp = JSON.parse(JSON.stringify(app));
+                        delete clonedApp.lines;
+                        delete clonedApp.diagnostics;
+                        const appYaml = jsYaml.dump(clonedApp, { indent: 4 })
+                        const toolTip = new MarkdownString().appendCodeblock(appYaml, 'yaml');
+
+                        //if diag enabled, figure out icon
+                        let icon = '';
+                        if (ext.nsDiag.enabled) {
+                            // todo: add diag stats to tooltip
+                            const stats = ext.nsDiag.getDiagStats(app.diagnostics as Diagnostic[]);
+
+                            icon = stats?.Error ? this.redDot
+                                : stats?.Warning ? this.orangeDot
+                                    : stats?.Information ? this.yellowDot : this.greenDot;
+                        }
+
+                        treeItems.push(new NsCfgApp(
+                            app.name,
+                            toolTip,
+                            desc,
+                            'nsApp', icon,
+                            TreeItemCollapsibleState.None, {
+                            command: 'f5-flipper.render',
+                            title: '',
+                            arguments: [app]
+                        }
+                        ));
+                    })
+
+                // prep for a future flag
+                if (true) {
+                    // sort tree items based on app IP, descending to put all the 0.0.0.0 at the bottom
+                    treeItems.sort((a, b) => {
+                        const x = a.label;
+                        const y = b.label;
+                        const xIp = this.explosion.config.apps.find(f => f.name === x);
+                        const yIp = this.explosion.config.apps.find(f => f.name === y);
+                        // https://stackoverflow.com/questions/48618635/require-sorting-on-ip-address-using-js
+                        const num1 = Number(xIp.ipAddress.split(".").map((num) => (`000${num}`).slice(-3) ).join(""));
+                        const num2 = Number(yIp.ipAddress.split(".").map((num) => (`000${num}`).slice(-3) ).join(""));
+                        return num2-num1;   // return descending
+                    });
+                }
+                treeItems;
+
+            } else if (element.label === 'GSLB') {
+
+                this.explosion.config.apps.filter(x => x.type === 'gslb').forEach(app => {
+
                     const clonedApp = JSON.parse(JSON.stringify(app));
                     delete clonedApp.lines;
                     delete clonedApp.diagnostics;
                     const appYaml = jsYaml.dump(clonedApp, { indent: 4 })
                     const toolTip = new MarkdownString().appendCodeblock(appYaml, 'yaml');
+
 
                     //if diag enabled, figure out icon
                     let icon = '';
@@ -247,8 +295,8 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                     treeItems.push(new NsCfgApp(
                         app.name,
                         toolTip,
-                        desc,
-                        'nsApp', icon,
+                        '',
+                        'nsGSLB', icon,
                         TreeItemCollapsibleState.None, {
                         command: 'f5-flipper.render',
                         title: '',
@@ -257,23 +305,8 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                     ));
                 })
 
-                // prep for a future flag
-                if(true) {
-                    // sort tree items based on app IP, descending to put all the 0.0.0.0 at the bottom
-                    treeItems = treeItems.sort((a, b) => {
-                        const x = a.label.toLowerCase();
-                        const y = b.label.toLowerCase();
-                        const xIp = this.explosion.config.apps.find(f => f.name === x).ipAddress;
-                        const yIp = this.explosion.config.apps.find(f => f.name === y).ipAddress;
-                        if (xIp > yIp) {
-                            return -1;
-                        } else {
-                            return 1;
-                        }
-                    });
-                }
-                treeItems;
-                
+                sortTreeItems(treeItems);
+
             } else if (element.label === 'Sources') {
 
                 this.explosion.config.sources.forEach(source => {
@@ -403,11 +436,18 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             }
             ));
 
-            const appsTotal = this.explosion?.config.apps ? this.explosion.config.apps.length.toString() : '';
+            // const appsTotal = this.explosion?.config.apps ? this.explosion.config.apps.length.toString() : '';
+            const csLbApps = this.explosion?.config.apps ? this.explosion.config.apps.filter(x => x.type === 'cs' || x.type === 'lb') : '';
+            const gslbApps = this.explosion?.config.apps ? this.explosion.config.apps.filter(x => x.type === 'gslb') : '';
 
-            if (this.explosion?.config?.apps) {
-                treeItems.push(new NsCfgApp('Apps', '', appsTotal, 'appsHeader', '', TreeItemCollapsibleState.Expanded,
-                    { command: 'f5-flipper.cfgExplore-show', title: '', arguments: [] }));
+            if (csLbApps.length > 0) {
+                treeItems.push(new NsCfgApp('Apps', '', csLbApps.length.toString(), 'appsHeader', '', TreeItemCollapsibleState.Expanded,
+                    { command: 'f5-flipper.cfgExplore-show', title: '', arguments: [csLbApps] }));
+            }
+
+            if (gslbApps.length > 0) {
+                treeItems.push(new NsCfgApp('GSLB', '', gslbApps.length.toString(), 'gslbHeader', '', TreeItemCollapsibleState.Expanded,
+                    { command: 'f5-flipper.cfgExplore-show', title: '', arguments: [csLbApps] }));
             }
 
         }
@@ -415,7 +455,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
     }
 
 
-    
+
 
     async render(items: any, output: "lines" | "full") {
 
@@ -429,7 +469,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         if (Array.isArray(items)) {
 
             docContent = items.join('\n');
-            
+
         } else if (output === 'full') {
 
             docContent = JSON.stringify(items, undefined, 4);
@@ -455,7 +495,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             // provide the rest of the json breakdown as a hover in a header?
 
         } else if (output === 'lines') {
-            
+
             docContent = items
 
         } else if (Object(items)) {
@@ -492,7 +532,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 /**
  * sort tree items by label
  */
-function sortTreeItems(treeItems: NsCfgApp[], ) {
+function sortTreeItems(treeItems: NsCfgApp[],) {
     return treeItems.sort((a, b) => {
         const x = a.label.toLowerCase();
         const y = b.label.toLowerCase();

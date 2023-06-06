@@ -22,6 +22,25 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.2.0] - (06-06-2023)
+
+### Added
+
+- test for gslb name with space
+
+### Changed
+
+- Moved gslb items from apps to it's own group in UI/view
+- updated vserver regexs (cs/lb/gslb) to handle names with spaces (wrapped in "")
+- updated all deps
+
+### Fixed
+
+- sorting of cs/lb by IP descending now working
+- couple of async/parsing bugs
+
+---
+
 ## [1.1.0] - (06-03-2023)
 
 ### Added

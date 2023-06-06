@@ -31,7 +31,9 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
 
     const apps: AdcApp[] = [];
 
-    coa.add?.lb?.vserver.forEach(vServ => {
+    if(!coa.add?.lb?.vserver) return apps;
+
+    await Promise.all(coa.add?.lb?.vserver?.map(vServ => {
         const parent = 'add lb vserver';
         const originalString = 'add lb vserver ' + vServ;
         const rxMatch = vServ.match(rx.parents[parent]);
@@ -123,7 +125,7 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
 
         apps.push(sortAdcApp(app))
 
-    })
+    }))
     return apps;
 
 }

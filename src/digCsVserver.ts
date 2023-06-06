@@ -1,4 +1,3 @@
-import { deepmergeInto } from "deepmerge-ts";
 import { sortAdcApp } from "./CitrixADC";
 import { logger } from "./logger";
 import { AdcApp, AdcConfObj, AdcRegExTree, Appflow, PolicyRef } from "./models";
@@ -20,7 +19,9 @@ export async function digCsVservers(coa: AdcConfObj, rx: AdcRegExTree) {
 
     const apps: AdcApp[] = [];
 
-    for await (const vServ of coa.add?.cs?.vserver) {
+    if(!coa.add?.cs?.vserver) return apps;
+
+    await Promise.all(coa.add?.cs?.vserver?.map(async vServ => {
 
         const parent = 'add cs vserver';
         const originalString = parent + ' ' + vServ;
@@ -49,9 +50,8 @@ export async function digCsVservers(coa: AdcConfObj, rx: AdcRegExTree) {
         }
 
         // dig 'bind cs vservers'
-        for await (const x of coa.bind?.cs?.vserver) {
-
-            if( x.startsWith(app.name)) {
+        coa.bind?.cs?.vserver?.filter(el => el.startsWith(app.name))
+            .forEach(x => {
 
                 const parent = 'bind cs vserver';
                 const originalString = parent + ' ' + x;
@@ -71,13 +71,12 @@ export async function digCsVservers(coa: AdcConfObj, rx: AdcRegExTree) {
                     app.bindings["-lbvserver"].push(opts['-lbvserver'])
 
                 }
-            }
-        } 
+            })
 
         await digAddCsPolicys(app, coa, rx);
         await digSslBinding(app, coa, rx);
         apps.push(sortAdcApp(app))
-    }
+    }))
 
     return apps;
 }
