@@ -63,4 +63,22 @@ describe('tgz unpacker tests', function () {
 
 
 
+    it(`test 'add gslb vserver' regex`, async () => {
+
+        // making sure names with space work along with regular names...
+        const items = [
+            'add gslb vserver "space_ jump.galaxy.io" HTTP -backupLBMethod ROUNDROBIN -tolerance 0 -EDR ENABLED -appflowLog DISABLED',
+            'add gslb vserver timeTravel.galaxy.io HTTP -lbMethod ROUNDROBIN -backupLBMethod LEASTCONNECTION -tolerance 0 -EDR ENABLED -appflowLog DISABLED'
+        ];
+
+        // strip off all the leading parent object details 'add gslb vserver '
+        const slim = items.map(x => x.replace('add gslb vserver ', ''))
+
+        const rxMatches = slim.map(x => x.match(rx.parents['add gslb vserver']))
+
+        const misses = rxMatches.filter(x => x === undefined)
+
+        assert.ok(misses.length === 0, 'should not have any rx misses');
+    })
+
 });

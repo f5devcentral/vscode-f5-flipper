@@ -37,3 +37,4 @@ tests
 # *.tgz
 *.vsix
 dist
+private
