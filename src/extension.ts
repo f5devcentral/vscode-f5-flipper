@@ -20,6 +20,7 @@ import path from 'path';
 import { NsDiag } from './nsDiag';
 import { Hovers } from './hovers';
 import { NsCodeLensProvider } from './codeLens';
+import { FastCore } from './fastCore';
 
 // turn off console logging
 logger.console = false;
@@ -68,6 +69,8 @@ export async function activateInternal(context: ExtensionContext) {
     });
 
     new Hovers(context, ext.eventEmitterGlobal);
+
+    ext.fast = new FastCore(context);
 
     ext.nsDiag = new NsDiag(context);  // move to settings/vars
 
