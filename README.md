@@ -322,6 +322,7 @@ https://www.techtarget.com/searchenterprisedesktop/news/252529104/Thousands-of-C
 https://www.reuters.com/business/finance/banks-brave-junk-debt-jitters-with-38-bln-citrix-bond-sale-2023-04-03/
 https://www.theregister.com/2023/03/03/citrix_universal_license/
 
+https://www.crn.com/news/cloud/-brutal-citrix-tibco-layoffs-hit-thousands-of-employees-sources
 
 # ChatGPT
 
