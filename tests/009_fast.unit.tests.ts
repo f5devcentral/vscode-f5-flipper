@@ -42,7 +42,7 @@ describe('tgz unpacker tests', function () {
 
         const resp = await provider.fetch('ns/http')
             .then((template) => {
-                console.log(template.getParametersSchema());
+                // console.log(template.getParametersSchema());
                 // console.log(template.render({
                 //     var: "value",
                 //     boolVar: false
@@ -51,8 +51,9 @@ describe('tgz unpacker tests', function () {
                 const schema = template.getParametersSchema();
                 // get the default values for the template
                 const defaultParams = template.getCombinedParameters();
-                const html = fast.guiUtils.generateHtmlPreview(schema, defaultParams)
-                html;
+                // const html = fast.guiUtils.generateHtmlPreview(schema, defaultParams)
+                // html;
+                return { schema, defaultParams }
             })
             .catch(e => {
                 console.log(e);
