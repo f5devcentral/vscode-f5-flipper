@@ -13,12 +13,23 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ### Added
 
-- fast templates?
-
 ### Changed
 
 ### Fixed
 
+
+---
+
+## [1.3.0] - (08-08-2023)
+
+### Added
+
+- NS->AS3 Fast template conversion process (initial)
+- Fast templates list/modify process
+
+### Fixed
+
+- GSLB parsing bug
 
 ---
 

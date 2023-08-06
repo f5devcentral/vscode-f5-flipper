@@ -231,15 +231,30 @@ export default class ADC extends EventEmitter {
 
         // dig each 'add cs vserver'
         await digCsVservers(this.configObjectArry, this.rx)
-            .then(csApps => apps.push(...csApps as AdcApp[]))
+            .then(csApps => {
+                apps.push(...csApps as AdcApp[])
+            })
+            .catch(err => {
+                logger.error(err)
+            });
 
         // dig each 'add lb vserver', but check for existing?
         await digLbVserver(this.configObjectArry, this.rx)
-            .then(lbApps => apps.push(...lbApps as AdcApp[]))
+            .then(lbApps => {
+                apps.push(...lbApps as AdcApp[])
+            })
+            .catch(err => {
+                logger.error(err)
+            });
 
 
         await digGslbVservers(this.configObjectArry, this.rx)
-            .then(gslbApps => apps.push(...gslbApps));
+            .then(gslbApps => {
+                apps.push(...gslbApps)
+            })
+            .catch(err => {
+                logger.error(err)
+            });
 
 
         // capture app abstraction time
