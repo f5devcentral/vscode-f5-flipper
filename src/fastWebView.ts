@@ -1,5 +1,5 @@
 
-import { 
+import {
     WebviewPanel,
     window,
     Range,
@@ -10,11 +10,14 @@ import {
     Uri,
     Position,
     workspace,
-    TextDocument
+    TextDocument,
+    ExtensionContext
 } from 'vscode';
 
 import { ext } from './extensionVariables';
 import { logger } from './logger';
+import fast from '@f5devcentral/f5-fast-core';
+import path from 'path';
 
 const fast = require('@f5devcentral/f5-fast-core');
 
@@ -30,13 +33,25 @@ export class FastWebView {
     protected fastEngine: any | undefined;
 
     private readonly panelResponses: Map<WebviewPanel, HttpResponse>;
+    ctx: ExtensionContext;
+    f5css: Uri;
+    baseFilePath: Uri;
+    vscodeStyleFilePath: Uri;
+    customStyleFilePath: Uri;
 
-    public constructor() {
-        this.panelResponses = new Map<WebviewPanel, HttpResponse>();
+    public constructor(ctx: ExtensionContext) {
+        this.ctx = ctx;
+        this.f5css = Uri.file(this.ctx.asAbsolutePath(path.join('styles', 'f5.css')));
+        this.baseFilePath = Uri.file(this.ctx.asAbsolutePath(path.join('styles', 'reset.css')));
+        this.vscodeStyleFilePath = Uri.file(this.ctx.asAbsolutePath(path.join('styles', 'vscode.css')));
+        this.customStyleFilePath = Uri.file(this.ctx.asAbsolutePath(path.join('styles', 'rest-client.css')));
+
+        const localPath = ctx.asAbsolutePath('templates');
+        this.fastEngine = new fast.FsTemplateProvider(localPath)
+        localPath;
     }
 
     public get onDidCloseAllWebviewPanels(): Event<void> {
-
         return this._onDidCloseAllWebviewPanels.event;
     }
 
@@ -48,46 +63,74 @@ export class FastWebView {
         commands.executeCommand('setContext', this.previewActiveContextKey, value);
     }
 
-    protected displayRenderedTemplate (tempParams: string) {
+    async renderAS3(tempParams: string) {
         /**
          * take params from panel submit button
          * process through fast with template
          * then display in new editor to the right...
          */
 
-        // const final = this.fastEngine.template.render(tempParams);
+        const as3 = await this.fastEngine.fetch('ns/http').then((template) => {
+            const as3 = template.render(tempParams);
+            return as3;
+        });
 
-        // ext.panel.render('text');
+        return as3;
+
     }
 
-    protected async renderHTML(fastYml: string) {
 
-        /**
-         * add checking for YAML format since we only want to support yaml
-         * 
-         */
-        try {
-            this.fastEngine = await fast.Template.loadYaml(fastYml);
-        } catch (e: any) {
-            logger.error(e);
-            window.showErrorMessage(e.message);
-        }
-        const schema = this.fastEngine.getParametersSchema();
-        const defaultParams = this.fastEngine.getCombinedParameters();
-        const htmlData = fast.guiUtils.generateHtmlPreview(schema, defaultParams);
-        return htmlData;
-    }
+    public async renderHTML(doc: TextDocument) {
+        // no input for now, just render the default http template
+        // future options detect tcp/udp/http/https/gslb, render the appropriate template
 
-    public async render(fastYml: string) {
+        // merget document values with template values/defaults
+        // need to figure this part out
 
-        // put the incoming fast template somewhere
-        this.fastTemplateYml = fastYml;
-        // create 
-        let html = await this.renderHTML(fastYml);
+        // load the fast template
+        let html = await this.fastEngine.fetch('ns/http')
+            .then((template) => {
+                // get the schema for the template
+                const schema = template.getParametersSchema();
+                // get the default values for the template
+                const defaultParams = template.getCombinedParameters();
 
-        let title = 'test-title';
+                // get ns app params from the document
+                const nsAppParams = JSON.parse(doc.getText());
 
-        const newEditorColumn = ext.settings.previewColumn; 
+                // map the ns app params to the fast template params
+                defaultParams.tenant_name = nsAppParams.name;
+                defaultParams.app_name = nsAppParams.name;
+                defaultParams.type = nsAppParams.type;
+                defaultParams.protocol = nsAppParams.protocol;
+                defaultParams.virtual_address = nsAppParams.ipAddress;
+                defaultParams.virtual_port = nsAppParams.port;
+
+                if (nsAppParams.bindings?.serviceGroup) {
+                    defaultParams.pool_members = [];
+                    nsAppParams.bindings.serviceGroup[0]?.servers.forEach((server: any) => {
+                        defaultParams.pool_members.push({
+                            serverAddress: server.address,
+                            servicePort: server.port
+                        });
+                    });
+                }
+
+
+                // generate the html preview
+                let html: string = fast.guiUtils.generateHtmlPreview(schema, defaultParams);
+
+                return html;
+            })
+            .catch(e => {
+                logger.error(e);
+            });
+
+
+
+        let title = 'NS App -> FAST AS3';
+
+        const newEditorColumn = ext.settings.previewColumn;
         const preserveEditorFocus = ext.settings.preserveEditorFocus;
         const newEditorTabForAll = ext.settings.newEditorTabForAll;
         let viewColumn: ViewColumn | undefined;
@@ -128,20 +171,23 @@ export class FastWebView {
                 this.activePanel = webviewPanel.active ? webviewPanel : undefined;
             });
 
-            panel.webview.onDidReceiveMessage( async message => {
-                // console.log( message );
+            panel.webview.onDidReceiveMessage(async message => {
+                console.log(message);
+
 
                 try {
-                    const final = await this.fastEngine.render(message);
+                    const final = await this.renderAS3(message);
                     var vDoc: Uri = Uri.parse("untitled:" + 'nsApp.as3.json');
                     workspace.openTextDocument(vDoc)
                         .then((a: TextDocument) => {
                             window.showTextDocument(a, undefined, false).then(async e => {
-                                await e.edit(edit => {
+                                await e.edit(async edit => {
                                     const startPosition = new Position(0, 0);
                                     const endPosition = a.lineAt(a.lineCount - 1).range.end;
                                     edit.replace(new Range(startPosition, endPosition), final);
-                                    commands.executeCommand("cursorTop");
+                                    await commands.executeCommand("cursorTop");
+                                    // await commands.executeCommand("f5.injectSchemaRef");
+
                                 });
                             });
                         });
@@ -149,9 +195,9 @@ export class FastWebView {
                     logger.error(e);
                     // window.showErrorMessage(e.message);
                 }
-    
+
             });
-            
+
             this.panels.push(panel);
         } else {
             panel = this.panels[this.panels.length - 1];
@@ -159,10 +205,32 @@ export class FastWebView {
         }
 
 
+        // Content Security Policy
+        const nonce = new Date().getTime() + '' + new Date().getMilliseconds();
+        const csp = this.getCsp(nonce);
+
+    //     const head = `
+    // <head>
+    // <meta charset="UTF-8">
+    // <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.baseFilePath)}">
+    // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.vscodeStyleFilePath)}">
+    // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.customStyleFilePath)}">
+    // <title>template title</title>
+    // </head>`
+
+        // html = html.replace(/<head>\n[\S\s]+<\/head>\n/, head);
+        // const html2 = html.replace(/ <head>\n[\S\s]+?\n +<\//, '');
+
         /**
          * Appends the necessary stuff for submit button and getting template params
          * move the following to it's own function
          */
+        
+        // f5 UI css for fast templates
+        // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.f5css)}">
+
+
         const htmlSubmitBtn = `
 <script>
 (function init() {
@@ -181,4 +249,33 @@ export class FastWebView {
         this.activePanel = panel;
     }
 
+    // private getSettingsOverrideStyles(width: number): string {
+    //     return [
+    //         '<style>',
+    //         // (this.settings.fontFamily || this.settings.fontSize || this.settings.fontWeight ? [
+    //         //     'code {',
+    //         //     this.settings.fontFamily ? `font-family: ${this.settings.fontFamily};` : '',
+    //         //     this.settings.fontSize ? `font-size: ${this.settings.fontSize}px;` : '',
+    //         //     this.settings.fontWeight ? `font-weight: ${this.settings.fontWeight};` : '',
+    //         //     '}',
+    //         // ] : []).join('\n'),
+    //         'code .line {',
+    //         `padding-left: calc(${width}ch + 20px );`,
+    //         '}',
+    //         'code .line:before {',
+    //         `width: ${width}ch;`,
+    //         `margin-left: calc(-${width}ch + -30px );`,
+    //         '}',
+    //         '.line .icon {',
+    //         `left: calc(${width}ch + 3px)`,
+    //         '}',
+    //         '.line.collapsed .icon {',
+    //         `left: calc(${width}ch + 3px)`,
+    //         '}',
+    //         '</style>'].join('\n');
+    // }
+
+    private getCsp(nonce: string): string {
+        return `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' http: https: data: vscode-resource:; script-src 'nonce-${nonce}'; style-src 'self' 'unsafe-inline' http: https: data: vscode-resource:;">`;
+    }
 }

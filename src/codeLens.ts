@@ -59,6 +59,10 @@ export class NsCodeLensProvider implements CodeLensProvider {
 
             // then get app json to feed into codeLens action (convert2XC/convert2AS3/convert2NX)
 
+            // decided to just pass the document reference and abstract whats needed later
+
+            // end goal should be to pass the app name and get the app config as needed
+
             codeLens.push(
                 new CodeLens(
                     secondLine,
@@ -66,7 +70,7 @@ export class NsCodeLensProvider implements CodeLensProvider {
                         command: 'f5-flipper.convert2XC',
                         title: 'Convert to XC',
                         tooltip: 'click to convert to XC',
-                        arguments: ["XC conversion"]
+                        arguments: [document]
                     }
                 )
             );
@@ -78,7 +82,7 @@ export class NsCodeLensProvider implements CodeLensProvider {
                         command: 'f5-flipper.convert2AS3',
                         title: 'Convert to AS3',
                         tooltip: 'click to convert to AS3',
-                        arguments: ["AS3 conversion"]
+                        arguments: [document]
                     }
                 )
             );
@@ -90,7 +94,7 @@ export class NsCodeLensProvider implements CodeLensProvider {
                         command: 'f5-flipper.convert2NX',
                         title: 'Convert to NGINX',
                         tooltip: 'click to convert to NGINX',
-                        arguments: ["NGINX conversion"]
+                        arguments: [document]
                     }
                 )
             );

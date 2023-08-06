@@ -33,24 +33,30 @@ describe('tgz unpacker tests', function () {
 
     it(`load fast template set`, async () => {
 
-        const localPath = path.join(__dirname, '..', 'templates', 'bigip-fast');
+        const localPath = path.join(__dirname, '..', 'templates');
 
         const provider = new fast.FsTemplateProvider(localPath)
         provider.invalidateCache();
-        
+
         console.log('localPath', localPath)
 
-        const resp = await provider.fetch('http')
-        .then((template) => {
-            console.log(template.getParametersSchema());
-            // console.log(template.render({
-            //     var: "value",
-            //     boolVar: false
-            // }));
-        })
-        .catch(e => {
-            console.log(e);
-        })
+        const resp = await provider.fetch('ns/http')
+            .then((template) => {
+                console.log(template.getParametersSchema());
+                // console.log(template.render({
+                //     var: "value",
+                //     boolVar: false
+                // }));
+                // get the schema for the template
+                const schema = template.getParametersSchema();
+                // get the default values for the template
+                const defaultParams = template.getCombinedParameters();
+                const html = fast.guiUtils.generateHtmlPreview(schema, defaultParams)
+                html;
+            })
+            .catch(e => {
+                console.log(e);
+            })
 
         assert.ok(resp);
     })

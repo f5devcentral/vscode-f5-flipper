@@ -31,8 +31,13 @@ export function parseNsOptions(str: string, rx: AdcRegExTree): { [k: string]: st
     // capture everything else without spaces
     str.match(rx.cfgOptions)?.forEach(el => {
         const [k, v] = el.split(' ')
-        obj[k] = v;
-        str = str.replace(el, '')
+        if (k === '-devno') {
+            // no nothing, devno is not needed
+        } else {
+            // add to object
+            obj[k] = v;
+            str = str.replace(el, '')
+        }
     })
 
     // // turn certain object values to arrays

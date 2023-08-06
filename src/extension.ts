@@ -74,7 +74,7 @@ export async function activateInternal(context: ExtensionContext) {
 
     ext.nsDiag = new NsDiag(context);  // move to settings/vars
 
-    ext.nsCfgProvider = new NsCfgProvider();
+    ext.nsCfgProvider = new NsCfgProvider(context);
     // const cfgView = window.registerTreeDataProvider('cfgTree', cfgProvider);
     const cfgView = window.createTreeView('nsConfigView', {
         treeDataProvider: ext.nsCfgProvider,

@@ -71,30 +71,6 @@ export class NsDiag {
         // workbench.action.files.openFile
     }
 
-    // // parse app to see if it gets excluded from diagnostics
-    // getDiagnosticExlusion(text: string) {
-
-    //     // setup reasons array
-    //     const reasons: string[] = [];
-
-    //     const vsReg = /ltm virtual ([\/\w]+)/;
-
-    //     // capture virtual server (app name)
-    //     const vs = vsReg.exec(text);
-    //     const vsName = (vs && vs.length > 0) ? vs[1] : "no-app-name-found";
-
-    //     // setup the regex for the default redirect
-    //     const defaultRedirect = new RegExp('\/Common\/_sys_https_redirect');
-
-    //     // // test app for default redirect string
-    //     // if (defaultRedirect.test(text)) {
-    //     //     reasons.push('default redirect');
-    //     // }
-
-    //     // return vs name and exlusion reasons
-    //     return { vs: vsName, reasons };
-    // }
-
     /**
      * recursive function to dig config for diagnostics
      * @param text 

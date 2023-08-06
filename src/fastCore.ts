@@ -24,20 +24,15 @@ import { FastWebView } from './fastWebView';
  * Provides command to download github releases of this extension so users can easily access beta versions for testing
  */
 export class FastCore {
-    provider: any;
+    fastEngine: any;
     panel: FastWebView;
 
-    constructor(context: ExtensionContext) {
+    constructor(ctx: ExtensionContext) {
 
-        this.panel = new FastWebView();
-
-        const localPath = context.asAbsolutePath('templates');
-
-        this.provider = new fast.FsTemplateProvider(localPath)
-        console.log('localPath', localPath)
+        this.panel = new FastWebView(ctx);
 
 
-        context.subscriptions.push(commands.registerCommand('f5-flipper.convert2AS3', async (text) => {
+        ctx.subscriptions.push(commands.registerCommand('f5-flipper.convert2AS3', async (doc) => {
 
             ext.telemetry.capture({ command: 'f5-flipper.convert2AS3' });
 
@@ -45,25 +40,11 @@ export class FastCore {
 
             logger.info('f5-flipper.convert2AS3, pulling up fast template');
 
-            // this.provider.fetch('bigip-fast/http')
-            //     .then((template) => {
-            //         console.log(template.getParametersSchema());
-            //         // console.log(template.render({
-            //         //     var: "value",
-            //         //     boolVar: false
-            //         // }));
-            //     })
-            //     .catch(e => {
-            //         console.log(e);
-            //     })
+            this.panel.renderHTML(doc);
+
         }));
     }
 
-    async load() {
-
-
-
-    }
 }
 
 

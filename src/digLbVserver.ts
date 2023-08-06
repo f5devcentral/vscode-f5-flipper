@@ -206,9 +206,16 @@ export async function digServiceGroup(serviceName: string, app: AdcApp, obj: Adc
                 // dig server from serviceGroup server reference
                 await digServer(memberRef[0], app, obj, rx)
                     .then(i => {
-                        if (i) memberRef.splice(1, 0, i)
+                        if (i) {
+                            memberRef.splice(1, 0, i)
+                        }
                         if (!serviceGroup.servers) serviceGroup.servers = []
-                        serviceGroup.servers.push(memberRef.join(' '))
+                        // serviceGroup.servers.push(memberRef.join(' '))
+                        serviceGroup.servers.push({
+                            name: memberRef[0],
+                            address: memberRef[1],
+                            port: memberRef[2]
+                        })
                     })
 
 
