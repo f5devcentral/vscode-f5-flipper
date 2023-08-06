@@ -27,8 +27,10 @@ import {
     ThemeIcon,
     Diagnostic,
     DiagnosticSeverity,
+    ExtensionContext,
 } from 'vscode';
 import jsYaml from 'js-yaml';
+import { readdirSync } from 'fs';
 
 import { ext } from './extensionVariables';
 
@@ -99,8 +101,10 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         Warning: [],
         Error: [],
     };
+    ctx: ExtensionContext;
 
-    constructor() {
+    constructor(ctx: ExtensionContext) {
+        this.ctx = ctx;
     }
 
     /**
@@ -263,9 +267,9 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                         const xIp = this.explosion.config.apps.find(f => f.name === x);
                         const yIp = this.explosion.config.apps.find(f => f.name === y);
                         // https://stackoverflow.com/questions/48618635/require-sorting-on-ip-address-using-js
-                        const num1 = Number(xIp.ipAddress.split(".").map((num) => (`000${num}`).slice(-3) ).join(""));
-                        const num2 = Number(yIp.ipAddress.split(".").map((num) => (`000${num}`).slice(-3) ).join(""));
-                        return num2-num1;   // return descending
+                        const num1 = Number(xIp.ipAddress.split(".").map((num) => (`000${num}`).slice(-3)).join(""));
+                        const num2 = Number(yIp.ipAddress.split(".").map((num) => (`000${num}`).slice(-3)).join(""));
+                        return num2 - num1;   // return descending
                     });
                 }
                 treeItems;
@@ -306,6 +310,22 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                 })
 
                 sortTreeItems(treeItems);
+
+            } else if (element.label === 'FAST Templates') {
+
+                // list fast template files
+                // list all the files in the templates/ns folder
+                const files = readdirSync(path.join(this.ctx.extensionPath, 'templates', 'ns'));
+
+                files.forEach(file => {
+                    const filePath = path.join(this.ctx.extensionPath, 'templates', 'ns', file);
+                    treeItems.push(new NsCfgApp(file, ``, ``, 'nsFile', '', TreeItemCollapsibleState.None, {
+                        command: 'vscode.open',
+                        title: '',
+                        arguments: [Uri.file(filePath)]
+                    }));
+                })
+
 
             } else if (element.label === 'Sources') {
 
@@ -449,6 +469,9 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                 treeItems.push(new NsCfgApp('GSLB', '', gslbApps.length.toString(), 'gslbHeader', '', TreeItemCollapsibleState.Expanded,
                     { command: 'f5-flipper.cfgExplore-show', title: '', arguments: [csLbApps] }));
             }
+
+            // todo: possibly move all the fast template stuff to a separate view
+            treeItems.push(new NsCfgApp('FAST Templates', 'Conversion Templates', '', 'fastHeader', '', TreeItemCollapsibleState.Collapsed));
 
         }
         return Promise.resolve(treeItems);

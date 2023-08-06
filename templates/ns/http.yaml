@@ -1,0 +1,85 @@
+title: Flipper -> AS3 HTTP Application Template
+description: This template aims to provide a jumping point for taking an NS app config and converting it to AS3.
+contentType: application/json
+definitions:
+  tenant_name:
+    title: Tenant Name
+    description: The *tenant* is the high-level grouping in an AS3 declaration. FAST deploys all configuration for a given tenant in a BIG-IP partition of the same name.
+    type: string
+    minLength: 1
+    maxLength: 255
+    pattern: ^[A-Za-z][0-9A-Za-z_.-]*$
+    immutable: true
+  app_name:
+    title: Application Name
+    description: The *application* is the low-level grouping in an AS3 declaration. FAST deploys all configuration for a given application in a BIG-IP folder within the tenant partition.
+    type: string
+    minLength: 1
+    maxLength: 255
+    pattern: ^[A-Za-z][0-9A-Za-z_.-]*$
+    immutable: true
+  virtual_address:
+    title: Virtual Server IP Address
+    description: This IP address, combined with the port you specify below, becomes
+        the BIG-IP virtual server address and port, which clients use to access the application.
+        The system uses this IP:Port for distributing requests to the web servers.
+  virtual_port:
+    title: Virtual Server Port
+    default: 443
+  pool_members:
+    title: Pool Members
+    description: 'The pool members are the servers that receive traffic from the virtual server (upstream).
+        To share nodes between pools see K88250015: AS3 expected behavior of ''shareNodes'' in declarations.  
+        https://my.f5.com/manage/s/article/K88250015'
+    type: array
+    uniqueItems: true
+    items:
+      type: object
+      properties:
+        serverAddress:
+          title: Server Address
+        servicePort:
+          title: Server Port
+          default: 80
+        shareNodes:
+          title: Share Node
+          type: boolean
+          default: false
+  monitor_name:
+    title: Monitor
+    description: Select an existing BIG-IP pool monitor. Monitors are used to determine the health of the application on each
+        server. If an application instance does not respond or responds incorrectly, the
+        system will cease to send client requests to that web server. The system will
+        continue to monitor the instance and will begin sending requests once the application
+        responds correctly.
+    type: string
+    default: '/Common/tcp'
+template: |
+  {
+    "class": "ADC",
+    "schemaVersion": "3.0.0",
+    "id": "urn:uuid:a858e55e-bbe6-42ce-a9b9-0f4ab33e3bf7",
+    "{{tenant_name}}": {
+      "class": "Tenant",
+      "{{app_name}}": {
+        "class": "Application",
+        "template": "generic",
+        "virtualAddresses": [
+          "{{virtual_address:f5:ipv4}}"
+        ],
+        "virtualPort": {{virtual_port:f5:port}},
+        "{{app_name}}_pool": {
+          "class": "Pool",
+          "members": [
+            {{#pool_members}}
+              {
+                "serverAddresses": [{{serverAddress:f5:ipv4}}],
+                "servicePort": {{servicePort:f5:port}},
+                "shareNodes": {{shareNodes::boolean}}
+              },
+            {{/pool_members}}
+          ]
+        }
+      }
+    }
+  }

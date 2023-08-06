@@ -14,7 +14,7 @@ export async function digGslbVservers(coa: AdcConfObj, rx: AdcRegExTree) {
     const apps: AdcApp[] = [];
 
 
-    coa.add?.gslb?.vserver.filter(x => true)
+    coa.add?.gslb?.vserver?.filter(x => true)
         .forEach(vServ => {
             const parent = 'add gslb vserver';
             const originalString = parent + ' ' + vServ;
@@ -40,7 +40,7 @@ export async function digGslbVservers(coa: AdcConfObj, rx: AdcRegExTree) {
 
             // look in the 'set gslb vserver' for the same name -> add details
             // setGslbVserver(app)
-            coa.set?.gslb?.vserver.filter(el => el.startsWith(app.name))
+            coa.set?.gslb?.vserver?.filter(el => el.startsWith(app.name))
                 .forEach(x => {
                     const parent = 'set gslb vserver'
                     const originalString = parent + ' ' + x;
@@ -63,7 +63,7 @@ export async function digGslbVservers(coa: AdcConfObj, rx: AdcRegExTree) {
 
             // look in the 'bind gslb vserver' for the same name -> add details
             // setGslbVserver(app)
-            coa.bind?.gslb?.vserver.filter(el => el.startsWith(app.name))
+            coa.bind?.gslb?.vserver?.filter(el => el.startsWith(app.name))
                 .forEach(x => {
                     const parent = 'bind gslb vserver'
                     const originalString = parent + ' ' + x;

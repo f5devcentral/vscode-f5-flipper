@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/hyper-schema",
+  "definitions": {
+    "bigip_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^[A-Za-z][0-9A-Za-z_.-]*$"
+    },
+    "bigip_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^\\x2f[^\\x00-\\x19\\x22#'*<>?\\x5b-\\x5d\\x7b-\\x7d\\x7f]+$",
+      "maxLength": 255
+    },
+    "ipv4": {
+      "type": "string",
+      "pattern": "^(((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)[.]){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d))(%(6553[0-5]|655[0-2]\\d|65[0-4]\\d{2}|6[0-4]\\d{3}|[1-5]\\d{4}|[1-9]\\d{3}|[1-9]\\d{2}|[1-9]?\\d))?(\\x2f(3[012]|2\\d|1\\d|\\d))?$"
+    },
+    "ipv4_ipv6": {
+      "type": "string",
+      "oneOf": [
+          {
+            "title": "IPv4 Address",
+            "pattern": "^(((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)[.]){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d))(%(6553[0-5]|655[0-2]\\d|65[0-4]\\d{2}|6[0-4]\\d{3}|[1-5]\\d{4}|[1-9]\\d{3}|[1-9]\\d{2}|[1-9]?\\d))?(\\x2f(3[012]|2\\d|1\\d|\\d))?$"
+          },
+          {
+            "title": "IPv6 Address",
+            "pattern": "^(::(([0-9a-f]{1,4}:){0,5}((([0-9a-f]{1,4}:)?[0-9a-f]{1,4})|(((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)[.]){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d))))?)|([0-9a-f]{1,4}::(([0-9a-f]{1,4}:){0,4}((([0-9a-f]{1,4}:)?[0-9a-f]{1,4})|(((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)[.]){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d))))?)|([0-9a-f]{1,4}:[0-9a-f]{1,4}::(([0-9a-f]{1,4}:){0,3}((([0-9a-f]{1,4}:)?[0-9a-f]{1,4})|(((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)[.]){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d))))?)|([0-9a-f]{1,4}(:[0-9a-f]{1,4}){2}::(([0-9a-f]{1,4}:){0,2}((([0-9a-f]{1,4}:)?[0-9a-f]{1,4})|(((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)[.]){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d))))?)|([0-9a-f]{1,4}(:[0-9a-f]{1,4}){3}::(([0-9a-f]{1,4}:)?((([0-9a-f]{1,4}:)?[0-9a-f]{1,4})|(((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)[.]){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d))))?)|([0-9a-f]{1,4}(:[0-9a-f]{1,4}){4}::((([0-9a-f]{1,4}:)?[0-9a-f]{1,4})|(((25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)[.]){3}(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]?\\d)))?)|([0-9a-f]{1,4}(:[0-9a-f]{1,4}){5}::([0-9a-f]{1,4})?)|([0-9a-f]{1,4}(:[0-9a-f]{1,4}){0,6}::)|(([0-9a-f]{1,4}:){7}[0-9a-f]{1,4})(%(6553[0-5]|655[0-2]\\d|65[0-4]\\d{2}|6[0-4]\\d{3}|[1-5]\\d{4}|[1-9]\\d{3}|[1-9]\\d{2}|[1-9]?\\d))?(\\x2f(12[0-8]|1[01]\\d|[1-9]?\\d))?$"
+          }
+      ],
+      "default": "10.1.1.1"
+    },
+    "ipv4_ipv6_array": {
+      "type": "array",
+      "uniqueItems": true,
+      "default": ["10.0.0.1"],
+      "items": {
+          "$ref": "#/definitions/ipv4_ipv6",
+          "default": "10.0.0.2"
+      }
+    },
+    "port": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535
+    },
+    "persistence": {
+      "type": "string",
+      "enum": [
+        "cookie",
+        "destination-address",
+        "msrdp",
+        "source-address",
+        "tls-session-id"
+      ]
+    },
+    "topology": {
+      "type": "string",
+      "enum": [
+        "lan",
+        "wan",
+        "mobile"
+      ]
+    },
+    "load_balancing_mode": {
+      "type": "string",
+      "default": "least-connections-member",
+      "enum": [
+        "dynamic-ratio-member",
+        "dynamic-ratio-node",
+        "fastest-app-response",
+        "fastest-node",
+        "least-connections-member",
+        "least-connections-node",
+        "least-sessions",
+        "observed-member",
+        "observed-node",
+        "predictive-member",
+        "predictive-node",
+        "ratio-least-connections-member",
+        "ratio-least-connections-node",
+        "ratio-member",
+        "ratio-node",
+        "ratio-session",
+        "round-robin",
+        "weighted-least-connections-member",
+        "weighted-least-connections-node"
+      ]
+    }
+  }
+}

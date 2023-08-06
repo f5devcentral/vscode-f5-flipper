@@ -1,0 +1,206 @@
+:root {
+    --base-black: #3a404b;
+    --popup-background-color: rgb(58, 64, 75, .98);
+    --green-base: #5e825c;
+    --green: rgb(94, 130, 92, .9);
+    --green-light: #d6ebd8;
+    --green-hover: #668863;
+    --red-base: rgba(126, 35, 35, 0.849);
+    --red-base-hover: rgba(145, 40, 40, 0.849);
+    --red: rgba(175, 79, 79, 0.849);
+    --red-hover: rgba(189, 84, 84, 0.849);
+    --normal-btn-width: 100px;
+  }
+  
+  html {
+    font-size: initial;
+  }
+  body {
+    background-color: #eae9e5;
+    border-left: 1px solid #ffffff1a;
+    font: 75% "FreeSans", Arial, Helvetica, sans-serif;
+    color: #333;
+    line-height: 122%;
+    padding: 10px;
+    max-width: 1400px;
+  }
+  
+  [v-cloak] {
+      display: none !important;
+  }
+  
+  #content-wrapper {
+    padding: 5px 7.5px;
+  }
+  
+  hr {
+    color: #c4c4c4;
+  }
+  
+  .btn {
+    border-radius: 3px;
+    background-color: #efefef;
+    color: black;
+  }
+  
+  .btn:hover,
+  .btn:active,
+  .btn:focus {
+    background-color: #ccc;
+    color: black;
+    border: 1px solid black;
+  }
+  
+  .btn.btn-primary {
+    background-color: #5180ae;
+    color: white;
+  }
+  
+  .btn.btn-primary:hover,
+  .btn.btn-primary:active {
+    background-color: #3070ac;
+    color: white;
+  }
+  
+  .btn:disabled,
+  .btn:disabled:hover,
+  .btn:disabled:active {
+    background-color: #ccc;
+    color: black;
+    border: 1px solid black;
+  }
+  
+  
+  .btn-icon {
+    cursor: pointer !important;
+  }
+  
+  #output {
+    min-height: 25px;
+  }
+  
+  /*********************************
+      TEMPLATES LIST PAGE
+  **********************************/
+  
+  .f5-icon {
+    display: inline-block;
+    background-image: url('../img/f5_logo.svg');
+    background-repeat: no-repeat;
+    background-size: contain;
+    width: 16px;
+    height: 16px;
+  }
+  
+  /*********************************
+      HEADER
+  **********************************/
+  #header {
+    display: inline-block;
+    font-size: 150%;
+    margin-right: 100px;
+  }
+  
+  #header img {
+    height: 48px;
+    vertical-align: middle;
+    filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.25)) drop-shadow(-1px -1px 0 rgba(255, 255, 255, 0.25));
+  }
+  
+  /*********************************
+      NAVBAR
+  **********************************/
+  #nav-bar {
+    display: inline-block;
+    vertical-align: bottom;
+  }
+  
+  .nav-disabled a {
+    pointer-events: none;
+  }
+  
+  #nav-bar a {
+    display: block;
+    float: left;
+    color: #6f6f6f;
+    text-align: center;
+    padding-top: 13px;
+    height: 40px;
+    margin: 0px 10px;
+    width: 120px;
+  }
+  
+  .router-link-exact-active,
+  .force-link-active {
+    height: 39px;
+    pointer-events: none;
+    font-weight: bold;
+    color: black !important;
+  }
+  
+  .router-link-exact-active,
+  .force-link-active,
+  #nav-bar a:hover {
+    border-bottom: 4px solid #1d98d0;
+  }
+  
+  /*********************************
+      LOADER
+  **********************************/
+  #loader {
+    position: relative;
+    top: 1.5rem;
+    left: -1.5rem;
+    height: 3rem;
+    width: 3rem;
+  }
+  .loading.loading-lg::after {
+    height: 3rem;
+    width: 3rem;
+  }
+  
+  
+  /*********************************
+      Choices.js Overrides
+  **********************************/
+  .choices {
+      font-size: 12px
+  }
+  .choices[data-type*=select-one] .choices__inner {
+      padding-bottom: 0px
+  }
+  .choices[data-type*=select-one] .choices__input {
+      padding: 5px;
+  }
+  .choices[data-type*=select-one] .choices__button {
+      padding: 0px;
+  }	
+  .choices__inner {
+      padding: 0px;
+      font-size: 12px;
+  }
+  .choices__list {
+      padding: 0px;
+    padding-left: 4px;
+  }
+  .choices__list--single {
+      padding: 0px;
+  }
+  .choices__list--multiple .choices__item {
+      padding: 0px;
+  }
+  .choices__list--dropdown .choices__item,
+  .choices__list[aria-expanded] .choices__item {
+      padding: 0px;
+      font-size: 12px
+  }
+  .choices__item--choice {
+      min-height: 20px;
+  }
+  .choices__heading {
+      padding: 0px;
+  }
+  .choices__input {
+      font-size: 12px;
+      padding: 0px;
+  }
