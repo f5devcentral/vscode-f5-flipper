@@ -20,7 +20,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## [1.3.0] - (08-08-2023)
+## [1.3.1] - (08-07-2023)
 
 ### Fixed
 
@@ -29,7 +29,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## [1.3.0] - (08-08-2023)
+## [1.3.0] - (08-06-2023)
 
 ### Added
 
