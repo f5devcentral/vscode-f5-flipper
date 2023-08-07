@@ -22,6 +22,15 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [1.3.0] - (08-08-2023)
 
+### Fixed
+
+- Fixed templater changes not displaying
+- updated deps
+
+---
+
+## [1.3.0] - (08-08-2023)
+
 ### Added
 
 - NS->AS3 Fast template conversion process (initial)

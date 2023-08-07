@@ -81,11 +81,12 @@ export class FastWebView {
 
 
     public async renderHTML(doc: TextDocument) {
-        // no input for now, just render the default http template
         // future options detect tcp/udp/http/https/gslb, render the appropriate template
 
         // merget document values with template values/defaults
-        // need to figure this part out
+
+        // invalidate the cache to load any template changes
+        this.fastEngine.invalidateCache();
 
         // load the fast template
         let html = await this.fastEngine.fetch('ns/http')
