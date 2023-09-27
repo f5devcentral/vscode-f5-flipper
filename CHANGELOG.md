@@ -20,6 +20,14 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.4.0] - (08-20-2023)
+
+### Fixed
+
+- 
+
+---
+
 ## [1.3.1] - (08-07-2023)
 
 ### Fixed

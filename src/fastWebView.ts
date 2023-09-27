@@ -231,8 +231,10 @@ export class FastWebView {
         // f5 UI css for fast templates
         // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.f5css)}">
 
+        // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.f5css)}">
 
         const htmlSubmitBtn = `
+<link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.vscodeStyleFilePath)}">
 <script>
 (function init() {
     const vscode = acquireVsCodeApi();
