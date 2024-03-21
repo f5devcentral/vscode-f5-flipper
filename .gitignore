@@ -8,3 +8,4 @@ out
 cache
 project-flipper-*.tgz
 *.vsix
+private*.conf

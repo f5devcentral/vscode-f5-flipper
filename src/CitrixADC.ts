@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { digCsVservers } from './digCsVserver';
 import { digLbVserver } from './digLbVserver';
 import { digGslbVservers } from './digGslbVserver';
+import { digCStoLBreferences } from './digCStoLbRefs';
 import intLogger from './intLogger';
 import { logger } from './logger';
 import { AdcApp, AdcConfObj, AdcRegExTree, ConfigFile, Explosion, Stats } from './models'
@@ -256,6 +257,9 @@ export default class ADC extends EventEmitter {
                 logger.error(err)
             });
 
+        // now that all apps have been abstracted, go through and find cs pointing to lb's
+        await digCStoLBreferences(apps)
+
 
         // capture app abstraction time
         this.stats.appTime = Number(process.hrtime.bigint() - startTime) / 1000000;
@@ -313,8 +317,14 @@ export function sortAdcApp(app: AdcApp): AdcApp {
         opts: app.opts || undefined,
         bindings: app.bindings,
         csPolicies: app.csPolicies,
+        csPolicyActions: app.csPolicyActions || undefined,
+        appflows: app.appflows || undefined,
         lines: app.lines,
         apps: app.apps
     }
+
+    // if(app.csPolicyActions) {
+
+    // }
     return sorted;
 }

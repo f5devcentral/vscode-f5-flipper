@@ -21,14 +21,22 @@ export type AdcApp = {
             '-key'?: string;
         }[];
     };
-    csPolicies?: unknown[];
-    csPolicyActions?: unknown[];
+    csPolicies?: {
+        name?: string;
+        action?: string;
+        rule?: string;
+    }[];
+    csPolicyActions?: CsPolicyActions[];
     appflows?: unknown[];
     lines?: string[];
     // additional apps referenced by this app (ie. cs servers pointing to lb servers)
     apps?: AdcApp[];
     diagnostics?: Diagnostic[] | string[];
 };
+
+export type CsPolicyActions = {
+    '-targetLBVserver'?: string;
+}
 
 export type Appflow = {
     name: string;
@@ -54,6 +62,7 @@ export type DomainBinding = {
 
 export type PolicyRef = {
     '-policyName': string;
+    '-targetLBVserver'?: string;
     opts?: Opts;
 } | string;
 
@@ -63,6 +72,7 @@ export type Service = {
     port: string;
     opts?: Opts;
     server: string;
+    address?: string;
 };
 
 export type Type = 'cs' | 'lb' | 'gslb' | string;

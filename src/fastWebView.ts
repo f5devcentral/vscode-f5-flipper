@@ -117,6 +117,22 @@ export class FastWebView {
                     });
                 }
 
+                if (nsAppParams.bindings.service) {
+                    // create array if needed
+                    if(!defaultParams.pool_members) {
+                        defaultParams.pool_members = [];
+                    }
+
+                    // loop through service bindings to populate pool members
+                    nsAppParams.bindings.service.forEach((service: any) => {
+                        defaultParams.pool_members.push({
+                            serverAddress: service.address,
+                            serverName: service.server,
+                            servicePort: service.port
+                        });
+                    })
+                }
+
 
                 // generate the html preview
                 let html: string = fast.guiUtils.generateHtmlPreview(schema, defaultParams);
