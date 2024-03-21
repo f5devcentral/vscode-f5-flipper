@@ -119,8 +119,11 @@ export async function digAddCsPolicys(app: AdcApp, obj: AdcConfObj, rx: AdcRegEx
                                 /* istanbul ignore next */
                                 return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
                             }
-                            const opts = parseNsOptions(rxMatch.groups.opts, rx)
-                            if (!app.csPolicyActions) app.csPolicyActions = []
+                            const opts = parseNsOptions(rxMatch.groups.opts, rx);
+
+                            if (!app.csPolicyActions) {
+                                app.csPolicyActions = [];
+                            }
                             app.csPolicyActions.push(opts)
                         })
                 }
@@ -184,12 +187,16 @@ export async function digAddCsPolicys(app: AdcApp, obj: AdcConfObj, rx: AdcRegEx
                                         app.lines.push(originalString)
                                     })
                             }
-                            if (!app.csPolicyActions) app.csPolicyActions = []
-                            // app.csPolicyActions.push(opts)
+                            if (!app.csPolicyActions) {
+                                app.csPolicyActions = [];
+                            }
+                            app.csPolicyActions.push(opts);
                         })
                 }
             })
     })
+
+    return;
 }
 
 

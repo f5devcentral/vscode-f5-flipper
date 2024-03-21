@@ -75,7 +75,7 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
 
                     // dig service details
                     coa.add?.service?.filter(s => s.startsWith(serviceName))
-                        .forEach(x => {
+                        .forEach(async x => {
                             const parent = 'add service';
                             const originalString = parent + ' ' + x;
                             app.lines.push(originalString);
@@ -85,15 +85,38 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
                                 /* istanbul ignore next */
                                 return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
                             }
+                            // also get server reference under 'add server <name>'
+                            if(rxMatch.groups.server) {
+                                
+                                // dig server from serviceGroup server reference
+                                await digServer(rxMatch.groups.server, app, coa, rx)
+                                .then(i => {
+                                    if (i) {
+                                        // rxMatch.groups.server.splice(1, 0, i)
+                                        rxMatch.groups.address = i
+                                    }
+                                    // if (!serviceGroup.servers) serviceGroup.servers = []
+                                    // // serviceGroup.servers.push(memberRef.join(' '))
+                                    // serviceGroup.servers.push({
+                                    //     name: memberRef[0],
+                                    //     address: memberRef[1],
+                                    //     port: memberRef[2]
+                                    // })
+                                })
+                            }
+
+                            // if we have service details create array to put them
                             if (!app.bindings.service) {
                                 app.bindings.service = [];
                             }
-                            // also get server reference under 'add server <name>'
+
+                            // push service details to app config
                             app.bindings.service.push({
                                 name: serviceName,
                                 protocol: rxMatch.groups.protocol,
                                 port: rxMatch.groups.port,
                                 server: rxMatch.groups.server,
+                                address: rxMatch.groups.address,
                                 opts
                             })
 

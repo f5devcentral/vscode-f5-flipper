@@ -20,6 +20,27 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.4.0] - (03-21-2024)
+
+### Added
+
+- "add server" collected from "add service" reference
+  - This helps to provide the destination/origin server IP address
+- added service to pool member mapping for FAST template/as3 conversion
+- added CS to LB reference digging
+  - this adds the full LB config to CS that reference them
+    - direct cs policy referencecs (bind cs vserver cs_vserver_name -policyName policy_name -targetLBVserver lbvserver_name)
+    - cs policy action reference (add cs action action_name -targetLBVserver lbvserver_name)
+    - -lbserver reference (bind cs vserver cs_vserver_name -lbvserver lbvserver_name)
+
+### Changed
+
+- Updated FAST template HTML view CSS to look more like vscode
+  - should support different color schemes
+  - font should look more like bigip also
+
+---
+
 ## [1.3.1] - (08-07-2023)
 
 ### Fixed

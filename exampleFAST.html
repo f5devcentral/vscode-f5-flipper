@@ -29,11 +29,3 @@
     </script>
 </body>
 </html>
-
-<script>
-(function init() {
-    const vscode = acquireVsCodeApi();
-    document.vscode = vscode;
-})();
-</script>
-<button onclick="vscode.postMessage(editor.getValue())">Render</button>

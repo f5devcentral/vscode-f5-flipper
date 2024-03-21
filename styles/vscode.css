@@ -6,7 +6,6 @@
     --input-margin-horizontal: 0;
 }
 
-
 .bg-light {
     background-color: var(--vscode-editor-background) !important;
 }
@@ -43,6 +42,15 @@ a:hover,
 a:active {
     color: var(--vscode-textLink-activeForeground);
 }
+
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: var(--vscode-foreground);
+    font-size: var(--vscode-font-size);
+    font-weight: var(--vscode-font-weight);
+    font-family: var(--vscode-font-family);
+  }
 
 code {
     font-size: var(--vscode-editor-font-size);
