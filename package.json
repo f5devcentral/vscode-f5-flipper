@@ -3,7 +3,7 @@
   "displayName": "F5 Flipper",
   "description": "Breaking down Citrix NetScaler ADC configs",
   "publisher": "F5DevCentral",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "keywords": [
     "F5",
     "F5Networks",
@@ -92,6 +92,11 @@
         "category": "F5-Flipper",
         "icon": "$(output)",
         "enablement": "view == nsConfigView"
+      },
+      {
+        "command": "f5-flipper.report2",
+        "title": "Flipper Report 2",
+        "category": "F5-Flipper"
       },
       {
         "command": "f5-flipper.csv",

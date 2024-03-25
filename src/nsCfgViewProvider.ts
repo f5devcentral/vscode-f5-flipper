@@ -225,7 +225,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             if (element.label === 'Apps') {
                 this.explosion.config.apps.filter(x => x.type === 'cs' || x.type === 'lb')
                     .forEach(app => {
-                        const descA = [app.type]
+                        const descA = [`(${app.lines.length})`, app.type]
                         descA.push(`${app.ipAddress}:${app.port}`);
                         const desc = descA.join(' - ');
                         const clonedApp = JSON.parse(JSON.stringify(app));
@@ -258,21 +258,21 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                         ));
                     })
 
-                // prep for a future flag
-                if (true) {
-                    // sort tree items based on app IP, descending to put all the 0.0.0.0 at the bottom
-                    treeItems.sort((a, b) => {
-                        const x = a.label;
-                        const y = b.label;
-                        const xIp = this.explosion.config.apps.find(f => f.name === x);
-                        const yIp = this.explosion.config.apps.find(f => f.name === y);
-                        // https://stackoverflow.com/questions/48618635/require-sorting-on-ip-address-using-js
-                        const num1 = Number(xIp.ipAddress.split(".").map((num) => (`000${num}`).slice(-3)).join(""));
-                        const num2 = Number(yIp.ipAddress.split(".").map((num) => (`000${num}`).slice(-3)).join(""));
-                        return num2 - num1;   // return descending
-                    });
-                }
-                treeItems;
+                // // prep for a future flag
+                // if (true) {
+                //     // sort tree items based on app IP, descending to put all the 0.0.0.0 at the bottom
+                //     treeItems.sort((a, b) => {
+                //         const x = a.label;
+                //         const y = b.label;
+                //         const xIp = this.explosion.config.apps.find(f => f.name === x);
+                //         const yIp = this.explosion.config.apps.find(f => f.name === y);
+                //         // https://stackoverflow.com/questions/48618635/require-sorting-on-ip-address-using-js
+                //         const num1 = Number(xIp.ipAddress.split(".").map((num) => (`000${num}`).slice(-3)).join(""));
+                //         const num2 = Number(yIp.ipAddress.split(".").map((num) => (`000${num}`).slice(-3)).join(""));
+                //         return num2 - num1;   // return descending
+                //     });
+                // }
+                sortTreeItems(treeItems);
 
             } else if (element.label === 'GSLB') {
 

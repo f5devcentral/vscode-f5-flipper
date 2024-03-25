@@ -20,6 +20,17 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.5.0] - (03-25-2024)
+
+### Added
+- A second report that is better formated for capturing application output
+- added line count to application description in view list
+
+### Changed
+- sorting application list by name (alpha-descending)
+
+---
+
 ## [1.4.0] - (03-21-2024)
 
 ### Added
