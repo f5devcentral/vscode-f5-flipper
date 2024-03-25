@@ -315,6 +315,49 @@ export async function activateInternal(context: ExtensionContext) {
     }));
 
     // context.subscriptions.push(disposable);
+
+    context.subscriptions.push(commands.registerCommand('f5-flipper.report2', async (text) => {
+
+        // build report header
+        const report: any = {
+            hostname: ext.nsCfgProvider.explosion.hostname,
+            repo: context.extension.packageJSON.repository.url,
+            issues: context.extension.packageJSON.bugs.url,
+            extensionVersion: context.extension.packageJSON.version,
+            id: ext.nsCfgProvider.explosion.id,
+            inputFileType: ext.nsCfgProvider.explosion.inputFileType,
+            dateTime: ext.nsCfgProvider.explosion.dateTime,
+            stats: ext.nsCfgProvider.explosion.stats,
+            appCount: ext.nsCfgProvider.explosion.config.apps.length
+        }
+
+
+        // build apps
+        const apps = []
+        for (const app of ext.nsCfgProvider.explosion.config.apps) {
+            const appCopy = JSON.parse(JSON.stringify(app))
+            delete appCopy.lines;
+            delete appCopy.diagnostics
+
+            apps.push(appCopy)
+            
+        }
+
+        report.apps = apps;
+        
+        // put all the content together
+        const content = JSON.stringify( report, undefined, 4);
+
+        // var vDoc: Uri = Uri.parse("untitled:" + 'CitrixADC_Report2.yml');
+        return await workspace.openTextDocument({ language: 'json', content})
+            .then(async (doc) => {
+                await window.showTextDocument(doc);
+                // this.documents.push(doc);  // add the document to this class doc list
+                return doc;
+            });
+
+
+    }))
 }
 
 
