@@ -20,6 +20,18 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.6.0] - (03-27-2024)
+
+### Fixed
+
+- [Bug] Missing "add server" from "bind serviceGroup" reference
+- Bug when config is missing title information with code version
+  - defaults to v13.0
+- Bug when config is missing hostname (should use filename instead)
+- Moved conversion codeLense from preview to main
+
+---
+
 ## [1.5.0] - (03-25-2024)
 
 ### Added

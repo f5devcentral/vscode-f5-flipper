@@ -49,6 +49,10 @@ export default class ADC extends EventEmitter {
      */
     public hostname: string | undefined;
     /**
+     * input file name
+     */
+    public inputFile: string;
+    /**
      * input file type (.conf/.tgz)
      */
     public inputFileType: string;
@@ -75,6 +79,9 @@ export default class ADC extends EventEmitter {
         const startTime = process.hrtime.bigint();
         // capture incoming file type
         this.inputFileType = path.parse(file).ext;
+
+        // capture input file name
+        this.inputFile = path.parse(file).name;
 
         const parseConfPromises: any[] = [];
         const parseStatPromises: any[] = [];
@@ -136,9 +143,11 @@ export default class ADC extends EventEmitter {
         await parseAdcConfArrays(config, this.configObjectArry, this.rx!)
 
         // get hostname from configObjectArry, assign to parent class for easy access
-        if (this.configObjectArry.set?.ns?.hostName.length > 0) {
+        if (this.configObjectArry.set?.ns?.hostName) {
             // there should always be only one in this array
             this.hostname = this.configObjectArry.set.ns.hostName[0];
+        } else {
+            this.hostname = this.inputFile;
         }
 
         // gather stats on the number of different objects found (vservers/monitors/policies)
@@ -161,8 +170,6 @@ export default class ADC extends EventEmitter {
         
         // get adc version
         [this.adcVersion, this.adcBuild] = this.getAdcVersion(x.content, rex.adcVersionBaseReg);
-        
-        intLogger.info(`Recieved .conf file of version: ${this.adcVersion}`)
 
         // assign regex tree for particular version
         this.rx = rex.get(this.adcVersion)
@@ -288,12 +295,16 @@ export default class ADC extends EventEmitter {
         if (version) {
             //found adc version, grab build (split off first line, then split build by spaces)
             const build = config.split('\n')[0].split(' ')[2]
+
+            intLogger.info(`Recieved .conf file of version: ${this.adcVersion}`)
+
             // return details
             return [version[1], build];
         } else {
-            const msg = 'citrix adc/ns version not detected -> meaning this probably is not an ns.conf'
+            const msg = 'citrix adc/ns version not detected, defaulting to v13.0'
             intLogger.error(msg)
-            throw new Error(msg)
+            return ['13.0', '000'];
+            // throw new Error(msg)
         }
     }
 
