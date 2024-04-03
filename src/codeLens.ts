@@ -52,7 +52,7 @@ export class NsCodeLensProvider implements CodeLensProvider {
                 )
             );
 
-        } else if(document.fileName === 'app.ns.json' && ext.settings.preview) {
+        } else if(document.fileName === 'app.ns.json') {
             // if document.name === 'app.ns.conf'
 
             // find the editor -> get first line of text and abstract the appName

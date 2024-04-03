@@ -31,7 +31,7 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
 
     const apps: AdcApp[] = [];
 
-    if(!coa.add?.lb?.vserver) return apps;
+    if (!coa.add?.lb?.vserver) return apps;
 
     await Promise.all(coa.add?.lb?.vserver?.map(vServ => {
         const parent = 'add lb vserver';
@@ -67,29 +67,32 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
                     return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
                 }
 
+                // todo:  need to see if this references a "add service" or "add serviceGroup"
+
                 if (!app.bindings) app.bindings = {};
                 if (rxMatch.groups?.service) {
 
                     const serviceName = rxMatch.groups?.service;
                     // app.bindings.service.push(rxMatch.groups.service)
 
-                    // dig service details
-                    coa.add?.service?.filter(s => s.startsWith(serviceName))
-                        .forEach(async x => {
-                            const parent = 'add service';
-                            const originalString = parent + ' ' + x;
-                            app.lines.push(originalString);
-                            const rxMatch = x.match(rx.parents[parent])
-                            const opts = parseNsOptions(rxMatch.groups?.opts, rx);
-                            if (!rxMatch) {
-                                /* istanbul ignore next */
-                                return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
-                            }
-                            // also get server reference under 'add server <name>'
-                            if(rxMatch.groups.server) {
-                                
-                                // dig server from serviceGroup server reference
-                                await digServer(rxMatch.groups.server, app, coa, rx)
+                    // dig service details -> do we have a service with this name?
+                    const serviceD = coa.add?.service?.filter(s => serviceName)[0]
+                    if (serviceD) {
+                        // this should only ever find one
+                        const parent = 'add service';
+                        const originalString = parent + ' ' + serviceD;
+                        app.lines.push(originalString);
+                        const rxMatch = serviceD.match(rx.parents[parent])
+                        const opts = parseNsOptions(rxMatch.groups?.opts, rx);
+                        if (!rxMatch) {
+                            /* istanbul ignore next */
+                            return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
+                        }
+                        // also get server reference under 'add server <name>'
+                        if (rxMatch.groups.server) {
+
+                            // dig server from serviceGroup server reference
+                            await digServer(rxMatch.groups.server, app, coa, rx)
                                 .then(i => {
                                     if (i) {
                                         // rxMatch.groups.server.splice(1, 0, i)
@@ -103,25 +106,25 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
                                     //     port: memberRef[2]
                                     // })
                                 })
-                            }
+                        }
 
-                            // if we have service details create array to put them
-                            if (!app.bindings.service) {
-                                app.bindings.service = [];
-                            }
+                        // if we have service details create array to put them
+                        if (!app.bindings.service) {
+                            app.bindings.service = [];
+                        }
 
-                            // push service details to app config
-                            app.bindings.service.push({
-                                name: serviceName,
-                                protocol: rxMatch.groups.protocol,
-                                port: rxMatch.groups.port,
-                                server: rxMatch.groups.server,
-                                address: rxMatch.groups.address,
-                                opts
-                            })
-
-
+                        // push service details to app config
+                        app.bindings.service.push({
+                            name: serviceName,
+                            protocol: rxMatch.groups.protocol,
+                            port: rxMatch.groups.port,
+                            server: rxMatch.groups.server,
+                            address: rxMatch.groups.address,
+                            opts
                         })
+
+
+                    }
 
                     // dig serviceGroup details
                     await digServiceGroup(serviceName, app, coa, rx)
@@ -313,10 +316,18 @@ export async function digSslBinding(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTr
 
     const sslBindObj = []
 
-    // check ssl bindings
-    for await (const x of obj.bind?.ssl?.vserver) {
+    const appName = app.name;
 
-        if (x.startsWith(app.name)) {
+    const appSslVservers = obj.bind?.ssl?.vserver?.filter(s => s.startsWith(appName))
+
+    // check ssl bindings
+    // for await (const x of obj.bind?.ssl?.vserver) {
+
+    // if (x.startsWith(app.name)) {
+    if (appSslVservers.length > 0) {
+        for await (const x of appSslVservers) {
+
+
             const parent = 'bind ssl vserver';
             const originalString = parent + ' ' + x;
             app.lines.push(originalString);
@@ -339,9 +350,10 @@ export async function digSslBinding(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTr
                     })
 
             }
-            // deepmergeInto(sslBindObj, opts)
         }
+        // deepmergeInto(sslBindObj, opts)
     }
+    // }
 
     if (sslBindObj.length > 0) {
         app.bindings.certs = sslBindObj;

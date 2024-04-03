@@ -88,7 +88,7 @@ export class RegExTree {
             'set ns hostName': /(?<hostName>[\S ]+)/,
             'set gslb vserver': /(?<name>\S+) (?<opts>[\S ]+)/,
             'bind service': /(?<opts>[\S ]+)/,
-            'bind serviceGroup': /(?<name>\S+) ((?<serv>\S+ \d+)|(?<monitor>-monitorName \S+)|(?<opts>[\S ]+))/,
+            'bind serviceGroup': /(?<name>\S+) ((?<serv>\S+ (\d+|\*))|(?<monitor>-monitorName \S+)|(?<opts>[\S ]+))/,
             'bind lb vserver': /(?<name>\S+) ((?<opts>-[\S ]+)|(?<service>[\S]+))/,
             'bind cs vserver': /(?<server>\S+) (?<opts>[\S ]+)/,
             'bind ssl vserver': /(?<server>\S+) (?<opts>[\S ]+)/,
