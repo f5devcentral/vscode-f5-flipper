@@ -20,7 +20,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## [1.6.0] - (03-27-2024)
+## [1.6.0] - (04-03-2024)
 
 ### Fixed
 
@@ -29,6 +29,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
   - defaults to v13.0
 - Bug when config is missing hostname (should use filename instead)
 - Moved conversion codeLense from preview to main
+- added test for serviceGroup abstraction
 
 ---
 

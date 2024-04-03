@@ -126,33 +126,33 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
 
                     }
 
-        // dig serviceGroup details
-        await digServiceGroup(serviceName, app, coa, rx)
+                    // dig serviceGroup details
+                    await digServiceGroup(serviceName, app, coa, rx)
 
-    } else if (rxMatch.groups?.opts) {
+                } else if (rxMatch.groups?.opts) {
 
-        const opts = parseNsOptions(rxMatch.groups?.opts, rx);
-        if (opts['-policyName']) {
-            const pName = opts['-policyName'];
-            if (!app.bindings['-policyName']) {
-                app.bindings['-policyName'] = [];
-            }
+                    const opts = parseNsOptions(rxMatch.groups?.opts, rx);
+                    if (opts['-policyName']) {
+                        const pName = opts['-policyName'];
+                        if (!app.bindings['-policyName']) {
+                            app.bindings['-policyName'] = [];
+                        }
 
-            const policy = await digPolicy(pName, app, coa, rx)
-            app.bindings['-policyName'].push(opts as unknown as PolicyRef)
-        }
+                        const policy = await digPolicy(pName, app, coa, rx)
+                        app.bindings['-policyName'].push(opts as unknown as PolicyRef)
+                    }
 
-    }
-
-
-})
+                }
 
 
+            })
 
-apps.push(sortAdcApp(app))
+
+
+        apps.push(sortAdcApp(app))
 
     }))
-return apps;
+    return apps;
 
 }
 
@@ -318,13 +318,16 @@ export async function digSslBinding(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTr
 
     const appName = app.name;
 
-    const x = obj.bind?.ssl?.vserver?.filter(s => s.startsWith(appName))[0]
+    const appSslVservers = obj.bind?.ssl?.vserver?.filter(s => s.startsWith(appName))
 
     // check ssl bindings
     // for await (const x of obj.bind?.ssl?.vserver) {
 
-        // if (x.startsWith(app.name)) {
-        if (x) {
+    // if (x.startsWith(app.name)) {
+    if (appSslVservers.length > 0) {
+        for await (const x of appSslVservers) {
+
+
             const parent = 'bind ssl vserver';
             const originalString = parent + ' ' + x;
             app.lines.push(originalString);
@@ -347,8 +350,9 @@ export async function digSslBinding(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTr
                     })
 
             }
-            // deepmergeInto(sslBindObj, opts)
         }
+        // deepmergeInto(sslBindObj, opts)
+    }
     // }
 
     if (sslBindObj.length > 0) {
