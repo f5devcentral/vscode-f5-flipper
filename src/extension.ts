@@ -92,8 +92,8 @@ export async function activateInternal(context: ExtensionContext) {
     );
 
     /**
-     * this command is exposed via right click in editor so user does not have to connect to F5
-     * this flow assumes the file is local
+     * 
+     * 
      */
     context.subscriptions.push(commands.registerCommand('f5-flipper.cfgExplore', async (item) => {
 
@@ -158,6 +158,24 @@ export async function activateInternal(context: ExtensionContext) {
     }));
 
 
+    context.subscriptions.push(commands.registerCommand('f5-flipper.cfgExplore-show', async (text) => {
+        ext.telemetry.capture({ command: 'f5-flipper.cfgExplore-show' });
+        const content = JSON.stringify( text, undefined, 4);
+
+        // var vDoc: Uri = Uri.parse("untitled:" + 'CitrixADC_Report2.yml');
+        return await workspace.openTextDocument({ language: 'json', content})
+            .then(async (doc) => {
+                await window.showTextDocument(doc);
+                // this.documents.push(doc);  // add the document to this class doc list
+
+                // fold all the json down
+                await commands.executeCommand("editor.foldAll");
+                // expand the first two levels of json to better visibility
+                await commands.executeCommand("editor.unfold", { levels: 2 });
+                return doc;
+            });
+    }));
+    
     context.subscriptions.push(commands.registerCommand('f5-flipper.cfgExploreClear', async (text) => {
         ext.telemetry.capture({ command: 'f5-flipper.cfgExploreClear' });
         ext.nsCfgProvider.clear();

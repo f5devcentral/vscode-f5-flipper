@@ -167,7 +167,7 @@ export default class ADC extends EventEmitter {
 
         // instantiate regex tree
         const rex = new RegExTree();
-        
+
         // get adc version
         [this.adcVersion, this.adcBuild] = this.getAdcVersion(x.content, rex.adcVersionBaseReg);
 
@@ -240,15 +240,17 @@ export default class ADC extends EventEmitter {
         // dig each 'add cs vserver'
         await digCsVservers(this.configObjectArry, this.rx)
             .then(csApps => {
+                // add the cs apps to the main app array
                 apps.push(...csApps as AdcApp[])
             })
             .catch(err => {
                 logger.error(err)
             });
-
-        // dig each 'add lb vserver', but check for existing?
-        await digLbVserver(this.configObjectArry, this.rx)
+            
+            // dig each 'add lb vserver', but check for existing?
+            await digLbVserver(this.configObjectArry, this.rx)
             .then(lbApps => {
+                // add the lb apps to the main app array
                 apps.push(...lbApps as AdcApp[])
             })
             .catch(err => {
@@ -265,7 +267,14 @@ export default class ADC extends EventEmitter {
             });
 
         // now that all apps have been abstracted, go through and find cs pointing to lb's
-        await digCStoLBreferences(apps)
+        digCStoLBreferences(apps)
+
+        // loop through each app and remove any duplicate NS config lines
+        for await (const app of apps) {
+            app.lines = app.lines.filter((value, index, array) => array.indexOf(value) === index)
+            // resort the app object properties for better human reading
+            sortAdcApp(app)
+        }
 
 
         // capture app abstraction time
@@ -317,7 +326,7 @@ export default class ADC extends EventEmitter {
  * @param app 
  * @returns 
  */
-export function sortAdcApp(app: AdcApp): AdcApp {
+export function sortAdcApp(app: AdcApp) {
 
     const sorted: AdcApp = {
         name: app.name,
@@ -337,5 +346,5 @@ export function sortAdcApp(app: AdcApp): AdcApp {
     // if(app.csPolicyActions) {
 
     // }
-    return sorted;
+    return app = sorted;
 }

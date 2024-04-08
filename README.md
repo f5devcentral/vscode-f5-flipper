@@ -166,6 +166,133 @@ Add walking details...
 
 Add walking details...
 
+# Mapping
+
+```mermaid
+flowchart TD
+    A[Incoming request]-->C{CS or LB?}
+    C -->acv[add cs verser]
+    acv -->bcsvs[bind cs vserver]
+    bcsvs-->|"-policyName"|acsp[add cs policy]
+    acsp-->|"-action"|acsa[add cs action]
+    acsa-->albvs
+
+    bcsvs-->|"-lbvserver"|albvs
+
+    acsp-->aafp[add appflow policy]
+    aafp-->aafa[add appflow action]
+    aafa-->aafc[add appflow collector]
+
+
+    C -->albvs[add lb vserver]
+    albvs-->ssvserver[set ssl verver]
+    albvs-->blbvs[bind lb vserver]
+    blbvs-->aservice[add service]
+    aservice-->aserver[add server]
+    blbvs-->asg[add serverGroup]
+    asg-->bsg[bind serviceGroup]
+    bsg-->aserver
+    bsg-->albm[add lb monitor]
+```
+
+## add cs vserver
+
+https://developer-docs.netscaler.com/en-us/adc-command-reference-int/13/cs/cs-vserver.html#synopsis-9
+
+add cs vserver <traffic-domain> <serviceType/Protocol>
+
+### traffic-domain
+
+Integer value that uniquely identifies the traffic domain in which you want to configure the entity. If you do not specify an ID, the entity becomes part of the default traffic domain, which has an ID of 0. Minimum value: 0 Maximum value: 4094
+
+### Possible ServiceTypes/protocols
+
+NS ServiceType | F5 Profiles | Additional Optional F5 profiles
+| :--- | ---: | :---: |
+HTTP | TCP/HTTP |
+SSL | TCP/HTTP/clientssl | serverssl
+TCP | TCP |
+FTP | TCP |
+RTSP | TCP/RTSP
+SSL_TCP | TCP/clientssl | serverssl
+UDP | UDP
+DNS | UDP | dns
+SIP_UDP | UDP | SIP
+SIP_TCP | TCP | SIP
+SIP_SSL | TCP/clientssl | SIP
+ANY | TCP
+RADIUS | UDP | RADIUS
+RDP | TCP
+MYSQL | TCP
+MSSQL | TCP
+DIAMETER | TCP | Diameter
+SSL_DIAMETER | TCP/clientssl | Diameter
+DNS_TCP | TCP | DNS
+ORACLE | TCP
+SMPP | TCP
+PROXY | ?
+MONGO | ?
+MONGO_TLS | TCP/clientssl
+MQTT | 
+MQTT_TLS | TCP/clientssl
+HTTP_QUIC |
+
+## add lb vserver
+
+https://developer-docs.netscaler.com/en-us/adc-command-reference-int/13/lb/lb-vserver#add-lb-vserver
+
+add lb vserver <name> <serviceType/Protocol> <ip_address>
+
+### Possible ServiceTypes/Protocols
+
+NS ServiceType | F5 Profiles | Additional Optional F5 profiles
+| :--- | ---: | :---: |
+HTTP | TCP/HTTP
+FTP | TCP
+TCP | TCP
+UDP | UDP
+SSL | TCP/clientssl | serverssl/HTTP?
+SSL_BRIDGE | TCP/clientssl | FastL4?/serverssl
+SSL_TCP | TCP/clietssl | serverssl
+DTLS | UDP/clientssl?
+NNTP | TCP
+DNS | UDP
+DHCPRA | TCP | dhcpv4
+ANY | tcp
+SIP_UDP | 
+SIP_TCP | 
+SIP_SSL | 
+DNS_TCP | 
+RTSP | 
+PUSH | 
+SSL_PUSH | 
+RADIUS | 
+RDP | 
+MYSQL | 
+MSSQL | 
+DIAMETER | 
+SSL_DIAMETER | 
+TFTP | 
+ORACLE | 
+SMPP | 
+SYSLOGTCP | 
+SYSLOGUDP | 
+FIX | 
+SSL_FIX | 
+PROXY | 
+USER_TCP | 
+USER_SSL_TCP | 
+QUIC | 
+IPFIX | 
+LOGSTREAM | 
+MONGO | 
+MONGO_TLS | 
+MQTT | 
+MQTT_TLS | 
+QUIC_BRIDGE | 
+HTTP_QUIC |
+
+
 # Notes
 
 - All of the 'add' operations need to happen before the 'bind' operations

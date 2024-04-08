@@ -473,6 +473,10 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             // todo: possibly move all the fast template stuff to a separate view
             treeItems.push(new NsCfgApp('FAST Templates', 'Conversion Templates', '', 'fastHeader', '', TreeItemCollapsibleState.Collapsed));
 
+            // display ns config as json object
+            treeItems.push(new NsCfgApp('JSON', 'Parent NS.Conf objects as JSON', '', '', '', TreeItemCollapsibleState.None,
+                { command: 'f5-flipper.cfgExplore-show', title: '', arguments: [this.adc.configObjectArry] }));
+
         }
         return Promise.resolve(treeItems);
     }
