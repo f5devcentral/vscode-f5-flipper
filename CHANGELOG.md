@@ -20,6 +20,23 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.7.0] - (04-08-2024)
+
+### Fixed
+
+- [BUG] Flipper 1.6.0 Service Parsing Error #29
+
+### Added
+
+- [RFE] TMOS/AS3 conversion output #7
+- [RFE] add confObjArray to the view #20
+- [RFE] code actions to provide conversion output #6
+- documentation details about cs/lb-vserver serviceTypes
+- documentation logic flow through cs/lb vserver details
+  - show how everything gets mapped through cs/lb/services/serviceGroups (diagram)
+
+---
+
 ## [1.6.0] - (04-03-2024)
 
 ### Fixed

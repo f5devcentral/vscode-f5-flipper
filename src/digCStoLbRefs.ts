@@ -5,13 +5,13 @@ import { logger } from "./logger";
 import { AdcApp, CsPolicyActions, PolicyRef } from "./models";
 
 
-export async function digCStoLBreferences(apps: AdcApp[]) {
+export function digCStoLBreferences(apps: AdcApp[]) {
 
     logger.info('digging lb app references from cs servers')
 
     // loop through all the apps and add -targetLBVserver and -lbvserver reference details
 
-    apps.forEach((app: AdcApp) => {
+    for (const app of apps) {
 
         // app.bindings.'-policyName'.forEach( x => x.'-targetLBVserver' )
         /**
@@ -33,7 +33,7 @@ export async function digCStoLBreferences(apps: AdcApp[]) {
                 app.apps = [];
             }
 
-            app.bindings["-policyName"].forEach((p: PolicyRef) => {
+            for ( const p of app.bindings["-policyName"]) {
 
                 if (typeof p === 'string') {
 
@@ -87,13 +87,13 @@ export async function digCStoLBreferences(apps: AdcApp[]) {
                 }
 
 
-            })
+            }
 
         }
 
         if (app?.csPolicyActions) {
             // dig cs policy action for lb reference
-            app.csPolicyActions.forEach((cpa: CsPolicyActions) => {
+            for (const cpa of app.csPolicyActions) {
 
                 if(cpa["-targetLBVserver"]) {
 
@@ -119,7 +119,7 @@ export async function digCStoLBreferences(apps: AdcApp[]) {
                         logger.error(`policy action with -targetLBVserver ${x} referenced by CS ${app.name} not found`)
                     }
                 }
-            })
+            }
         }
 
         // app.bindings.'-lbvserver'.forEach( (x: string) => )
@@ -130,7 +130,7 @@ export async function digCStoLBreferences(apps: AdcApp[]) {
             }
             // this should be a list of strings/names
             // todo: loop through list and add lb vservers
-            app.bindings["-lbvserver"].forEach((e: string) => {
+            for (const e of app.bindings["-lbvserver"]) {
 
                 const a = apps.filter((b: AdcApp) => b.name === e)[0]
 
@@ -152,13 +152,13 @@ export async function digCStoLBreferences(apps: AdcApp[]) {
                 
                 }
 
-            })
+            }
 
         }
 
 
 
-    })
+    }
 
     // nothing to return since we just added details to existing apps
     return;

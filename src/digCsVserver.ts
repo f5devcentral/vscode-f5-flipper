@@ -19,6 +19,7 @@ export async function digCsVservers(coa: AdcConfObj, rx: AdcRegExTree) {
 
     const apps: AdcApp[] = [];
 
+    // if there are no cs vservers, then return the empty array
     if(!coa.add?.cs?.vserver) return apps;
 
     await Promise.all(coa.add?.cs?.vserver?.map(async vServ => {
@@ -64,18 +65,20 @@ export async function digCsVservers(coa: AdcConfObj, rx: AdcRegExTree) {
 
                 if (opts['-policyName']) {
 
+                    // points to "add cs policy"
                     app.bindings["-policyName"].push(opts as unknown as PolicyRef)
 
                 } else if (opts['-lbvserver']) {
 
+                    // points to "add lb vserver"
                     app.bindings["-lbvserver"].push(opts['-lbvserver'])
 
                 }
             })
 
         await digAddCsPolicys(app, coa, rx);
-        await digSslBinding(app, coa, rx);
-        apps.push(sortAdcApp(app))
+        digSslBinding(app, coa, rx);
+        apps.push(app)
     }))
 
     return apps;

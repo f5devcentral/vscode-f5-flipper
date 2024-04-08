@@ -31,9 +31,10 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
 
     const apps: AdcApp[] = [];
 
+    // if there are no add lb vservers, then return the empty array
     if (!coa.add?.lb?.vserver) return apps;
 
-    await Promise.all(coa.add?.lb?.vserver?.map(vServ => {
+    await Promise.all(coa.add?.lb?.vserver?.map(async vServ => {
         const parent = 'add lb vserver';
         const originalString = 'add lb vserver ' + vServ;
         const rxMatch = vServ.match(rx.parents[parent]);
@@ -55,8 +56,8 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
         }
 
         // start with 'bind lb vserver'
-        coa.bind?.lb?.vserver?.filter(el => el.startsWith(app.name))
-            .forEach(async x => {
+        const bindLbVservers = coa.bind?.lb?.vserver?.filter(el => el.startsWith(app.name));
+            for await (const x of bindLbVservers) {
                 const parent = 'bind lb vserver';
                 const originalString = parent + ' ' + x;
                 app.lines.push(originalString);
@@ -76,7 +77,8 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
                     // app.bindings.service.push(rxMatch.groups.service)
 
                     // dig service details -> do we have a service with this name?
-                    const serviceD = coa.add?.service?.filter(s => serviceName)[0]
+                    // there should only be one "add service" with this name since we are looking in this specific "bind lb vserver"
+                    const serviceD = coa.add?.service?.filter(s => s.startsWith(serviceName))[0]
                     if (serviceD) {
                         // this should only ever find one
                         const parent = 'add service';
@@ -138,6 +140,7 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
                             app.bindings['-policyName'] = [];
                         }
 
+                        // this reference is for "add rewrite policy"
                         const policy = await digPolicy(pName, app, coa, rx)
                         app.bindings['-policyName'].push(opts as unknown as PolicyRef)
                     }
@@ -145,11 +148,11 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
                 }
 
 
-            })
+            };
 
 
 
-        apps.push(sortAdcApp(app))
+        apps.push(app)
 
     }))
     return apps;
@@ -292,27 +295,28 @@ export async function digServiceGroup(serviceName: string, app: AdcApp, obj: Adc
 export async function digServer(serverName: string, app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree): Promise<string | undefined> {
 
     let dest = undefined;
-    obj?.add?.server?.filter(s => s.startsWith(serverName))
-        .forEach(x => {
+    const server = obj?.add?.server?.filter(s => s.startsWith(serverName))[0]
 
-            const parent = 'add server';
-            const originalString = parent + ' ' + x;
-            app.lines.push(originalString)
-            const rxMatch = x.match(rx.parents[parent])
+    if (server) {
 
-            if (rxMatch) {
-                dest = rxMatch.groups?.dest;
-            } else {
-                /* istanbul ignore next */
-                logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
-            }
-        })
+        const parent = 'add server';
+        const originalString = parent + ' ' + server;
+        app.lines.push(originalString)
+        const rxMatch = server.match(rx.parents[parent])
+
+        if (rxMatch) {
+            dest = rxMatch.groups?.dest;
+        } else {
+            /* istanbul ignore next */
+            logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
+        }
+    }
     return dest;
 }
 
 
 
-export async function digSslBinding(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) {
+export function digSslBinding(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) {
 
     const sslBindObj = []
 
@@ -321,11 +325,8 @@ export async function digSslBinding(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTr
     const appSslVservers = obj.bind?.ssl?.vserver?.filter(s => s.startsWith(appName))
 
     // check ssl bindings
-    // for await (const x of obj.bind?.ssl?.vserver) {
-
-    // if (x.startsWith(app.name)) {
     if (appSslVservers.length > 0) {
-        for await (const x of appSslVservers) {
+        for (const x of appSslVservers) {
 
 
             const parent = 'bind ssl vserver';
@@ -337,23 +338,24 @@ export async function digSslBinding(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTr
             // only parse certkeyName details, pass on all the ciphers and eccCurveNames
             if (opts['-certkeyName']) {
                 const certKeyName = opts['-certkeyName']
-                obj.add?.ssl?.certKey.filter(el => el.startsWith(certKeyName))
-                    .forEach(x => {
+
+                for (const el of obj.add?.ssl?.certKey) {
+
+                    if (el.startsWith(certKeyName)) {
                         const parent = 'add ssl certKey';
-                        const originalString = parent + ' ' + x;
+                        const originalString = parent + ' ' + el;
                         app.lines.push(originalString);
-                        const rxMatch = x.match(rx.parents[parent]);
+                        const rxMatch = el.match(rx.parents[parent]);
                         const opts2 = parseNsOptions(rxMatch.groups.opts, rx)
                         // deepmergeInto(opts2, opts2)
                         opts2.profileName = certKeyName;
                         sslBindObj.push(opts2)
-                    })
+                    }
+                }
 
             }
         }
-        // deepmergeInto(sslBindObj, opts)
     }
-    // }
 
     if (sslBindObj.length > 0) {
         app.bindings.certs = sslBindObj;

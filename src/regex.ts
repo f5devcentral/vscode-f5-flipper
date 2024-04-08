@@ -74,8 +74,8 @@ export class RegExTree {
             'add cs action': /(?<name>\S+) (?<opts>[\S ]+)/,
             'add cs policy': /(?<name>\S+) (?<opts>[\S ]+)/,
             'add gslb vserver': /(?<name>("[\S ]+"|[\S]+)) (?<protocol>\S+) (?<opts>[\S ]+)/,
-            'add gslb service': /(?<name>\S+) (?<server>\S+) (?<protocol>\S+) (?<port>(\d+|\*)) (?<opts>[\S ]+)/,
-            'add gslb site': /(?<name>\S+) (?<server>\S+) (?<opts>[\S ]+)/,
+            'add gslb service': /(?<name>("[\S ]+"|[\S]+)) (?<server>\S+) (?<protocol>\S+) (?<port>(\d+|\*)) (?<opts>[\S ]+)/,
+            'add gslb site': /(?<name>("[\S ]+"|[\S]+)) (?<server>\S+) (?<opts>[\S ]+)/,
             'add rewrite action': /(?<name>\S+) (?<opts>[\S ]+)/,
             'add rewrite policy': /(?<name>\S+) (?<opts>[\S ]+)/,
             'add appflow policy': /(?<name>\S+) (?<rule>[\S]+) (?<action>[\S]+)/,
@@ -88,11 +88,11 @@ export class RegExTree {
             'set ns hostName': /(?<hostName>[\S ]+)/,
             'set gslb vserver': /(?<name>\S+) (?<opts>[\S ]+)/,
             'bind service': /(?<opts>[\S ]+)/,
-            'bind serviceGroup': /(?<name>\S+) ((?<serv>\S+ (\d+|\*))|(?<monitor>-monitorName \S+)|(?<opts>[\S ]+))/,
-            'bind lb vserver': /(?<name>\S+) ((?<opts>-[\S ]+)|(?<service>[\S]+))/,
-            'bind cs vserver': /(?<server>\S+) (?<opts>[\S ]+)/,
-            'bind ssl vserver': /(?<server>\S+) (?<opts>[\S ]+)/,
-            'bind gslb vserver': /(?<name>\S+) (?<opts>[\S ]+)/,
+            'bind serviceGroup': /(?<name>("[\S ]+"|[\S]+)) ((?<serv>\S+ (\d+|\*))|(?<monitor>-monitorName \S+)|(?<opts>[\S ]+))/,
+            'bind lb vserver': /(?<name>("[\S ]+"|[\S]+)) ((?<opts>-[\S ]+)|(?<service>[\S]+))/,
+            'bind cs vserver': /(?<name>("[\S ]+"|[\S]+)) (?<opts>[\S ]+)/,
+            'bind ssl vserver': /(?<name>("[\S ]+"|[\S]+)) (?<opts>[\S ]+)/,
+            'bind gslb vserver': /(?<name>("[\S ]+"|[\S]+)) (?<opts>[\S ]+)/,
         }
     }
 
