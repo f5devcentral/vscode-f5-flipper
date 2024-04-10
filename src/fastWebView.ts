@@ -31,6 +31,7 @@ export class FastWebView {
     protected activePanel: WebviewPanel | undefined;
     protected fastTemplateYml: string | undefined;
     protected fastEngine: any | undefined;
+    protected selectedTemplate: string | undefined;
 
     private readonly panelResponses: Map<WebviewPanel, HttpResponse>;
     ctx: ExtensionContext;
@@ -70,26 +71,32 @@ export class FastWebView {
          * then display in new editor to the right...
          */
 
-        const as3 = await this.fastEngine.fetch('ns/http').then((template) => {
-            const as3 = template.render(tempParams);
-            return as3;
-        });
+        const as3 = await this.fastEngine.fetch(this.selectedTemplate)
+            .then((template) => {
+                const as3 = template.render(tempParams);
+                return as3;
+            });
 
         return as3;
 
     }
 
 
-    public async renderHTML(doc: TextDocument) {
+    public async renderHTML(doc: TextDocument, template: string) {
         // future options detect tcp/udp/http/https/gslb, render the appropriate template
 
         // merget document values with template values/defaults
 
+        // save template name so we can fetch it during render
+        this.selectedTemplate = template;
+
         // invalidate the cache to load any template changes
         this.fastEngine.invalidateCache();
 
+        const fe = this.fastEngine;
+
         // load the fast template
-        let html = await this.fastEngine.fetch('ns/http')
+        let html = await this.fastEngine.fetch(template)
             .then((template) => {
                 // get the schema for the template
                 const schema = template.getParametersSchema();
@@ -119,7 +126,7 @@ export class FastWebView {
 
                 if (nsAppParams.bindings.service) {
                     // create array if needed
-                    if(!defaultParams.pool_members) {
+                    if (!defaultParams.pool_members) {
                         defaultParams.pool_members = [];
                     }
 
@@ -226,15 +233,15 @@ export class FastWebView {
         const nonce = new Date().getTime() + '' + new Date().getMilliseconds();
         const csp = this.getCsp(nonce);
 
-    //     const head = `
-    // <head>
-    // <meta charset="UTF-8">
-    // <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.baseFilePath)}">
-    // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.vscodeStyleFilePath)}">
-    // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.customStyleFilePath)}">
-    // <title>template title</title>
-    // </head>`
+        //     const head = `
+        // <head>
+        // <meta charset="UTF-8">
+        // <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.baseFilePath)}">
+        // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.vscodeStyleFilePath)}">
+        // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.customStyleFilePath)}">
+        // <title>template title</title>
+        // </head>`
 
         // html = html.replace(/<head>\n[\S\s]+<\/head>\n/, head);
         // const html2 = html.replace(/ <head>\n[\S\s]+?\n +<\//, '');
@@ -243,7 +250,7 @@ export class FastWebView {
          * Appends the necessary stuff for submit button and getting template params
          * move the following to it's own function
          */
-        
+
         // f5 UI css for fast templates
         // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.f5css)}">
 

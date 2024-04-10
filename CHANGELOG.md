@@ -20,6 +20,23 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.8.0] - (04-10-2024)
+
+### Fixed
+
+- [BUG] report output blending with previous config #24
+
+### Added
+
+- [RFE] provide easy button for feedback/issues #4
+- specify hostname or address with server references
+- Added multiple fast templates for different general apps (tcp/udp/http/https)
+  - this includes being able to select this fast template to convert with in the ns app json view
+- added diagnostic rule to identify when a vserver is pointing to another vserver as a -backupVServer
+  - this should be converted to f5 priority group activation, not multiple vs
+
+---
+
 ## [1.7.0] - (04-08-2024)
 
 ### Fixed

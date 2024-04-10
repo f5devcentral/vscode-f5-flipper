@@ -30,7 +30,7 @@ import {
     ExtensionContext,
 } from 'vscode';
 import jsYaml from 'js-yaml';
-import { readdirSync } from 'fs';
+import { lstatSync, readdirSync } from 'fs';
 
 import { ext } from './extensionVariables';
 
@@ -197,6 +197,22 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         this.adc = undefined;
         this.explosion = undefined;
         this.parsedFileEvents.length = 0;
+
+        // reset the diagnostic stats
+        this.diagStats = {
+            defaultRedirects: 0,
+            Green: undefined,
+            Information: undefined,
+            Warning: undefined,
+            Error: undefined,
+        };
+        this.diags = {
+            defaultRedirects: [],
+            Green: [],
+            Information: [],
+            Warning: [],
+            Error: [],
+        };
         this.refresh();
     }
 
@@ -314,18 +330,63 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             } else if (element.label === 'FAST Templates') {
 
                 // list fast template files
-                // list all the files in the templates/ns folder
-                const files = readdirSync(path.join(this.ctx.extensionPath, 'templates', 'ns'));
+                // list all the files in the templates folder
+                const files = readdirSync(path.join(this.ctx.extensionPath, 'templates'), {withFileTypes: true});
+
 
                 files.forEach(file => {
-                    const filePath = path.join(this.ctx.extensionPath, 'templates', 'ns', file);
-                    treeItems.push(new NsCfgApp(file, ``, ``, 'nsFile', '', TreeItemCollapsibleState.None, {
-                        command: 'vscode.open',
-                        title: '',
-                        arguments: [Uri.file(filePath)]
-                    }));
+                    // is file or folder?
+
+                    const filePath = path.join(file.path, file.name);
+                    const isFile = lstatSync(filePath).isFile();
+                    
+                    if(isFile) {
+                        
+                        // create template object
+                        // const filePath = path.join(this.ctx.extensionPath, 'templates', 'ns', file.name);
+                        // treeItems.push(new NsCfgApp(file.name, ``, ``, 'nsFile', '', TreeItemCollapsibleState.None, {
+                        //     command: 'vscode.open',
+                        //     title: '',
+                        //     arguments: [Uri.file(filePath)]
+                        // }));
+                    } else {
+                        // get number of templates in folder
+                        const filesCount = readdirSync(path.join(this.ctx.extensionPath, 'templates', file.name))
+                        // create folder
+                        treeItems.push(new NsCfgApp(file.name, ``, filesCount.length.toString(), 'nsFolder', '', TreeItemCollapsibleState.Collapsed));
+                    }
+
+
                 })
 
+            } else if (element.contextValue === 'nsFolder') {
+
+                // list templates in folder
+                const x = element;
+                const files = readdirSync(path.join(this.ctx.extensionPath, 'templates', element.label), {withFileTypes: true});
+
+                files.forEach(file => {
+                    // is file or folder?
+
+                    const filePath = path.join(file.path, file.name);
+                    const isFile = lstatSync(filePath).isFile();
+                    
+                    if(isFile) {
+                        
+                        // create template object
+                        // const filePath = path.join(this.ctx.extensionPath, 'templates', 'ns', file.name);
+                        treeItems.push(new NsCfgApp(file.name, ``, ``, 'fastTemplate', '', TreeItemCollapsibleState.None, {
+                            command: 'vscode.open',
+                            title: '',
+                            arguments: [Uri.file(filePath)]
+                        }));
+                    } else {
+                        // create folder
+                        // treeItems.push(new NsCfgApp(file.name, ``, ``, 'nsFolder', '', TreeItemCollapsibleState.Collapsed));
+                    }
+
+
+                })
 
             } else if (element.label === 'Sources') {
 

@@ -73,6 +73,7 @@ export type Service = {
     opts?: Opts;
     server: string;
     address?: string;
+    hostname?: string;
 };
 
 export type Type = 'cs' | 'lb' | 'gslb' | string;

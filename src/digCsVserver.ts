@@ -20,7 +20,7 @@ export async function digCsVservers(coa: AdcConfObj, rx: AdcRegExTree) {
     const apps: AdcApp[] = [];
 
     // if there are no cs vservers, then return the empty array
-    if(!coa.add?.cs?.vserver) return apps;
+    if (!coa.add?.cs?.vserver) return apps;
 
     await Promise.all(coa.add?.cs?.vserver?.map(async vServ => {
 
@@ -51,8 +51,10 @@ export async function digCsVservers(coa: AdcConfObj, rx: AdcRegExTree) {
         }
 
         // dig 'bind cs vservers'
-        coa.bind?.cs?.vserver?.filter(el => el.startsWith(app.name))
-            .forEach(x => {
+        const csVservers = coa.bind?.cs?.vserver?.filter(el => el.startsWith(app.name))
+        if (csVservers?.length > 0) {
+
+            for await (const x of csVservers) {
 
                 const parent = 'bind cs vserver';
                 const originalString = parent + ' ' + x;
@@ -74,7 +76,8 @@ export async function digCsVservers(coa: AdcConfObj, rx: AdcRegExTree) {
                     app.bindings["-lbvserver"].push(opts['-lbvserver'])
 
                 }
-            })
+            }
+        }
 
         await digAddCsPolicys(app, coa, rx);
         digSslBinding(app, coa, rx);
@@ -87,11 +90,14 @@ export async function digCsVservers(coa: AdcConfObj, rx: AdcRegExTree) {
 export async function digAddCsPolicys(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) {
 
     // loop through each policy attached to this app
-    app.bindings["-policyName"].forEach(policy => {
+    for await (const policy of app.bindings["-policyName"]) {
 
         // filter out all the policies with this name
-        obj.add?.cs?.policy?.filter(x => x.startsWith(policy['-policyName']))
-            .forEach(x => {
+        const csPolicies = obj.add?.cs?.policy?.filter(x => x.startsWith(policy['-policyName']))
+
+        if (csPolicies?.length > 0) {
+
+            for await (const x of csPolicies) {
                 const parent = 'add cs policy';
                 const originalString = parent + ' ' + x;
                 app.lines.push(originalString);
@@ -112,8 +118,10 @@ export async function digAddCsPolicys(app: AdcApp, obj: AdcConfObj, rx: AdcRegEx
                 if (opts['-action']) {
                     // 'add cs action <name> '
                     // get the action config
-                    obj.add.cs.action.filter(el => el.startsWith(opts['-action']))
-                        .forEach(x => {
+                    const csAction = obj.add?.cs?.action?.filter(el => el.startsWith(opts['-action']))
+                    if (csAction?.length > 0) {
+
+                        for await (const x of csAction) {
                             const parent = 'add cs action';
                             const originalString = parent + ' ' + x;
                             app.lines.push(originalString)
@@ -128,9 +136,11 @@ export async function digAddCsPolicys(app: AdcApp, obj: AdcConfObj, rx: AdcRegEx
                                 app.csPolicyActions = [];
                             }
                             app.csPolicyActions.push(opts)
-                        })
+                        }
+                    }
                 }
-            })
+            }
+        }
 
         //todo:  dig appflow referenced by -policyName
         // 'add appflow policy <name>' -> 'add appflow action <name>' -> 'add appflow collector <name>'
@@ -197,7 +207,7 @@ export async function digAddCsPolicys(app: AdcApp, obj: AdcConfObj, rx: AdcRegEx
                         })
                 }
             })
-    })
+    }
 
     return;
 }

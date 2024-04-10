@@ -12,6 +12,7 @@ import {
     workspace
 } from "vscode";
 import { ext } from "./extensionVariables";
+import { globSync } from 'glob';
 
 
 
@@ -82,7 +83,7 @@ export class NsCodeLensProvider implements CodeLensProvider {
                         command: 'f5-flipper.convert2AS3',
                         title: 'Convert to AS3',
                         tooltip: 'click to convert to AS3',
-                        arguments: [document]
+                        arguments: [{document, template: 'ns/http'}]
                     }
                 )
             );
@@ -99,6 +100,27 @@ export class NsCodeLensProvider implements CodeLensProvider {
                 )
             );
 
+            // get template directory /templates/as3
+            // list file names *.yaml
+            // push a codeLens per file as3/tcp, as3/http, as3/https
+            const baseDir = path.join(__dirname, '..', 'templates', 'as3');
+            let filesPaths: string[] = globSync('*.yaml', { cwd: baseDir })
+
+            filesPaths.forEach((template) => {
+                template = template.split('.')[0]
+                const title = path.join('as3', template);
+                const thirdLine = new Range(2, 0, 2, 0);
+                codeLens.push(
+                    new CodeLens(
+                        secondLine,
+                        {
+                            command: 'f5-flipper.convert2AS3',
+                            title,
+                            arguments: [{document, template: title}]
+                        }
+                    )
+                );
+            })
         }
 
 
