@@ -93,9 +93,9 @@
     {
         "code": "5617",
         "severity": "Information",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "title": "vs references backupVServer",
+        "message": "In NS points to a backup VS if current pool resources are down, F5 priority group activation is the equivilant",
+        "regex": " -backupVServer (?<name>(\"[\\S ]+\"|[\\S]+))"
     },
     {
         "code": "4818",

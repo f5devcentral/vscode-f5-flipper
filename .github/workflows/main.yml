@@ -103,6 +103,9 @@ jobs:
 
       - name: publish to open-vsix
         run: ovsx publish ${{ env.VSIX_PATH }} -p ${{ secrets.OPEN_VSX_TOKEN }}
+        # Apr2024: open-vsix has been going through changes recently and things seem to be unstable
+        # so this step is not critical
+        continue-on-error: true
 
 
 

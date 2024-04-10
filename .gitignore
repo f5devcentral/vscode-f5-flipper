@@ -6,6 +6,6 @@ dist
 tmp
 out
 cache
-project-flipper-*.tgz
+vscode-f5-flipper-*.tgz
 *.vsix
 private*.conf

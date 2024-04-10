@@ -36,11 +36,11 @@ export class FastCore {
 
             ext.telemetry.capture({ command: 'f5-flipper.convert2AS3' });
 
-            window.showInformationMessage('conversion outputs are in development!')
+            // window.showInformationMessage('conversion outputs are in development!')
 
             logger.info('f5-flipper.convert2AS3, pulling up fast template');
 
-            this.panel.renderHTML(doc);
+            this.panel.renderHTML(doc.document, doc.template);
 
         }));
     }

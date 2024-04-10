@@ -120,6 +120,15 @@ export async function activateInternal(context: ExtensionContext) {
             logger.info(`f5-flipper.cfgExplore _fsPath recieved:`, item._fsPath);
             filePath = item._fsPath;
 
+        } else if (item?.path.startsWith('Untitled-') && item?.scheme === 'untitled') {
+
+            // this is an unsaved file in vscode
+
+            // one spot to setup direct text to engine
+
+
+
+
         } else if (item?.path) {
 
             logger.info(`f5-flipper.cfgExplore path revieved:`, item.path);

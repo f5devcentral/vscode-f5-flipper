@@ -246,9 +246,9 @@ export default class ADC extends EventEmitter {
             .catch(err => {
                 logger.error(err)
             });
-            
-            // dig each 'add lb vserver', but check for existing?
-            await digLbVserver(this.configObjectArry, this.rx)
+
+        // dig each 'add lb vserver', but check for existing?
+        await digLbVserver(this.configObjectArry, this.rx)
             .then(lbApps => {
                 // add the lb apps to the main app array
                 apps.push(...lbApps as AdcApp[])
