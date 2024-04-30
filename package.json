@@ -3,7 +3,7 @@
   "displayName": "F5 Flipper",
   "description": "Breaking down Citrix NetScaler ADC configs",
   "publisher": "F5DevCentral",
-  "version": "1.8.0",
+  "version": "1.10.0",
   "keywords": [
     "F5",
     "F5Networks",
@@ -21,7 +21,6 @@
     "theme": "light"
   },
   "activationEvents": [
-    "onCommand:f5-flipper.cfgExplore",
     "onView:f5-ns-container"
   ],
   "main": "./out/extLoader.js",
@@ -71,6 +70,10 @@
         {
           "id": "nsConfigView",
           "name": "Citrix ADC/NS Config Explorer"
+        },
+        {
+          "id": "nsTemplatesView",
+          "name": "Citrix ADC/NS FAST Templates"
         }
       ]
     },
@@ -111,10 +114,23 @@
         "enablement": "view == nsConfigView"
       },
       {
+        "command": "f5-flipper.templateExploreRefresh",
+        "title": "Refresh",
+        "category": "F5-Flipper",
+        "icon": "$(refresh)",
+        "enablement": "view == nsTemplatesView"
+      },
+      {
         "command": "f5-flipper.viewJson",
         "title": "JSON Output",
         "category": "F5-Flipper",
         "icon": "$(json)",
+        "enablement": "view == nsConfigView"
+      },
+      {
+        "command": "f5-flipper.afton",
+        "title": "AFTON",
+        "category": "F5-Flipper",
         "enablement": "view == nsConfigView"
       },
       {
@@ -127,6 +143,11 @@
     ],
     "menus": {
       "view/title": [
+        {
+          "command": "f5-flipper.templateExploreRefresh",
+          "when": "view == nsTemplatesView",
+          "group": "navigation"
+        },
         {
           "command": "f5-flipper.cfgExploreClear",
           "when": "view == nsConfigView",
@@ -142,6 +163,11 @@
         {
           "command": "f5-flipper.csv",
           "when": "view == nsConfigView && viewItem =~ /(appsHeader|gslbHeader)/",
+          "group": "inline"
+        },
+        {
+          "command": "f5-flipper.afton",
+          "when": "view == nsConfigView && viewItem =~ /(appsHeader)/",
           "group": "inline"
         },
         {

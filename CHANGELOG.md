@@ -20,6 +20,25 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.10.0] - (04-30-2024)
+
+### Added
+
+- Moved FAST templates to dedicated view outside of Citrix ADC exploring
+  - This includes a dedicated folder for templates with each template name aliging with the different major NS app protocol types (ANY/SSL/TCP/UDP/RDP/...)
+  - refresh button for this view
+- AFTON command to process bulk conversions
+  - This work flow is still in progress.  There is a key difference in how the HTML view mutates the NS config data
+- increased and streamlined ns app parameter mutating for FAST templates
+
+
+### Fixed
+
+- Logger now works with env logging levels of (info/warn/error/debug)
+- Updated FAST templates from latest work/testing
+
+---
+
 ## [1.8.0] - (04-10-2024)
 
 ### Fixed

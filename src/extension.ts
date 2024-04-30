@@ -21,9 +21,14 @@ import { NsDiag } from './nsDiag';
 import { Hovers } from './hovers';
 import { NsCodeLensProvider } from './codeLens';
 import { FastCore } from './fastCore';
+import { NsTemplateProvider } from './templateViewProvider';
+
+ext.logger = logger;
 
 // turn off console logging
-logger.console = false;
+ext.logger.console = false;
+// turn off local logger buffer since vscode OUTPUT is the buffer
+logger.buffer = false;
 
 // create OUTPUT channel
 const f5FlipperOutputChannel = window.createOutputChannel('f5-flipper');
@@ -52,9 +57,10 @@ export async function activateInternal(context: ExtensionContext) {
         userInfo: JSON.stringify(os.userInfo())
     });
 
+    
     // initialize extension settings
     await initSettings(context);
-
+    
     // load ext config to ext.settings.
     await loadSettings();
 

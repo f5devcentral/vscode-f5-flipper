@@ -331,7 +331,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
                 // list fast template files
                 // list all the files in the templates folder
-                const files = readdirSync(path.join(this.ctx.extensionPath, 'templates'), {withFileTypes: true});
+                const files = readdirSync(path.join(this.ctx.extensionPath, 'templates'), { withFileTypes: true });
 
 
                 files.forEach(file => {
@@ -339,9 +339,9 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
                     const filePath = path.join(file.path, file.name);
                     const isFile = lstatSync(filePath).isFile();
-                    
-                    if(isFile) {
-                        
+
+                    if (isFile) {
+
                         // create template object
                         // const filePath = path.join(this.ctx.extensionPath, 'templates', 'ns', file.name);
                         // treeItems.push(new NsCfgApp(file.name, ``, ``, 'nsFile', '', TreeItemCollapsibleState.None, {
@@ -363,16 +363,16 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
                 // list templates in folder
                 const x = element;
-                const files = readdirSync(path.join(this.ctx.extensionPath, 'templates', element.label), {withFileTypes: true});
+                const files = readdirSync(path.join(this.ctx.extensionPath, 'templates', element.label), { withFileTypes: true });
 
                 files.forEach(file => {
                     // is file or folder?
 
                     const filePath = path.join(file.path, file.name);
                     const isFile = lstatSync(filePath).isFile();
-                    
-                    if(isFile) {
-                        
+
+                    if (isFile) {
+
                         // create template object
                         // const filePath = path.join(this.ctx.extensionPath, 'templates', 'ns', file.name);
                         treeItems.push(new NsCfgApp(file.name, ``, ``, 'fastTemplate', '', TreeItemCollapsibleState.None, {
@@ -542,7 +542,33 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         return Promise.resolve(treeItems);
     }
 
+    /**
+     * bulk convert all known apps cs/lb
+     */
+    async bulk() {
+        // gather all the ns apps into an array
+        const apps = this.explosion.config.apps;
 
+        // create an array to put the converted apps
+        const as3Apps = []
+
+        // loop through the array and convert each app
+        for await (const app of apps) {
+
+            // // mutate the ns json app params to fast template params
+            // const fastTempParams = await ext.fast.panel.mungeNS2FAST(app)
+
+            const fastTempParams = await ext.fast.panel.autoRenderHTML(app)
+
+            await ext.fast.panel.renderAS3(fastTempParams)
+                .then(a => as3Apps.push(a))
+                .catch(e => {
+                    as3Apps.push(e)
+                })
+        }
+
+        await commands.executeCommand("f5-flipper.cfgExplore-show", as3Apps);
+    }
 
 
     async render(items: any, output: "lines" | "full") {
@@ -559,6 +585,11 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             docContent = items.join('\n');
 
         } else if (output === 'full') {
+
+            // add FAST template params
+            const fastTempParams = ext.fast.panel.mungeNS2FAST(items)
+
+            items.fastTempParams = fastTempParams;
 
             docContent = JSON.stringify(items, undefined, 4);
             docName = 'app.ns.json'
@@ -588,6 +619,12 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
         } else if (Object(items)) {
             docName = 'app.ns.json'
+
+            // add FAST template params
+            const fastTempParams = ext.fast.panel.mungeNS2FAST(items)
+
+            items.fastTempParams = fastTempParams;
+
             // if array -> single selection, just join internal array normally -> display contents
             docContent = JSON.stringify(items, undefined, 4);
         }
