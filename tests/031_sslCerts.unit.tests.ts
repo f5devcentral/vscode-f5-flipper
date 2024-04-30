@@ -48,7 +48,7 @@ describe('ssl certificate tests', function () {
             })
             .catch(y => {
                 err = y;
-                log = adc.logs()
+                // log = adc.logs()
                 debugger;
             })
 

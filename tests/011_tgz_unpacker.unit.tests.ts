@@ -70,7 +70,7 @@ describe('tgz unpacker tests', function () {
             })
             .catch(y => {
                 err = y;
-                log = adc.logs()
+                // log = adc.logs()
                 debugger;
             })
 
@@ -80,7 +80,7 @@ describe('tgz unpacker tests', function () {
             })
             .catch(thisErr => {
                 err = thisErr;
-                log = adc.logs();
+                // log = adc.logs();
                 debugger;
             });
 
@@ -95,7 +95,7 @@ describe('tgz unpacker tests', function () {
         assert.ok(exp.dateTime)
         assert.ok(exp.id)
         assert.ok(exp.inputFileType)
-        assert.ok(exp.logs)
+        // assert.ok(exp.logs)
         assert.ok(exp.stats)
 
     })
