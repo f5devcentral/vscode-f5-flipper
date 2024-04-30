@@ -19,6 +19,8 @@ import { NsDiag } from './nsDiag';
 import { NsCfgProvider } from './nsCfgViewProvider';
 import { NsCodeLensProvider } from './codeLens';
 import { FastCore } from './fastCore';
+import { NsTemplateProvider } from './templateViewProvider';
+import Logger from 'f5-conx-core/dist/logger';
 
 
 /**
@@ -31,7 +33,9 @@ export namespace ext {
     export let telemetry: Telemetry;
     export let nsDiag: NsDiag;
     export let fast: FastCore;
+    export let logger: Logger;
     export let nsCfgProvider: NsCfgProvider;
+    export let nsTemplateProvider: NsTemplateProvider;
     export let nsCodeLens: NsCodeLensProvider;
     export let eventEmitterGlobal: EventEmitter;
     export let connectBar: StatusBarItem;
@@ -123,7 +127,7 @@ export async function loadSettings() {
     // plugin preview setting to view context
     commands.executeCommand('setContext', 'f5-flipper.preview', ext.settings.preview);
 
-    process.env.F5_VSCODE_LOG_LEVEL = f5Cfg.get<string>('logLevel', 'INFO');
+    process.env.F5_VSCODE_FLIPPER_LOG_LEVEL = f5Cfg.get<string>('logLevel', 'INFO');
 
     const tenv = f5Cfg.get<boolean>('TEEM', true).toString();
     if(tenv === 'true') {

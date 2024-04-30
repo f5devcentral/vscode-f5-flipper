@@ -1,0 +1,72 @@
+title: HTTP Application Template
+description: This template aims to provide a jumping point for taking an NS app config and converting it to AS3.
+contentType: application/json
+template: |
+  {
+    "$schema": "https://raw.githubusercontent.com/F5Networks/f5-appsvcs-extension/master/schema/latest/as3-schema.json",
+    "class": "AS3",
+    "declaration": {
+      "class": "ADC",
+      "schemaVersion": "3.45.0",
+      "id": "urn:uuid:0209b091-aec0-47ff-8da0-cdf10eb6daf6",
+      "t_{{virtual_address}}": {
+        "class": "Tenant",
+        "{{app_name}}-app": {
+          "class": "Application",
+          "template": "shared",
+          "{{app_name}}": {
+            "layer4": "tcp",
+            "pool": "pool_{{app_name}}",
+            "translateServerAddress": true,
+            "translateServerPort": true,
+            "class": "Service_HTTP",
+            {{#persistence}}
+              {{#SOURCEIP}}"persistenceMethods": [{"bigip": "/Common/source_addr"}],{{/SOURCEIP}}
+              {{#COOKIEINSERT}}"persistenceMethods": [{"bigip": "/Common/cookie"}],{{/COOKIEINSERT}}
+              {{#SSLSESSION}}"persistenceMethods": [{"bigip": "/Common/ssl"}],{{/SSLSESSION}}
+              {{#NONE}}"persistenceMethods" : [],{{/NONE}}
+            {{/persistence}}
+            "virtualAddresses": [
+              "{{virtual_address}}"
+            ],
+            "virtualPort": {{virtual_port}},
+            "snat": "auto"
+          },
+          "pool_{{app_name}}": {
+            "members": [
+            {{#pool_members}}
+                {
+                {{#address}}
+                "serverAddresses": ["{{address}}"],
+                {{/address}}
+                {{#hostname}}
+                "addressDiscovery": "fqdn",
+                "hostname": "{{hostname}}",
+                {{/hostname}}
+                {{#port}}
+                "servicePort": {{port}},
+                {{/port}}
+                "shareNodes": true
+                },
+            {{/pool_members}}
+            ],
+            "class": "Pool",
+            {{#lbMethod}}
+                {{#ROUNDROBIN}}
+                "loadBalancingMode":"round-robin",
+                {{/ROUNDROBIN}}
+                {{#LEASTCONNECTION}}
+                "loadBalancingMode":"least-connections-member",
+                {{/LEASTCONNECTION}}
+            {{/lbMethod}}
+            {{^lbMethod}}
+                "loadBalancingMode":"least-connections-member",
+            {{/lbMethod}}
+            "monitors": [
+              "http"
+            ]
+          }
+        }
+      }
+    }
+  }

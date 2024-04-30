@@ -50,6 +50,7 @@ export class FastWebView {
 
         const localPath = ctx.asAbsolutePath('templates');
         this.fastEngine = new fast.FsTemplateProvider(localPath)
+        // this.fastEngine = new fast.
         localPath;
     }
 
@@ -315,6 +316,8 @@ export class FastWebView {
      */
     public async renderHTML(app: AdcApp, template: string) {
 
+
+
         const nsAppProtocol = app.protocol;
 
         if (nsAppProtocol) {
@@ -332,7 +335,7 @@ export class FastWebView {
         // invalidate the cache to load any template changes
         this.fastEngine.invalidateCache();
 
-
+        // const fe = this.fastEngine;
 
         // load the fast template
         let html = await this.fastEngine.fetch(template)

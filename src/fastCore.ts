@@ -19,6 +19,7 @@ import { ext } from './extensionVariables';
 import fast from '@f5devcentral/f5-fast-core';
 import path from 'path';
 import { FastWebView } from './fastWebView';
+import { NsTemplateProvider } from './templateViewProvider';
 
 /**
  * Provides command to download github releases of this extension so users can easily access beta versions for testing
@@ -31,18 +32,41 @@ export class FastCore {
 
         this.panel = new FastWebView(ctx);
 
-
         ctx.subscriptions.push(commands.registerCommand('f5-flipper.convert2AS3', async (doc) => {
 
             ext.telemetry.capture({ command: 'f5-flipper.convert2AS3' });
 
-            // window.showInformationMessage('conversion outputs are in development!')
-
             logger.info('f5-flipper.convert2AS3, pulling up fast template');
 
-            this.panel.renderHTML(doc.document, doc.template);
+            const docText = JSON.parse(doc.document.getText());
 
-        }));
+            this.panel.renderHTML(docText, doc.template);
+
+
+
+          }));
+
+
+
+          ext.nsTemplateProvider = new NsTemplateProvider(ctx);
+          const templateView = window.createTreeView('nsTemplatesView', {
+              treeDataProvider: ext.nsTemplateProvider,
+              showCollapseAll: true
+          });
+      
+          ctx.subscriptions.push(commands.registerCommand('f5-flipper.templateExploreRefresh', async (text) => {
+              // logger.info('Refreshing NS FAST Templates view');
+              ext.nsTemplateProvider.refresh();
+          }));
+      
+      
+          ctx.subscriptions.push(commands.registerCommand('f5-flipper.afton', async (text) => {
+              // logger.info('Refreshing NS FAST Templates view');
+              const converted = ext.nsCfgProvider.bulk();
+          }));
+
+
+          
     }
 
 }

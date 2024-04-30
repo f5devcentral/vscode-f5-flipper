@@ -1,0 +1,80 @@
+title: Simple TCP Application
+description: Layer 4 Passthrough TCP Application - Includes Persistence
+contentType: application/json
+template: |
+  {
+    "$schema": "https://raw.githubusercontent.com/F5Networks/f5-appsvcs-extension/master/schema/latest/as3-schema.json",
+    "class": "AS3",
+    "declaration": {
+        "class": "ADC",
+        "schemaVersion": "3.45.0",
+        "id": "urn:uuid:8cbab3f1-de39-4944-9459-cea0b3e7f69c",
+        "t_{{virtual_address}}": {
+            "class": "Tenant",
+            "{{app_name}}-app": {
+                "class": "Application",
+                "template": "shared",
+                "{{app_name}}": {
+                    "layer4": "tcp",
+                    "pool": "pool_{{app_name}}",
+                    "translateServerAddress": true,
+                    "translateServerPort": true,
+                    "class": "Service_TCP",
+                    {{#persistence}}
+                        {{#SOURCEIP}}"persistenceMethods": [{"bigip": "/Common/source_addr"}],{{/SOURCEIP}}
+                        {{#SSLSESSION}}"persistenceMethods": [{"bigip": "/Common/ssl"}],{{/SSLSESSION}}
+                        {{#NONE}}"persistenceMethods" : [],{{/NONE}}
+                    {{/persistence}}
+                    "profileTCP": {
+                        "use": "{{app_name}}-tcp_idle_9000"
+                    },
+                    "virtualAddresses": [
+                        "{{virtual_address}}"
+                    ],
+                    "virtualPort": {{virtual_port}},
+                    "snat": "auto"
+                },
+                "pool_{{app_name}}": {
+                    "members": [
+                    {{#pool_members}}
+                        {
+                        {{#address}}
+                        "serverAddresses": ["{{address}}"],
+                        {{/address}}
+                        {{#hostname}}
+                        "addressDiscovery": "fqdn",
+                        "hostname": "{{hostname}}",
+                        {{/hostname}}
+                        {{#port}}
+                        "servicePort": {{port}},
+                        {{/port}}
+                        "shareNodes": true
+                        },
+                    {{/pool_members}}
+                    ],
+                    "monitors": [
+                        {
+                            "bigip": "/Common/tcp"
+                        }
+                    ],
+                    {{#lbMethod}}
+                        {{#ROUNDROBIN}}
+                        "loadBalancingMode":"round-robin",
+                        {{/ROUNDROBIN}}
+                        {{#LEASTCONNECTION}}
+                        "loadBalancingMode":"least-connections-member",
+                        {{/LEASTCONNECTION}}
+                    {{/lbMethod}}
+                    {{^lbMethod}}
+                        "loadBalancingMode":"least-connections-member",
+                    {{/lbMethod}}
+                    "class": "Pool"
+                },
+                "{{app_name}}-tcp_idle_9000": {
+                  "idleTimeout": 9000,
+                  "class": "TCP_Profile"
+              }
+            }
+        }
+    }
+  }

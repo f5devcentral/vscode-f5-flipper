@@ -14,7 +14,7 @@ export type AdcApp = {
         '-domainName'?: DomainBinding[];
         '-serviceName'?: GslbService[];
         service?: Service[];
-        serviceGroup?: string[];
+        serviceGroup?: ServiceGroup[];
         certs?: {
             '-certKeyName'?: string;
             '-cert'?: string;
@@ -32,7 +32,32 @@ export type AdcApp = {
     // additional apps referenced by this app (ie. cs servers pointing to lb servers)
     apps?: AdcApp[];
     diagnostics?: Diagnostic[] | string[];
+    // mutated params to be feed into the fast template
+    fastTempParams?: unknown;
 };
+
+export type NsFastTempParams = {
+    tenant_name: string;
+    app_name: string;
+    type: string;
+    protocol: string;
+    virtual_address: string;
+    virtual_port: string;
+    persistence?: { [key: string]: string };
+    lbMethod?: { [key: string]: string };
+    cltTimeout?: { [key: string]: string };
+    timeout?: { [key: string]: string };
+    redirectURL?: { [key: string]: string };
+    backupVServer?: { [key: string]: string };
+    tcpProfileName?: { [key: string]: string };
+    pool_members?: {
+        hostname?: { hostname: string };
+        address?: { address: string };
+        port?: { port: string };
+        name?: { name: string };
+    }[];
+}
+
 
 export type CsPolicyActions = {
     '-targetLBVserver'?: string;
@@ -76,9 +101,17 @@ export type Service = {
     hostname?: string;
 };
 
+export type ServiceGroup = {
+    name: string;
+    servers: Service[]
+};
+
 export type Type = 'cs' | 'lb' | 'gslb' | string;
 export type Protocol = 'HTTP' | 'SSL' | 'TCP' | string;
-export type Opts =  { [k: string]: string | unknown};
+export type Opts =  { 
+    [k: string]: string | unknown;
+    '-persistenceType'?: string;
+};
 
 export type GslbService = {
     serviceName: string;
@@ -135,7 +168,7 @@ export type Explosion = {
     },
     stats: Stats,
     fileStore?: ConfigFile[]
-    logs: string[]
+    // logs?: string[]
 }
 
 

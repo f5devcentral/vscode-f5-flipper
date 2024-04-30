@@ -1,4 +1,4 @@
-title: HTTPS Application Template
+title: HTTP Application Template
 description: This template aims to provide a jumping point for taking an NS app config and converting it to AS3.
 contentType: application/json
 definitions:
@@ -36,6 +36,8 @@ definitions:
     items:
       type: object
       properties:
+        addressDiscovery:
+          default: fqdn
         serverAddress:
           title: Server Address
         servicePort:
@@ -56,29 +58,53 @@ definitions:
     default: '/Common/tcp'
 template: |
   {
-    "class": "ADC",
-    "schemaVersion": "3.0.0",
-    "id": "urn:uuid:a858e55e-bbe6-42ce-a9b9-0f4ab33e3bf7",
-    "{{tenant_name}}": {
-      "class": "Tenant",
-      "{{app_name}}": {
-        "class": "Application",
-        "template": "generic",
-        "virtualAddresses": [
-          "{{virtual_address:f5:ipv4}}"
-        ],
-        "virtualPort": {{virtual_port:f5:port}},
-        "{{app_name}}_pool": {
-          "class": "Pool",
-          "members": [
-            {{#pool_members}}
-              {
-                "serverAddresses": [{{serverAddress:f5:ipv4}}],
-                "servicePort": {{servicePort:f5:port}},
-                "shareNodes": {{shareNodes::boolean}}
-              },
-            {{/pool_members}}
-          ]
+    "$schema": "https://raw.githubusercontent.com/F5Networks/f5-appsvcs-extension/master/schema/latest/as3-schema.json",
+    "class": "AS3",
+    "declaration": {
+      "class": "ADC",
+      "schemaVersion": "3.45.0",
+      "id": "urn:uuid:0209b091-aec0-47ff-8da0-cdf10eb6daf6",
+      "t_{{virtual_address}}": {
+        "class": "Tenant",
+        "{{app_name}}-app": {
+          "class": "Application",
+          "template": "shared",
+          "{{app_name}}": {
+            "layer4": "tcp",
+            "pool": "pool_{{app_name}}",
+            "translateServerAddress": true,
+            "translateServerPort": true,
+            "class": "Service_HTTP",
+            "virtualAddresses": [
+              "{{virtual_address}}"
+            ],
+            "virtualPort": {{virtual_port}},
+            "snat": "auto"
+          },
+          "pool_{{app_name}}": {
+            "members": [
+              {{#pool_members}}
+                  {
+                  {{#address}}
+                  "serverAddresses": ["{{address}}"],
+                  {{/address}}
+                  {{#hostname}}
+                  "addressDiscovery": "fqdn",
+                  "hostname": "{{hostname}}",
+                  {{/hostname}}
+                  {{#port}}
+                  "servicePort": {{port}},
+                  {{/port}}
+                  "shareNodes": true
+                  },
+              {{/pool_members}}
+            ],
+            "class": "Pool",
+            "loadBalancingMode":"least-connections-member",
+            "monitors": [
+              "tcp"
+            ]
+          }
         }
       }
     }

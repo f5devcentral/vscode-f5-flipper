@@ -9,7 +9,6 @@ import { digCsVservers } from './digCsVserver';
 import { digLbVserver } from './digLbVserver';
 import { digGslbVservers } from './digGslbVserver';
 import { digCStoLBreferences } from './digCStoLbRefs';
-import intLogger from './intLogger';
 import { logger } from './logger';
 import { AdcApp, AdcConfObj, AdcRegExTree, ConfigFile, Explosion, Stats } from './models'
 import { countMainObjects } from './objectCounter';
@@ -201,7 +200,7 @@ export default class ADC extends EventEmitter {
                 sources: this.configFiles,
             },
             stats: this.stats,                      // add stats object
-            logs: await this.logs()                 // get all the processing logs
+            // logs: await this.logs()                 // get all the processing logs
         }
 
         if (apps.length > 0) {
@@ -214,14 +213,6 @@ export default class ADC extends EventEmitter {
 
         return retObj;
     }
-
-    /**
-     * Get processing logs
-     */
-    async logs(): Promise<string[]> {
-        return intLogger.getLogs();
-    }
-
 
     /**
      * extracts app(s)
@@ -305,13 +296,13 @@ export default class ADC extends EventEmitter {
             //found adc version, grab build (split off first line, then split build by spaces)
             const build = config.split('\n')[0].split(' ')[2]
 
-            intLogger.info(`Recieved .conf file of version: ${this.adcVersion}`)
+            logger.info(`Recieved .conf file of version: ${this.adcVersion}`)
 
             // return details
             return [version[1], build];
         } else {
             const msg = 'citrix adc/ns version not detected, defaulting to v13.0'
-            intLogger.error(msg)
+            logger.error(msg)
             return ['13.0', '000'];
             // throw new Error(msg)
         }
