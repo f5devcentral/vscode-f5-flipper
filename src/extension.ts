@@ -128,11 +128,11 @@ export async function activateInternal(context: ExtensionContext) {
 
         } else if (item?.path.startsWith('Untitled-') && item?.scheme === 'untitled') {
 
-            // this is an unsaved file in vscode
+            // todo: this is an unsaved text file in vscode, need to save text to a temp file and load it
 
             // one spot to setup direct text to engine
 
-
+            return logger.error('f5-flipper.cfgExplore -> direct text not supported yet.  Please save the file', JSON.stringify(item));
 
 
         } else if (item?.path) {

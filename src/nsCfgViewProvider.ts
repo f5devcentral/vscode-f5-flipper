@@ -40,6 +40,7 @@ import { logger } from './logger';
 import path from 'path';
 import { AdcConfObj, Explosion, AdcApp } from './models';
 import ADC from './CitrixADC';
+import { mungeNS2FAST } from './ns2FastParams';
 
 // remodel everything here like this example:  https://github.com/microsoft/vscode-extension-samples/blob/master/tree-view-sample/src/testView.ts
 // it will provide a working 'reveal' function and a browsable tmos config tree in the view
@@ -327,66 +328,66 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
                 sortTreeItems(treeItems);
 
-            } else if (element.label === 'FAST Templates') {
+            // } else if (element.label === 'FAST Templates') {
 
-                // list fast template files
-                // list all the files in the templates folder
-                const files = readdirSync(path.join(this.ctx.extensionPath, 'templates'), { withFileTypes: true });
-
-
-                files.forEach(file => {
-                    // is file or folder?
-
-                    const filePath = path.join(file.path, file.name);
-                    const isFile = lstatSync(filePath).isFile();
-
-                    if (isFile) {
-
-                        // create template object
-                        // const filePath = path.join(this.ctx.extensionPath, 'templates', 'ns', file.name);
-                        // treeItems.push(new NsCfgApp(file.name, ``, ``, 'nsFile', '', TreeItemCollapsibleState.None, {
-                        //     command: 'vscode.open',
-                        //     title: '',
-                        //     arguments: [Uri.file(filePath)]
-                        // }));
-                    } else {
-                        // get number of templates in folder
-                        const filesCount = readdirSync(path.join(this.ctx.extensionPath, 'templates', file.name))
-                        // create folder
-                        treeItems.push(new NsCfgApp(file.name, ``, filesCount.length.toString(), 'nsFolder', '', TreeItemCollapsibleState.Collapsed));
-                    }
+            //     // list fast template files
+            //     // list all the files in the templates folder
+            //     const files = readdirSync(path.join(this.ctx.extensionPath, 'templates'), { withFileTypes: true });
 
 
-                })
+            //     files.forEach(file => {
+            //         // is file or folder?
 
-            } else if (element.contextValue === 'nsFolder') {
+            //         const filePath = path.join(file.path, file.name);
+            //         const isFile = lstatSync(filePath).isFile();
 
-                // list templates in folder
-                const x = element;
-                const files = readdirSync(path.join(this.ctx.extensionPath, 'templates', element.label), { withFileTypes: true });
+            //         if (isFile) {
 
-                files.forEach(file => {
-                    // is file or folder?
-
-                    const filePath = path.join(file.path, file.name);
-                    const isFile = lstatSync(filePath).isFile();
-
-                    if (isFile) {
-
-                        // create template object
-                        // const filePath = path.join(this.ctx.extensionPath, 'templates', 'ns', file.name);
-                        treeItems.push(new NsCfgApp(file.name, ``, ``, 'fastTemplate', '', TreeItemCollapsibleState.None, {
-                            command: 'vscode.open',
-                            title: '',
-                            arguments: [Uri.file(filePath)]
-                        }));
-                    } else {
-                        // create folder
-                        // treeItems.push(new NsCfgApp(file.name, ``, ``, 'nsFolder', '', TreeItemCollapsibleState.Collapsed));
-                    }
+            //             // create template object
+            //             // const filePath = path.join(this.ctx.extensionPath, 'templates', 'ns', file.name);
+            //             // treeItems.push(new NsCfgApp(file.name, ``, ``, 'nsFile', '', TreeItemCollapsibleState.None, {
+            //             //     command: 'vscode.open',
+            //             //     title: '',
+            //             //     arguments: [Uri.file(filePath)]
+            //             // }));
+            //         } else {
+            //             // get number of templates in folder
+            //             const filesCount = readdirSync(path.join(this.ctx.extensionPath, 'templates', file.name))
+            //             // create folder
+            //             treeItems.push(new NsCfgApp(file.name, ``, filesCount.length.toString(), 'nsFolder', '', TreeItemCollapsibleState.Collapsed));
+            //         }
 
 
-                })
+            //     })
+
+            // } else if (element.contextValue === 'nsFolder') {
+
+            //     // list templates in folder
+            //     const x = element;
+            //     const files = readdirSync(path.join(this.ctx.extensionPath, 'templates', element.label), { withFileTypes: true });
+
+            //     files.forEach(file => {
+            //         // is file or folder?
+
+            //         const filePath = path.join(file.path, file.name);
+            //         const isFile = lstatSync(filePath).isFile();
+
+            //         if (isFile) {
+
+            //             // create template object
+            //             // const filePath = path.join(this.ctx.extensionPath, 'templates', 'ns', file.name);
+            //             treeItems.push(new NsCfgApp(file.name, ``, ``, 'fastTemplate', '', TreeItemCollapsibleState.None, {
+            //                 command: 'vscode.open',
+            //                 title: '',
+            //                 arguments: [Uri.file(filePath)]
+            //             }));
+            //         } else {
+            //             // create folder
+            //             // treeItems.push(new NsCfgApp(file.name, ``, ``, 'nsFolder', '', TreeItemCollapsibleState.Collapsed));
+            //         }
+
+
+            //     })
 
             } else if (element.label === 'Sources') {
 
@@ -531,8 +532,8 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                     { command: 'f5-flipper.cfgExplore-show', title: '', arguments: [csLbApps] }));
             }
 
-            // todo: possibly move all the fast template stuff to a separate view
-            treeItems.push(new NsCfgApp('FAST Templates', 'Conversion Templates', '', 'fastHeader', '', TreeItemCollapsibleState.Collapsed));
+            // // todo: possibly move all the fast template stuff to a separate view
+            // treeItems.push(new NsCfgApp('FAST Templates', 'Conversion Templates', '', 'fastHeader', '', TreeItemCollapsibleState.Collapsed));
 
             // display ns config as json object
             treeItems.push(new NsCfgApp('JSON', 'Parent NS.Conf objects as JSON', '', '', '', TreeItemCollapsibleState.None,
@@ -587,7 +588,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         } else if (output === 'full') {
 
             // add FAST template params
-            const fastTempParams = ext.fast.panel.mungeNS2FAST(items)
+            const fastTempParams = mungeNS2FAST(items)
 
             items.fastTempParams = fastTempParams;
 
@@ -621,7 +622,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             docName = 'app.ns.json'
 
             // add FAST template params
-            const fastTempParams = ext.fast.panel.mungeNS2FAST(items)
+            const fastTempParams = mungeNS2FAST(items)
 
             items.fastTempParams = fastTempParams;
 

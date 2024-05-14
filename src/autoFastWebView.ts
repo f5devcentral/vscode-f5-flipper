@@ -19,7 +19,6 @@ import { logger } from './logger';
 import fast from '@f5devcentral/f5-fast-core';
 import path from 'path';
 import { AdcApp, NsFastTempParams } from './models';
-import { mungeNS2FAST } from './ns2FastParams';
 
 const fast = require('@f5devcentral/f5-fast-core');
 
@@ -44,10 +43,10 @@ export class FastWebView {
 
     public constructor(ctx: ExtensionContext) {
         this.ctx = ctx;
-        this.f5css = Uri.file(this.ctx.asAbsolutePath(path.join('styles', 'f5.css')));
-        this.baseFilePath = Uri.file(this.ctx.asAbsolutePath(path.join('styles', 'reset.css')));
-        this.vscodeStyleFilePath = Uri.file(this.ctx.asAbsolutePath(path.join('styles', 'vscode.css')));
-        this.customStyleFilePath = Uri.file(this.ctx.asAbsolutePath(path.join('styles', 'rest-client.css')));
+        // this.f5css = Uri.file(this.ctx.asAbsolutePath(path.join('styles', 'f5.css')));
+        // this.baseFilePath = Uri.file(this.ctx.asAbsolutePath(path.join('styles', 'reset.css')));
+        // this.vscodeStyleFilePath = Uri.file(this.ctx.asAbsolutePath(path.join('styles', 'vscode.css')));
+        // this.customStyleFilePath = Uri.file(this.ctx.asAbsolutePath(path.join('styles', 'rest-client.css')));
 
         const localPath = ctx.asAbsolutePath('templates');
         this.fastEngine = new fast.FsTemplateProvider(localPath)
@@ -98,7 +97,9 @@ export class FastWebView {
 
     }
 
+
     public async autoRenderHTML(app: AdcApp) {
+
 
         // invalidate the cache to load any template changes
         this.fastEngine.invalidateCache();
@@ -119,14 +120,8 @@ export class FastWebView {
                 // get the default values for the template
                 const defaultParams = template.getCombinedParameters();
 
-                // // get ns app params from the document
-                // const nsAppParams = JSON.parse(doc.getText());
-
-                // mutate ns app params into a better format for FAST templates
-                const temp = mungeNS2FAST(app);
-
                 // merge with FAST template default params
-                const fastParams = Object.assign(defaultParams, temp)
+                const fastParams = Object.assign(defaultParams, {})
 
                 logger.debug(`ns app ${app.name} FAST Template params: `, fastParams);
 
@@ -225,10 +220,10 @@ export class FastWebView {
                 // const nsAppParams = JSON.parse(doc.getText());
 
                 // mutate ns app params into a better format for FAST templates
-                const temp = mungeNS2FAST(app);
+                // const temp = this.mungeNS2FAST(app);
 
                 // merge with FAST template default params
-                const fastParams = Object.assign(defaultParams, temp)
+                const fastParams = Object.assign(defaultParams, template)
 
                 logger.debug(`ns app ${app.name} FAST Template params: `, fastParams);
 

@@ -2,72 +2,104 @@
 'use strict';
 
 import {
-    commands,
-    EndOfLine,
-    ExtensionContext,
-    languages,
-    Position,
-    Range,
-    Selection,
-    window
+  commands,
+  EndOfLine,
+  ExtensionContext,
+  languages,
+  Position,
+  Range,
+  Selection,
+  window
 } from 'vscode';
-import fs from 'fs';
-import { isObject } from 'f5-conx-core';
 import { logger } from './logger';
 import { ext } from './extensionVariables';
 
-import fast from '@f5devcentral/f5-fast-core';
-import path from 'path';
 import { FastWebView } from './fastWebView';
 import { NsTemplateProvider } from './templateViewProvider';
+import { FastWebViewFull } from './fastWebViewFull';
+import AutoFast from './autoFast';
 
 /**
  * Provides command to download github releases of this extension so users can easily access beta versions for testing
  */
 export class FastCore {
-    fastEngine: any;
-    panel: FastWebView;
+  fastEngine: any;
+  panel: FastWebView;
+  panelFull: FastWebViewFull;
 
-    constructor(ctx: ExtensionContext) {
+  constructor(ctx: ExtensionContext) {
 
-        this.panel = new FastWebView(ctx);
+    this.panel = new FastWebView(ctx);
+    this.panelFull = new FastWebViewFull(ctx);
 
-        ctx.subscriptions.push(commands.registerCommand('f5-flipper.convert2AS3', async (doc) => {
+    ctx.subscriptions.push(commands.registerCommand('f5-flipper.flip', async (nsApp) => {
 
-            ext.telemetry.capture({ command: 'f5-flipper.convert2AS3' });
+      ext.telemetry.capture({ command: 'f5-flipper.flip' });
 
-            logger.info('f5-flipper.convert2AS3, pulling up fast template');
+      const x = nsApp;
 
-            const docText = JSON.parse(doc.document.getText());
+      logger.info('f5-flipper.flip, entering the matrix');
 
-            this.panel.renderHTML(docText, doc.template);
+      this.panelFull.baseHTML(nsApp)
 
+      // this.panel.renderHTML(docText, doc.template);
 
-
-          }));
-
-
-
-          ext.nsTemplateProvider = new NsTemplateProvider(ctx);
-          const templateView = window.createTreeView('nsTemplatesView', {
-              treeDataProvider: ext.nsTemplateProvider,
-              showCollapseAll: true
-          });
-      
-          ctx.subscriptions.push(commands.registerCommand('f5-flipper.templateExploreRefresh', async (text) => {
-              // logger.info('Refreshing NS FAST Templates view');
-              ext.nsTemplateProvider.refresh();
-          }));
-      
-      
-          ctx.subscriptions.push(commands.registerCommand('f5-flipper.afton', async (text) => {
-              // logger.info('Refreshing NS FAST Templates view');
-              const converted = ext.nsCfgProvider.bulk();
-          }));
+    }));
 
 
-          
-    }
+
+
+    ctx.subscriptions.push(commands.registerCommand('f5-flipper.convert2AS3', async (doc) => {
+
+      ext.telemetry.capture({ command: 'f5-flipper.convert2AS3' });
+
+      logger.info('f5-flipper.convert2AS3, pulling up fast template');
+
+      const docText = JSON.parse(doc.document.getText());
+
+      this.panel.renderHTML(docText, doc.template);
+
+    }));
+
+
+    ext.nsTemplateProvider = new NsTemplateProvider(ctx);
+    const templateView = window.createTreeView('nsTemplatesView', {
+      treeDataProvider: ext.nsTemplateProvider,
+      showCollapseAll: true
+    });
+
+    ctx.subscriptions.push(commands.registerCommand('f5-flipper.templateExploreRefresh', async (text) => {
+      // logger.info('Refreshing NS FAST Templates view');
+      ext.nsTemplateProvider.refresh();
+    }));
+
+
+    ctx.subscriptions.push(commands.registerCommand('f5-flipper.afton', async (text) => {
+      // logger.info('Refreshing NS FAST Templates view');
+
+      // gather all the ns apps into an array
+      const apps = ext.nsCfgProvider.explosion.config.apps.filter(a => a.type === 'lb' || a.type === 'cs').slice(0, 4);
+
+      const autoF = new AutoFast(ctx);
+
+      const fastAppParams = []
+
+      autoF.on('fastHtmlParams/template', fap => {
+
+        fastAppParams.push(fap);
+        fastAppParams;
+      })
+
+      await autoF.fastApps(apps);
+      // const converted = ext.nsCfgProvider.bulk();
+
+      fastAppParams;
+
+    }));
+
+
+
+  }
 
 }
 

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <li><button onclick="toggleDiv('NS')">NS</button></li>
+        <li><button onclick="toggleDiv('JSON')">JSON</button></li>
+        <li><button onclick="toggleDiv('TMP')">Template</button></li>
+      </ul>
+    </nav>
+
+    <div id="NS">This is ns config lines</div>
+    <div id="JSON">This is ns json output</div>
+    <div id="TMP">This is fast template html</div>
+  </body>
+</html>
+
+<script>
+  function toggleDiv(b) {
+    console.log(b);
+    var x = document.getElementById(b);
+    if (x.style.display === "none") {
+      x.style.display = "block";
+    } else {
+      x.style.display = "none";
+    }
+  }
+</script>
