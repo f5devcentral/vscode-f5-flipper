@@ -16,11 +16,11 @@ import {
 
 import { ext } from './extensionVariables';
 import { logger } from './logger';
-import fast from '@f5devcentral/f5-fast-core';
+// import fast from '@f5devcentral/f5-fast-core';
 import path from 'path';
 import { AdcApp, NsFastTempParams } from './models';
 
-const fast = require('@f5devcentral/f5-fast-core');
+// const fast = require('@f5devcentral/f5-fast-core');
 
 type HttpResponse = '';
 
@@ -49,7 +49,7 @@ export class FastWebView {
         // this.customStyleFilePath = Uri.file(this.ctx.asAbsolutePath(path.join('styles', 'rest-client.css')));
 
         const localPath = ctx.asAbsolutePath('templates');
-        this.fastEngine = new fast.FsTemplateProvider(localPath)
+        // this.fastEngine = new fast.FsTemplateProvider(localPath);
         localPath;
     }
 
@@ -105,11 +105,11 @@ export class FastWebView {
         this.fastEngine.invalidateCache();
 
         const nsAppProtocol = app.protocol;
-        let template = ''
+        let template = '';
 
         if (nsAppProtocol) {
 
-            template = `as3/${nsAppProtocol}`
+            template = `as3/${nsAppProtocol}`;
         }
 
         // load the fast template
@@ -121,12 +121,12 @@ export class FastWebView {
                 const defaultParams = template.getCombinedParameters();
 
                 // merge with FAST template default params
-                const fastParams = Object.assign(defaultParams, {})
+                const fastParams = Object.assign(defaultParams, {});
 
                 logger.debug(`ns app ${app.name} FAST Template params: `, fastParams);
 
                 // generate the html preview
-                let html: string = fast.guiUtils.generateHtmlPreview(schema, fastParams)
+                // let html: string = fast.guiUtils.generateHtmlPreview(schema, fastParams);
 
                 return html;
             })
@@ -152,11 +152,11 @@ export class FastWebView {
             console.log(message);
 
             // get fast template
-            const template = this.selectedTemplate
+            const template = this.selectedTemplate;
 
             try {
                 const final = await this.renderAS3(message, template);
-                return final
+                return final;
             } catch (e) {
                 logger.error(e);
                 // window.showErrorMessage(e.message);
@@ -193,7 +193,7 @@ export class FastWebView {
 
         if (nsAppProtocol) {
 
-            template = `as3/${nsAppProtocol}`
+            template = `as3/${nsAppProtocol}`;
         }
 
         // merget document values with template values/defaults
@@ -201,7 +201,7 @@ export class FastWebView {
         // save template name so we can fetch it during render
         this.selectedTemplate = template;
 
-        logger.debug(`converting ns app ${app.name} with FAST Template ${template}`)
+        logger.debug(`converting ns app ${app.name} with FAST Template ${template}`);
 
         // invalidate the cache to load any template changes
         this.fastEngine.invalidateCache();
@@ -223,12 +223,12 @@ export class FastWebView {
                 // const temp = this.mungeNS2FAST(app);
 
                 // merge with FAST template default params
-                const fastParams = Object.assign(defaultParams, template)
+                const fastParams = Object.assign(defaultParams, template);
 
                 logger.debug(`ns app ${app.name} FAST Template params: `, fastParams);
 
                 // generate the html preview
-                let html: string = fast.guiUtils.generateHtmlPreview(schema, fastParams)
+                // let html: string = fast.guiUtils.generateHtmlPreview(schema, fastParams);
 
                 return html;
             })
@@ -285,7 +285,7 @@ export class FastWebView {
                 console.log(message);
 
                 // get fast template
-                const template = this.selectedTemplate
+                const template = this.selectedTemplate;
 
                 try {
                     const final = await this.renderAS3(message, template);

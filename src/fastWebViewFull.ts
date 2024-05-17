@@ -11,17 +11,18 @@ import {
     Position,
     workspace,
     TextDocument,
-    ExtensionContext
+    ExtensionContext,
+    Webview
 } from 'vscode';
+
+import { readFileSync } from 'fs';
 
 import { ext } from './extensionVariables';
 import { logger } from './logger';
-import fast from '@f5devcentral/f5-fast-core';
-import path from 'path';
 import { AdcApp, NsFastTempParams } from './models';
 import { mungeNS2FAST } from './ns2FastParams';
+// import { NsCfgApp } from './nsCfgViewProvider';
 
-const fHtml = require('./')
 
 const fast = require('@f5devcentral/f5-fast-core');
 
@@ -46,13 +47,13 @@ export class FastWebViewFull {
 
     public constructor(ctx: ExtensionContext) {
         this.ctx = ctx;
-        this.f5css = Uri.file(this.ctx.asAbsolutePath(path.join('styles', 'f5.css')));
-        this.baseFilePath = Uri.file(this.ctx.asAbsolutePath(path.join('styles', 'reset.css')));
-        this.vscodeStyleFilePath = Uri.file(this.ctx.asAbsolutePath(path.join('styles', 'vscode.css')));
-        this.customStyleFilePath = Uri.file(this.ctx.asAbsolutePath(path.join('styles', 'rest-client.css')));
+        this.f5css = Uri.joinPath(ctx.extensionUri, 'styles', 'f5.css');
+        this.baseFilePath = Uri.joinPath(ctx.extensionUri, 'styles', 'reset.css');
+        this.vscodeStyleFilePath = Uri.joinPath(ctx.extensionUri, 'styles', 'vscode.css');
+        this.customStyleFilePath = Uri.joinPath(ctx.extensionUri, 'styles', 'rest-client.css');
 
         const localPath = ctx.asAbsolutePath('templates');
-        this.fastEngine = new fast.FsTemplateProvider(localPath)
+        this.fastEngine = new fast.FsTemplateProvider(localPath);
         localPath;
     }
 
@@ -111,48 +112,9 @@ export class FastWebViewFull {
 
         // 1. 
 
-
-        const nsAppProtocol = app.protocol;
-
-        if (nsAppProtocol) {
-
-            template = `as3/${nsAppProtocol}`
-        }
-
-        logger.debug(`converting ns app ${app.name} with flip-top`)
-
-        // invalidate the cache to load any template changes
-        this.fastEngine.invalidateCache();
-
-        // const fe = this.fastEngine;
-
-        // load the fast template
-        let html = await this.fastEngine.fetch(template)
-            .then((template) => {
-                // get the schema for the template
-                const schema = template.getParametersSchema();
-                // get the default values for the template
-                const defaultParams = template.getCombinedParameters();
-
-                // // get ns app params from the document
-                // const nsAppParams = JSON.parse(doc.getText());
-
-                // mutate ns app params into a better format for FAST templates
-                const temp = mungeNS2FAST(app);
-
-                // merge with FAST template default params
-                const fastParams = Object.assign(defaultParams, temp)
-
-                logger.debug(`ns app ${app.name} FAST Template params: `, fastParams);
-
-                // generate the html preview
-                let html: string = fast.guiUtils.generateHtmlPreview(schema, fastParams)
-
-                return html;
-            })
-            .catch(e => {
-                logger.error(e);
-            });
+        const htmlFile = Uri.joinPath(this.ctx.extensionUri, 'flipWebviewFull', 'index.html');
+        // let html = readFileSync(htmlFile.path).toString();
+        // let html = this._getHtmlForWebview();
 
 
 
@@ -186,7 +148,7 @@ export class FastWebViewFull {
                 const index = this.panels.findIndex(v => v === panel);
                 if (index !== -1) {
                     this.panels.splice(index, 1);
-                    this.panelResponses.delete(panel);
+                    // this.panelResponses.delete(panel);
                 }
                 if (this.panels.length === 0) {
                     this._onDidCloseAllWebviewPanels.fire();
@@ -203,30 +165,10 @@ export class FastWebViewFull {
                 console.log(message);
 
                 // get fast template
-                const template = this.selectedTemplate
+                const template = this.selectedTemplate;
 
                 debugger;
 
-                // try {
-                //     const final = await this.renderAS3(message, template);
-                //     var vDoc: Uri = Uri.parse("untitled:" + 'nsApp.as3.json');
-                //     workspace.openTextDocument(vDoc)
-                //         .then((a: TextDocument) => {
-                //             window.showTextDocument(a, undefined, false).then(async e => {
-                //                 await e.edit(async edit => {
-                //                     const startPosition = new Position(0, 0);
-                //                     const endPosition = a.lineAt(a.lineCount - 1).range.end;
-                //                     edit.replace(new Range(startPosition, endPosition), final);
-                //                     await commands.executeCommand("cursorTop");
-                //                     // await commands.executeCommand("f5.injectSchemaRef");
-
-                //                 });
-                //             });
-                //         });
-                // } catch (e) {
-                //     logger.error(e);
-                //     // window.showErrorMessage(e.message);
-                // }
 
             });
 
@@ -236,37 +178,13 @@ export class FastWebViewFull {
             panel.title = title;
         }
 
+        let html = this._getHtmlForWebview(panel, app);
 
         // Content Security Policy
-        const nonce = new Date().getTime() + '' + new Date().getMilliseconds();
-        const csp = this.getCsp(nonce);
-
-        //     const head = `
-        // <head>
-        // <meta charset="UTF-8">
-        // <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.baseFilePath)}">
-        // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.vscodeStyleFilePath)}">
-        // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.customStyleFilePath)}">
-        // <title>template title</title>
-        // </head>`
-
-        // html = html.replace(/<head>\n[\S\s]+<\/head>\n/, head);
-        // const html2 = html.replace(/ <head>\n[\S\s]+?\n +<\//, '');
-
-        /**
-         * Appends the necessary stuff for submit button and getting template params
-         * move the following to it's own function
-         */
-
-        // f5 UI css for fast templates
-        // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.f5css)}">
-
-        // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.f5css)}">
+        // const nonce = new Date().getTime() + '' + new Date().getMilliseconds();
+        // const csp = this.getCsp(nonce);
 
         const htmlSubmitBtn = `
-<link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.vscodeStyleFilePath)}">
-<script>
 (function init() {
     const vscode = acquireVsCodeApi();
     document.vscode = vscode;
@@ -276,40 +194,98 @@ export class FastWebViewFull {
 <p></p>
         `;
 
-        html += htmlSubmitBtn;
+        // let = ''
+
+        // html += htmlSubmitBtn;
         panel.webview.html = html;
         panel.reveal(viewColumn, !preserveEditorFocus);
         this.activePanel = panel;
 
     }
 
-    // private getSettingsOverrideStyles(width: number): string {
-    //     return [
-    //         '<style>',
-    //         // (this.settings.fontFamily || this.settings.fontSize || this.settings.fontWeight ? [
-    //         //     'code {',
-    //         //     this.settings.fontFamily ? `font-family: ${this.settings.fontFamily};` : '',
-    //         //     this.settings.fontSize ? `font-size: ${this.settings.fontSize}px;` : '',
-    //         //     this.settings.fontWeight ? `font-weight: ${this.settings.fontWeight};` : '',
-    //         //     '}',
-    //         // ] : []).join('\n'),
-    //         'code .line {',
-    //         `padding-left: calc(${width}ch + 20px );`,
-    //         '}',
-    //         'code .line:before {',
-    //         `width: ${width}ch;`,
-    //         `margin-left: calc(-${width}ch + -30px );`,
-    //         '}',
-    //         '.line .icon {',
-    //         `left: calc(${width}ch + 3px)`,
-    //         '}',
-    //         '.line.collapsed .icon {',
-    //         `left: calc(${width}ch + 3px)`,
-    //         '}',
-    //         '</style>'].join('\n');
+    // private getCsp(nonce: string): string {
+    //     return `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' http: https: data: vscode-resource:; script-src 'nonce-${nonce}'; style-src 'self' 'unsafe-inline' http: https: data: vscode-resource:;">`;
     // }
 
-    private getCsp(nonce: string): string {
-        return `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' http: https: data: vscode-resource:; script-src 'nonce-${nonce}'; style-src 'self' 'unsafe-inline' http: https: data: vscode-resource:;">`;
-    }
+	private _getHtmlForWebview(webview: WebviewPanel, app: AdcApp) {
+		// Local path to main script run in the webview
+		const scriptPathOnDisk = Uri.joinPath(this.ctx.extensionUri, 'out', 'webview.js');
+
+		// And the uri we use to load this script in the webview
+		const scriptUri = webview.webview.asWebviewUri(scriptPathOnDisk);
+
+		// Local path to css styles
+		const styleResetPath = Uri.joinPath(this.ctx.extensionUri, 'flipWebviewFull', 'reset.css');
+		const stylesPathMainPath = Uri.joinPath(this.ctx.extensionUri, 'flipWebviewFull', 'vscode.css');
+
+		// Uri to load styles into webview
+		const stylesResetUri = webview.webview.asWebviewUri(styleResetPath);
+		const stylesMainUri = webview.webview.asWebviewUri(stylesPathMainPath);
+
+        const csp = webview.webview.cspSource
+
+		// Use a nonce to only allow specific scripts to be run
+		const nonce = getNonce();
+
+		return `<!DOCTYPE html>
+			<html lang="en">
+			<head>
+				<meta charset="UTF-8">
+
+				<!--
+					Use a content security policy to only allow loading images from https or from our extension directory,
+					and only allow scripts that have a specific nonce.
+				-->
+				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.webview.cspSource}; img-src ${webview.webview.cspSource} https:; script-src 'nonce-${nonce}';">
+
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+				<title>Cat Coding</title>
+			</head>
+			<body>
+            <section>
+
+ 
+            <!-- Text field with active tab -->
+            <p>NS Config Flipper</p>
+            <vscode-panels activeid="tab-2" aria-label="With Active Tab">
+              
+              <vscode-panel-tab id="tab-1">NS.conf</vscode-panel-tab>
+              <vscode-panel-tab id="tab-2">NS.json</vscode-panel-tab>
+              <vscode-panel-tab id="tab-3">Template Params</vscode-panel-tab>
+              <vscode-panel-tab id="tab-4">Template</vscode-panel-tab>
+              <vscode-panel-tab id="tab-5">Output</vscode-panel-tab>
+      
+              <vscode-panel-view id="view-1">
+                NetScaler app config lines
+              </vscode-panel-view>
+              <vscode-panel-view id="view-2">
+                NetScaler app config as json
+              </vscode-panel-view>
+              <vscode-panel-view id="view-3">
+                Template Parameters
+              </vscode-panel-view>
+              <vscode-panel-view id="view-4">
+                Template
+              </vscode-panel-view>
+              <vscode-panel-view id="view-5">
+                Template Output
+              </vscode-panel-view>
+            </vscode-panels>
+      
+      
+          <!-- Component registration code -->
+          <script type="module" nonce="${nonce}" src="${scriptUri}"></script>
+			</body>
+			</html>`;
+	}
+}
+
+function getNonce() {
+	let text = '';
+	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	for (let i = 0; i < 32; i++) {
+		text += possible.charAt(Math.floor(Math.random() * possible.length));
+	}
+	return text;
 }

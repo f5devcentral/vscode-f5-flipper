@@ -18,27 +18,27 @@ import { AdcRegExTree } from "./models";
  * @returns options as an object
  */
 export function parseNsOptions(str: string, rx: AdcRegExTree): { [k: string]: string } {
-    const obj = {}
+    const obj = {};
 
     // grep out all the options with quotes/spaces
     str.match(rx.cfgOptionsQuotes)?.forEach(el => {
         // split the name off by the first space
-        const [k, v] = el.split(/ (.*)/)
+        const [k, v] = el.split(/ (.*)/);
         obj[k] = v;
-        str = str.replace(el, '')
-    })
+        str = str.replace(el, '');
+    });
 
     // capture everything else without spaces
     str.match(rx.cfgOptions)?.forEach(el => {
-        const [k, v] = el.split(' ')
+        const [k, v] = el.split(' ');
         if (k === '-devno') {
             // no nothing, devno is not needed
         } else {
             // add to object
             obj[k] = v;
-            str = str.replace(el, '')
+            str = str.replace(el, '');
         }
-    })
+    });
 
     // // turn certain object values to arrays
     // if () {
@@ -61,13 +61,13 @@ export function sortNsLines(cfg: string[], rx: AdcRegExTree) {
     cfg.sort((a, b) => {
 
         // the order of these verb will set the order of the ns config lines
-        const verbs = ['add','set','bind','link','enable','disable']
+        const verbs = ['add','set','bind','link','enable','disable'];
         
-        const aVerb = a.match(rx.verbs)?.pop()?.trim()!
-        const bVerb = b.match(rx.verbs)?.pop()?.trim()!
-        const aIndex = verbs.indexOf(aVerb)
-        const bIndex = verbs.indexOf(bVerb)
+        const aVerb = a.match(rx.verbs)?.pop()?.trim()!;
+        const bVerb = b.match(rx.verbs)?.pop()?.trim()!;
+        const aIndex = verbs.indexOf(aVerb);
+        const bIndex = verbs.indexOf(bVerb);
 
-        return aIndex - bIndex
-    })
+        return aIndex - bIndex;
+    });
 }

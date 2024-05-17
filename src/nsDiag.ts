@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 'use strict';
 
 import path from "path";

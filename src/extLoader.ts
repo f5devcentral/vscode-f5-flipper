@@ -1,4 +1,4 @@
-"use strict";
+// "use strict";
 
 export type PerfStats = {
     loadStartTime: number;
@@ -21,7 +21,7 @@ import { activateInternal, deactivateInternal } from './extension';
 import { ext } from './extensionVariables';
 import { logger } from './logger';
 
-async function activate(ctx: ExtensionContext) {
+export async function activate(ctx: ExtensionContext) {
     
     // we need to await this to complete so we can gather stats and log as needed
     await activateInternal(ctx);
@@ -41,15 +41,12 @@ async function activate(ctx: ExtensionContext) {
     return;
 }
 
-async function deactivate(ctx: ExtensionContext) {
+export async function deactivate(ctx: ExtensionContext) {
     await deactivateInternal(ctx);
     const name = ctx.extension.id;
     console.log(`de-activation extension ${name} complete in ${Math.floor((Date.now() - perfStats.loadStartTime) / 1000 )}ms`);
     return;
 }
-
-exports.activate = activate;
-exports.deactivate = deactivate;
 
 perfStats.loadEndTime = Date.now();
 perfStats.load = (perfStats.loadEndTime - perfStats.loadStartTime);

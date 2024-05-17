@@ -11,7 +11,7 @@
 import path from "path";
 import * as fs from 'fs';
 import zlib from 'zlib';
-import tar from 'tar-stream'
+import tar from 'tar-stream';
 import { EventEmitter } from "events";
 // import { multilineRegExp } from "./regex";
 import { ConfigFile } from "./models";
@@ -69,9 +69,9 @@ export class UnPacker extends EventEmitter {
                 // try to read file contents
                 const content = fs.readFileSync(path.join(filePath.dir, filePath.base), 'utf-8');
 
-                logger.debug(`got .conf file [${input}], size [${size}]`)
+                logger.debug(`got .conf file [${input}], size [${size}]`);
 
-                this.emit('conf', { fileName: filePath.base, size, content })
+                this.emit('conf', { fileName: filePath.base, size, content });
 
                 return { size };
                 // return
@@ -85,21 +85,21 @@ export class UnPacker extends EventEmitter {
         } else if (filePath.ext === '.tgz') {
 
             const size = fs.statSync(path.join(filePath.dir, filePath.base)).size;
-            logger.debug(`detected file: [${input}], size: [${size}]`)
+            logger.debug(`detected file: [${input}], size: [${size}]`);
 
             const extract = tar.extract();
-            const files: ConfigFile[] = []
+            const files: ConfigFile[] = [];
 
             return new Promise((resolve, reject) => {
                 extract.on('entry', (header, stream, next) => {
                     let captureFile = false;
-                    const contentBuffer: any[] = []
+                    const contentBuffer: any[] = [];
                     // detect the files we want and set capture flag
                     if (fileFilter(header.name) && header.type === 'file') {
                         captureFile = true;
                     } else {
                         // not the file we want, so call the next entry
-                        next()
+                        next();
                     }
                     stream.on('data', (chunk) => {
                         // if this is a file we want, buffer it's content
@@ -116,7 +116,7 @@ export class UnPacker extends EventEmitter {
                                     fileName: header.name,
                                     size: header.size,
                                     content: contentBuffer.join('')
-                                })
+                                });
 
                             }
                         }
@@ -139,10 +139,10 @@ export class UnPacker extends EventEmitter {
                 fs.createReadStream(input)
                     .pipe(zlib.createGunzip())
                     .pipe(extract);
-            })
+            });
 
         } else {
-            const msg = `file type of "${filePath.ext}", not supported, try (.conf/.tgz)`
+            const msg = `file type of "${filePath.ext}", not supported, try (.conf/.tgz)`;
             logger.error(msg);
             throw new Error(`not able to read file => ${msg}`);
         }
@@ -213,7 +213,7 @@ export function fileFilter(name: string): boolean {
         // fileStoreFilesUcs,                  // certs/keys (ucs)
         // fileStoreFilesQkview,               // certs/keys (qkviews)
         /^\w+.xml$/                         // qkview stats files
-    ]
+    ];
     
     return fileRegexs.some( rx => rx.test(name));
 

@@ -6,7 +6,7 @@ import { AdcConfObj, ObjStats } from "./models";
 
 export async function countMainObjects(cfgObj: AdcConfObj): Promise<ObjStats> {
 
-    const stat: ObjStats = {}
+    const stat: ObjStats = {};
 
     // note:  we assume that every 'add' is unique, since all the binds/sets attach to what was "add"ed
 
@@ -23,7 +23,7 @@ export async function countMainObjects(cfgObj: AdcConfObj): Promise<ObjStats> {
     'add service',
     'add serviceGroup',
     'add ssl certKey'
-    ]
+    ];
 
     // todo: capture the above list from the rx tree and filter on just the adds
     //  this will make it dynamic and update as parsing gets extended
@@ -32,11 +32,11 @@ export async function countMainObjects(cfgObj: AdcConfObj): Promise<ObjStats> {
     //  https://dev.to/tipsy_dev/advanced-typescript-reinventing-lodash-get-4fhe
 
     items.forEach(x => {
-        const path = x.split(' ')
-        const b = lodashGet(cfgObj, path.join('.'))
+        const path = x.split(' ');
+        const b = lodashGet(cfgObj, path.join('.'));
         if(b) {
-            const n = Object.keys(b).length
-            path.shift()    // remove the first element "add"
+            const n = Object.keys(b).length;
+            path.shift();    // remove the first element "add"
             if (path.length === 1) {
 
                 // if path is a single work, assign it
@@ -50,7 +50,7 @@ export async function countMainObjects(cfgObj: AdcConfObj): Promise<ObjStats> {
 
             }
         }
-    })
+    });
 
     // todo: work on cleaning up the capitalization and key building
     // probably make a dedicated function

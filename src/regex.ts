@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 
 
 import { AdcRegExTree } from "./models";
@@ -93,7 +94,7 @@ export class RegExTree {
             'bind ssl vserver': /(?<name>("[\S ]+"|[\S]+)) (?<opts>[\S ]+)/,
             'bind gslb vserver': /(?<name>("[\S ]+"|[\S]+)) (?<opts>[\S ]+)/,
         }
-    }
+    };
 
     constructor() {
         // commend to keep TS error away...
@@ -175,7 +176,7 @@ export type TmosRegExTree = {
         fbPersist: RegExp,
         destination: RegExp
     }
-}
+};
 
 /**
  * returns full number without decimals so it can be compared

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { Diagnostic } from "vscode";
 
 export type AdcApp = {
@@ -56,12 +57,12 @@ export type NsFastTempParams = {
         port?: { port: string };
         name?: { name: string };
     }[];
-}
+};
 
 
 export type CsPolicyActions = {
     '-targetLBVserver'?: string;
-}
+};
 
 export type Appflow = {
     name: string;
@@ -169,7 +170,7 @@ export type Explosion = {
     stats: Stats,
     fileStore?: ConfigFile[]
     // logs?: string[]
-}
+};
 
 
 /**
@@ -189,7 +190,7 @@ export type ObjStats = {
     service?: number,
     serviceGroup?: number
     sslCertKey?: number
-}
+};
 
 /**
  * stats object type for object counts
@@ -206,7 +207,7 @@ export type Stats = {
     lineCount?: number,
     objects?: ObjStats
     sourceSize?: number;
-}
+};
 
 
 export type AdcRegExTree = {
@@ -251,7 +252,7 @@ export type AdcRegExTree = {
         'bind ssl vserver': RegExp;
         'bind gslb vserver': RegExp;
     }
-}
+};
 
 
 export type AdcConfObj = {
@@ -350,4 +351,4 @@ export type AdcConfObj = {
     enable?: {
         ns?: unknown;
     };
-}
+};

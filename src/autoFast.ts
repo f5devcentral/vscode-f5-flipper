@@ -7,11 +7,11 @@ import {
 import { EventEmitter } from 'events';
 
 import { AdcApp } from './models';
-import { As3App } from 'f5-conx-core';
+// import { As3App } from 'f5-conx-core';
 import { logger } from './logger';
 import { mungeNS2FAST } from './ns2FastParams';
 
-const fast = require('@f5devcentral/f5-fast-core');
+// const fast = require('@f5devcentral/f5-fast-core');
 
 
 export default class AutoFast extends EventEmitter {
@@ -25,7 +25,7 @@ export default class AutoFast extends EventEmitter {
         this.ctx = ctx;
         const localPath = ctx.asAbsolutePath('templates');
 
-        this.fastEngine = new fast.FsTemplateProvider(localPath);
+        // this.fastEngine = new fast.FsTemplateProvider(localPath);
         // invalidate the cache to load any template changes
         this.fastEngine.invalidateCache();
 
@@ -52,12 +52,12 @@ export default class AutoFast extends EventEmitter {
                     const defaultParams = template.getCombinedParameters();
 
                     // merge with FAST template default params
-                    const fastParams = Object.assign(defaultParams, fastAppP)
+                    const fastParams = Object.assign(defaultParams, fastAppP);
 
                     logger.debug(`ns app ${app.name} FAST Template params: `, fastParams);
 
                     // generate the html preview
-                    let html: string = fast.guiUtils.generateHtmlPreview(schema, fastParams)
+                    // let html: string = fast.guiUtils.generateHtmlPreview(schema, fastParams);
 
                     return html;
                 })
@@ -82,11 +82,11 @@ export default class AutoFast extends EventEmitter {
 
             panel.webview.onDidReceiveMessage(message => {
                 console.log(message);
-                this.emit('fastHtmlParams/template', {fastParams: message, template})
+                this.emit('fastHtmlParams/template', {fastParams: message, template});
 
             });
 
-            panel.viewType
+            panel.viewType;
 
             const autoRenderHtml = `
                     <script>

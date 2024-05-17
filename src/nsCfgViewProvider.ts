@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 /*
  * Copyright 2020. F5 Networks, Inc. See End User License Agreement ("EULA") for
  * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
@@ -30,14 +31,10 @@ import {
     ExtensionContext,
 } from 'vscode';
 import jsYaml from 'js-yaml';
-import { lstatSync, readdirSync } from 'fs';
 
 import { ext } from './extensionVariables';
 
-// import { ConfigFile, Explosion, TmosApp, xmlStats } from 'f5-corkscrew';
 import { logger } from './logger';
-// import BigipConfig from 'f5-corkscrew/dist/ltm';
-import path from 'path';
 import { AdcConfObj, Explosion, AdcApp } from './models';
 import ADC from './CitrixADC';
 import { mungeNS2FAST } from './ns2FastParams';
@@ -53,11 +50,11 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
     private _onDidChangeTreeData: EventEmitter<NsCfgApp | undefined> = new EventEmitter<NsCfgApp | undefined>();
     readonly onDidChangeTreeData: Event<NsCfgApp | undefined> = this._onDidChangeTreeData.event;
 
-    redDot = ext.context.asAbsolutePath(path.join("images", "redDot.svg"));
-    orangeDot = ext.context.asAbsolutePath(path.join("images", "orangeDot.svg"));
-    yellowDot = ext.context.asAbsolutePath(path.join("images", "yellowDot.svg"));
-    greenDot = ext.context.asAbsolutePath(path.join("images", "greenDot.svg"));
-    greenCheck = ext.context.asAbsolutePath(path.join("images", "greenCheck.svg"));
+    redDot = Uri.joinPath(ext.context.extensionUri, "images", "redDot.svg");
+    orangeDot = Uri.joinPath(ext.context.extensionUri, "images", "orangeDot.svg");
+    yellowDot = Uri.joinPath(ext.context.extensionUri, "images", "yellowDot.svg");
+    greenDot = Uri.joinPath(ext.context.extensionUri, "images", "greenDot.svg");
+    greenCheck = Uri.joinPath(ext.context.extensionUri, "images", "greenCheck.svg");
 
     /**
      * switch to globally enable/disable diagnostics
@@ -150,7 +147,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                                 stats: exp.stats
                             });
                             this.refresh();
-                        })
+                        });
                     // .catch(err => logger.error('makeExplosion-error', err));
 
                 })
@@ -165,7 +162,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
     async refresh(): Promise<void> {
 
-        logger.info('refreshing ns diagnostic rules and tree view')
+        logger.info('refreshing ns diagnostic rules and tree view');
 
         // update diagnostics rules
         ext.nsDiag.loadRules();
@@ -182,9 +179,9 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                 } else {
 
                     //remove all the diagnostics
-                    delete app.diagnostics
+                    delete app.diagnostics;
                 }
-            })
+            });
         }
 
         // if we have a current config in view, refresh it also
@@ -242,17 +239,17 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             if (element.label === 'Apps') {
                 this.explosion.config.apps.filter(x => x.type === 'cs' || x.type === 'lb')
                     .forEach(app => {
-                        const descA = [`(${app.lines.length})`, app.type]
+                        const descA = [`(${app.lines.length})`, app.type];
                         descA.push(`${app.ipAddress}:${app.port}`);
                         const desc = descA.join(' - ');
                         const clonedApp = JSON.parse(JSON.stringify(app));
                         delete clonedApp.lines;
                         delete clonedApp.diagnostics;
-                        const appYaml = jsYaml.dump(clonedApp, { indent: 4 })
+                        const appYaml = jsYaml.dump(clonedApp, { indent: 4 });
                         const toolTip = new MarkdownString().appendCodeblock(appYaml, 'yaml');
 
                         //if diag enabled, figure out icon
-                        let icon = '';
+                        let icon: Uri = this.greenDot;
                         if (ext.nsDiag.enabled) {
                             // todo: add diag stats to tooltip
                             const stats = ext.nsDiag.getDiagStats(app.diagnostics as Diagnostic[]);
@@ -268,12 +265,12 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                             desc,
                             'nsApp', icon,
                             TreeItemCollapsibleState.None, {
-                            command: 'f5-flipper.render',
+                            command: 'f5-flipper.flip',
                             title: '',
                             arguments: [app]
                         }
                         ));
-                    })
+                    });
 
                 // // prep for a future flag
                 // if (true) {
@@ -298,12 +295,12 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                     const clonedApp = JSON.parse(JSON.stringify(app));
                     delete clonedApp.lines;
                     delete clonedApp.diagnostics;
-                    const appYaml = jsYaml.dump(clonedApp, { indent: 4 })
+                    const appYaml = jsYaml.dump(clonedApp, { indent: 4 });
                     const toolTip = new MarkdownString().appendCodeblock(appYaml, 'yaml');
 
 
                     //if diag enabled, figure out icon
-                    let icon = '';
+                    let icon: Uri = this.greenDot;
                     if (ext.nsDiag.enabled) {
                         // todo: add diag stats to tooltip
                         const stats = ext.nsDiag.getDiagStats(app.diagnostics as Diagnostic[]);
@@ -324,7 +321,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                         arguments: [app]
                     }
                     ));
-                })
+                });
 
                 sortTreeItems(treeItems);
 
@@ -405,7 +402,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                         arguments: [source.content]
                     }
                     ));
-                })
+                });
             }
 
         } else {
@@ -485,7 +482,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
                     }
 
-                })
+                });
             }
 
             const diagStatsYml = jsYaml.dump(this.diagStats, { indent: 4 });
@@ -551,7 +548,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         const apps = this.explosion.config.apps;
 
         // create an array to put the converted apps
-        const as3Apps = []
+        const as3Apps = [];
 
         // loop through the array and convert each app
         for await (const app of apps) {
@@ -559,13 +556,13 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             // // mutate the ns json app params to fast template params
             // const fastTempParams = await ext.fast.panel.mungeNS2FAST(app)
 
-            const fastTempParams = await ext.fast.panel.autoRenderHTML(app)
+            const fastTempParams = await ext.fast.panel.autoRenderHTML(app);
 
             await ext.fast.panel.renderAS3(fastTempParams)
                 .then(a => as3Apps.push(a))
                 .catch(e => {
-                    as3Apps.push(e)
-                })
+                    as3Apps.push(e);
+                });
         }
 
         await commands.executeCommand("f5-flipper.cfgExplore-show", as3Apps);
@@ -588,18 +585,18 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         } else if (output === 'full') {
 
             // add FAST template params
-            const fastTempParams = mungeNS2FAST(items)
+            const fastTempParams = mungeNS2FAST(items);
 
             items.fastTempParams = fastTempParams;
 
             docContent = JSON.stringify(items, undefined, 4);
-            docName = 'app.ns.json'
+            docName = 'app.ns.json';
 
         } else if (items.lines && items.name && items.type) {
             // rough test for the type we need
 
             // deep copy the object
-            const brkdwn = JSON.parse(JSON.stringify(items))
+            const brkdwn = JSON.parse(JSON.stringify(items));
             delete brkdwn.lines;    // delete the lines
             const lines = items.lines;  // capture the lines from the original object
 
@@ -608,7 +605,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                 ...lines,
                 // '\n######################################################\n',
                 // jsYaml.dump(brkdwn, { indent: 4, lineWidth: -1 })
-            ].join('\n')
+            ].join('\n');
 
             // test if this is the full app definition object
             // then break down to display the lines of ns config in an ns.conf with language
@@ -616,13 +613,13 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
         } else if (output === 'lines') {
 
-            docContent = items
+            docContent = items;
 
         } else if (Object(items)) {
-            docName = 'app.ns.json'
+            docName = 'app.ns.json';
 
             // add FAST template params
-            const fastTempParams = mungeNS2FAST(items)
+            const fastTempParams = mungeNS2FAST(items);
 
             items.fastTempParams = fastTempParams;
 
@@ -676,7 +673,7 @@ export class NsCfgApp extends TreeItem {
         public tooltip: string | MarkdownString,
         public description: string,
         public contextValue: string,
-        public iconPath: string | ThemeIcon,
+        public iconPath: string | ThemeIcon | Uri,
         public readonly collapsibleState: TreeItemCollapsibleState,
         public readonly command?: Command
     ) {

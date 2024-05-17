@@ -69,12 +69,12 @@ export class NsTemplateProvider implements TreeDataProvider<NsCfgApp> {
 
     constructor(ctx: ExtensionContext) {
         this.ctx = ctx;
-        this.baseTemplatesFolder = path.join(this.ctx.extensionPath, 'templates')
+        this.baseTemplatesFolder = path.join(this.ctx.extensionPath, 'templates');
     }
 
     async refresh(): Promise<void> {
 
-        logger.info('refreshing FAST templates tree view')
+        logger.info('refreshing FAST templates tree view');
 
 
 
@@ -130,7 +130,7 @@ export class NsTemplateProvider implements TreeDataProvider<NsCfgApp> {
                         // treeItems.push(new NsCfgApp(file.name, ``, ``, 'nsFolder', '', TreeItemCollapsibleState.Collapsed));
                     }
 
-                })
+                });
             }
 
         } else {
@@ -149,7 +149,7 @@ export class NsTemplateProvider implements TreeDataProvider<NsCfgApp> {
 
                 if (isFile) {
 
-                    console.log('should there be files here?')
+                    console.log('should there be files here?');
                     // create template object
                     // const filePath = path.join(this.ctx.extensionPath, 'templates', 'ns', file.name);
                     // treeItems.push(new NsCfgApp(file.name, ``, ``, 'nsFile', '', TreeItemCollapsibleState.None, {
@@ -159,11 +159,11 @@ export class NsTemplateProvider implements TreeDataProvider<NsCfgApp> {
                     // }));
                 } else {
                     // get number of templates in folder
-                    const filesCount = readdirSync(path.join(this.ctx.extensionPath, 'templates', file.name))
+                    const filesCount = readdirSync(path.join(this.ctx.extensionPath, 'templates', file.name));
                     // create folder
                     treeItems.push(new NsCfgApp(file.name, ``, filesCount.length.toString(), 'templateFolder', '', TreeItemCollapsibleState.Expanded));
                 }
-            })
+            });
         }
 
         return Promise.resolve(treeItems);
@@ -188,13 +188,13 @@ export class NsTemplateProvider implements TreeDataProvider<NsCfgApp> {
         } else if (output === 'full') {
 
             docContent = JSON.stringify(items, undefined, 4);
-            docName = 'app.ns.json'
+            docName = 'app.ns.json';
 
         } else if (items.lines && items.name && items.type) {
             // rough test for the type we need
 
             // deep copy the object
-            const brkdwn = JSON.parse(JSON.stringify(items))
+            const brkdwn = JSON.parse(JSON.stringify(items));
             delete brkdwn.lines;    // delete the lines
             const lines = items.lines;  // capture the lines from the original object
 
@@ -203,7 +203,7 @@ export class NsTemplateProvider implements TreeDataProvider<NsCfgApp> {
                 ...lines,
                 // '\n######################################################\n',
                 // jsYaml.dump(brkdwn, { indent: 4, lineWidth: -1 })
-            ].join('\n')
+            ].join('\n');
 
             // test if this is the full app definition object
             // then break down to display the lines of ns config in an ns.conf with language
@@ -211,10 +211,10 @@ export class NsTemplateProvider implements TreeDataProvider<NsCfgApp> {
 
         } else if (output === 'lines') {
 
-            docContent = items
+            docContent = items;
 
         } else if (Object(items)) {
-            docName = 'app.ns.json'
+            docName = 'app.ns.json';
             // if array -> single selection, just join internal array normally -> display contents
             docContent = JSON.stringify(items, undefined, 4);
         }

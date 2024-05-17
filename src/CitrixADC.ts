@@ -10,7 +10,7 @@ import { digLbVserver } from './digLbVserver';
 import { digGslbVservers } from './digGslbVserver';
 import { digCStoLBreferences } from './digCStoLbRefs';
 import { logger } from './logger';
-import { AdcApp, AdcConfObj, AdcRegExTree, ConfigFile, Explosion, Stats } from './models'
+import { AdcApp, AdcConfObj, AdcRegExTree, ConfigFile, Explosion, Stats } from './models';
 import { countMainObjects } from './objectCounter';
 import { parseAdcConfArrays } from './parseAdcArrys';
 import { RegExTree } from './regex';
@@ -88,8 +88,8 @@ export default class ADC extends EventEmitter {
 
         unPacker.on('conf', conf => {
             // parse .conf files, capture promises
-            parseConfPromises.push(this.parseConf(conf))
-        })
+            parseConfPromises.push(this.parseConf(conf));
+        });
 
         await unPacker.stream(file)
             .then(async ({ files, size }) => {
@@ -97,15 +97,15 @@ export default class ADC extends EventEmitter {
                 this.stats.sourceSize = size;
 
                 // wait for all the parse config promises to finish
-                await Promise.all(parseConfPromises)
+                await Promise.all(parseConfPromises);
 
-            })
+            });
 
         // wait for all the stats files processing promises to finish
-        await Promise.all(parseStatPromises)
+        await Promise.all(parseStatPromises);
 
         // assign souceAdcVersion to stats object also
-        this.stats.sourceAdcVersion = this.adcVersion
+        this.stats.sourceAdcVersion = this.adcVersion;
 
         // end processing time, convert microseconds to miliseconds
         this.stats.parseTime = Number(process.hrtime.bigint() - startTime) / 1000000;
@@ -120,13 +120,13 @@ export default class ADC extends EventEmitter {
     async parseConf(conf: ConfigFile): Promise<void> {
 
         // emit event about the config file we are about to parse
-        this.emit('parseFile', conf.fileName)
+        this.emit('parseFile', conf.fileName);
 
         // standardize line endings -> not the best way, but it works
-        conf.content = conf.content.replace(/\r\n/g, '\n')
+        conf.content = conf.content.replace(/\r\n/g, '\n');
 
         // split the config into lines
-        const config = conf.content.split('\n')
+        const config = conf.content.split('\n');
 
         // count lines of config, add to stats
         // get object counts (lines)
@@ -134,12 +134,12 @@ export default class ADC extends EventEmitter {
         this.stats.objectCount = config.length;
 
         // push the raw config files to storage array
-        this.configFiles.push(conf)
+        this.configFiles.push(conf);
 
         // build rx tree based on ns version
-        await this.setAdcVersion(conf)
+        await this.setAdcVersion(conf);
 
-        await parseAdcConfArrays(config, this.configObjectArry, this.rx!)
+        await parseAdcConfArrays(config, this.configObjectArry, this.rx!);
 
         // get hostname from configObjectArry, assign to parent class for easy access
         if (this.configObjectArry.set?.ns?.hostName) {
@@ -171,7 +171,7 @@ export default class ADC extends EventEmitter {
         [this.adcVersion, this.adcBuild] = this.getAdcVersion(x.content, rex.adcVersionBaseReg);
 
         // assign regex tree for particular version
-        this.rx = rex.get(this.adcVersion)
+        this.rx = rex.get(this.adcVersion);
     }
 
 
@@ -201,7 +201,7 @@ export default class ADC extends EventEmitter {
             },
             stats: this.stats,                      // add stats object
             // logs: await this.logs()                 // get all the processing logs
-        }
+        };
 
         if (apps.length > 0) {
             // add virtual servers (apps), if found
@@ -232,39 +232,39 @@ export default class ADC extends EventEmitter {
         await digCsVservers(this.configObjectArry, this.rx)
             .then(csApps => {
                 // add the cs apps to the main app array
-                apps.push(...csApps as AdcApp[])
+                apps.push(...csApps as AdcApp[]);
             })
             .catch(err => {
-                logger.error(err)
+                logger.error(err);
             });
 
         // dig each 'add lb vserver', but check for existing?
         await digLbVserver(this.configObjectArry, this.rx)
             .then(lbApps => {
                 // add the lb apps to the main app array
-                apps.push(...lbApps as AdcApp[])
+                apps.push(...lbApps as AdcApp[]);
             })
             .catch(err => {
-                logger.error(err)
+                logger.error(err);
             });
 
 
         await digGslbVservers(this.configObjectArry, this.rx)
             .then(gslbApps => {
-                apps.push(...gslbApps)
+                apps.push(...gslbApps);
             })
             .catch(err => {
-                logger.error(err)
+                logger.error(err);
             });
 
         // now that all apps have been abstracted, go through and find cs pointing to lb's
-        digCStoLBreferences(apps)
+        digCStoLBreferences(apps);
 
         // loop through each app and remove any duplicate NS config lines
         for await (const app of apps) {
-            app.lines = app.lines.filter((value, index, array) => array.indexOf(value) === index)
+            app.lines = app.lines.filter((value, index, array) => array.indexOf(value) === index);
             // resort the app object properties for better human reading
-            sortAdcApp(app)
+            sortAdcApp(app);
         }
 
 
@@ -274,9 +274,9 @@ export default class ADC extends EventEmitter {
         // log a warning if we didn't abstract any apps
         if (apps.length === 0) {
             const msg = 'no "add cs vserver"/"add lb vserver"/"add gslb vserver" objects found - excluding apps information';
-            logger.error(msg)
+            logger.error(msg);
             // do we want to just log or toss on error if we have no apps?
-            throw new Error(msg)
+            throw new Error(msg);
         }
 
         // return the app array
@@ -294,15 +294,15 @@ export default class ADC extends EventEmitter {
         const version = config.match(regex);
         if (version) {
             //found adc version, grab build (split off first line, then split build by spaces)
-            const build = config.split('\n')[0].split(' ')[2]
+            const build = config.split('\n')[0].split(' ')[2];
 
-            logger.info(`Recieved .conf file of version: ${this.adcVersion}`)
+            logger.info(`Recieved .conf file of version: ${this.adcVersion}`);
 
             // return details
             return [version[1], build];
         } else {
-            const msg = 'citrix adc/ns version not detected, defaulting to v13.0'
-            logger.error(msg)
+            const msg = 'citrix adc/ns version not detected, defaulting to v13.0';
+            logger.error(msg);
             return ['13.0', '000'];
             // throw new Error(msg)
         }
@@ -332,7 +332,7 @@ export function sortAdcApp(app: AdcApp) {
         appflows: app.appflows || undefined,
         lines: app.lines,
         apps: app.apps
-    }
+    };
 
     // if(app.csPolicyActions) {
 

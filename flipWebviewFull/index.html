@@ -1,0 +1,41 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>VS Code Panels</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <section>
+
+      <!-- Text field with active tab -->
+      <p>NS Config Flipper</p>
+      <vscode-panels activeid="tab-2" aria-label="With Active Tab">
+        
+        <vscode-panel-tab id="tab-1">NS.conf</vscode-panel-tab>
+        <vscode-panel-tab id="tab-2">NS.json</vscode-panel-tab>
+        <vscode-panel-tab id="tab-3">Template Params</vscode-panel-tab>
+        <vscode-panel-tab id="tab-4">Template</vscode-panel-tab>
+        <vscode-panel-tab id="tab-5">Output</vscode-panel-tab>
+
+        <vscode-panel-view id="view-1">
+          NetScaler app config lines
+        </vscode-panel-view>
+        <vscode-panel-view id="view-2">
+          NetScaler app config as json
+        </vscode-panel-view>
+        <vscode-panel-view id="view-3">
+          Template Parameters
+        </vscode-panel-view>
+        <vscode-panel-view id="view-4">
+          Template
+        </vscode-panel-view>
+        <vscode-panel-view id="view-5">
+          Template Output
+        </vscode-panel-view>
+      </vscode-panels>
+
+
+    <!-- Component registration code -->
+    <script type="module" src="./webview.js"></script>
+  </body>
+</html>
