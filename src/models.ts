@@ -50,6 +50,9 @@ export type NsFastTempParams = {
     redirectURL?: { [key: string]: string };
     backupVServer?: { [key: string]: string };
     tcpProfileName?: { [key: string]: string };
+    monitors?: {
+        name: string;
+    }[];
     pool_members?: {
         hostname?: { hostname: string };
         address?: { address: string };
@@ -103,7 +106,8 @@ export type Service = {
 
 export type ServiceGroup = {
     name: string;
-    servers: Service[]
+    servers: Service[];
+    monitors: any[];
 };
 
 export type Type = 'cs' | 'lb' | 'gslb' | string;

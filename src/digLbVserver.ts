@@ -35,7 +35,7 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
     // if there are no add lb vservers, then return the empty array
     if (!coa.add?.lb?.vserver) return apps;
 
-    await Promise.all(coa.add?.lb?.vserver?.map(async vServ => {
+    for await (const vServ of coa.add?.lb?.vserver) {
         const parent = 'add lb vserver';
         const originalString = 'add lb vserver ' + vServ;
         const rxMatch = vServ.match(rx.parents[parent]);
@@ -56,7 +56,19 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
             lines: [originalString]
         }
 
+        // app.name = app.name.replace(/"/g, '')
+
+        if (app.name === '"1 APPLE_443_HTTPS"') {
+
+            // debugger;
+            const x = RegExp(/\w+|"[\w\s]*"/);
+            const y = x.test(app.name)
+            const v = app.name.split(/\w+|"[\w\s]*"/gm)
+            const z = y;
+        }
+
         // start with 'bind lb vserver'
+        // todo:  update this filter to accomodate names with spaces, see above;
         const bindLbVservers = coa.bind?.lb?.vserver?.filter(el => el.startsWith(app.name));
         for await (const x of bindLbVservers) {
             const parent = 'bind lb vserver';
@@ -75,11 +87,10 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
             if (rxMatch.groups?.service) {
 
                 const serviceName = rxMatch.groups?.service;
-                // app.bindings.service.push(rxMatch.groups.service)
 
                 // dig service details -> do we have a service with this name?
                 // there should only be one "add service" with this name since we are looking in this specific "bind lb vserver"
-                const serviceD = coa.add?.service?.filter(s => s.startsWith(serviceName))[0]
+                const serviceD = coa.add?.service?.filter(s => s.startsWith(serviceName))[0];
                 if (serviceD) {
                     // this should only ever find one
                     const parent = 'add service';
@@ -142,7 +153,7 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
 
         apps.push(app)
 
-    }))
+    }
     return apps;
 
 }
@@ -160,7 +171,7 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
 export async function digPolicy(name: string, app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) {
 
 
-    const policies = obj.add?.rewrite?.policy?.filter(s => s.startsWith(name))
+    const policies = obj.add?.rewrite?.policy?.filter(s => s.split(' ')[0] === name)
 
     if (policies?.length > 0) {
         for await (const x of policies) {
@@ -189,7 +200,7 @@ export async function digServiceGroup(serviceName: string, app: AdcApp, obj: Adc
     const serviceGroup: any = {};
 
     // 'add serviceGroup <serviceName>'
-    const sgs = obj.add?.serviceGroup?.filter(s => s.startsWith(serviceName))
+    const sgs = obj.add?.serviceGroup?.filter(s => s.split(' ')[0] === serviceName)
     // should produce one since each "add serviceGroup" will be unique
     // there is a 1:many with "add serviceGroup" to "bind serviceGroup"
     if (sgs?.length > 0) {
@@ -211,7 +222,7 @@ export async function digServiceGroup(serviceName: string, app: AdcApp, obj: Adc
     }
 
     // 'bind serviceGroup <serviceName>'
-    obj.bind?.serviceGroup?.filter(s => s.startsWith(serviceName))
+    obj.bind?.serviceGroup?.filter(s => s.split(' ')[0] === serviceName)
         .forEach(async x => {
             const parent = 'bind serviceGroup';
             const originalString = parent + ' ' + x;
@@ -246,10 +257,18 @@ export async function digServiceGroup(serviceName: string, app: AdcApp, obj: Adc
 
                 const monitorName = rxMatch.groups.monitor.split(' ').pop();
 
+                // add the object param/array if not already there
+                if (!serviceGroup.monitors) serviceGroup.monitors = [];
+
                 //todo: get a list of the default monitor names and add them to the config somehow
 
+                // create the serviceGroup monitor object with the name
+                const monitorObj = {
+                    name: monitorName
+                };
+
                 // get monitor config line
-                obj.add?.lb?.monitor?.filter(m => m.startsWith(monitorName))
+                obj.add?.lb?.monitor?.filter(m => m.split(' ')[0] === monitorName)
                     .forEach(x => {
                         const parent = 'add lb monitor';
                         const originalString = parent + ' ' + x;
@@ -260,11 +279,13 @@ export async function digServiceGroup(serviceName: string, app: AdcApp, obj: Adc
                             return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
                         }
                         const opts = parseNsOptions(rxMatch.groups.opts, rx);
-                        serviceGroup.monitor = {
-                            name: monitorName
-                        }
-                        deepmergeInto(serviceGroup.monitor, opts)
+
+                        // add any monitor object options
+                        deepmergeInto(monitorObj, opts)
                     })
+
+                // push the full monitor object to the serviceGroup
+                serviceGroup.monitors.push(monitorObj);
 
             } else if (rxMatch.groups.opts) {
                 deepmergeInto(
@@ -289,7 +310,7 @@ export async function digServiceGroup(serviceName: string, app: AdcApp, obj: Adc
 export async function digServer(serverName: string, app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree): Promise<{ address?: string, hostname?: string } | undefined> {
 
     const dest: { address?: string, hostname?: string } = {};
-    const server = obj?.add?.server?.filter(s => s.startsWith(serverName))[0]
+    const server = obj?.add?.server?.filter(s => s.split(' ')[0] === serverName)[0]
 
     if (server) {
 
@@ -324,6 +345,7 @@ export function digSslBinding(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) {
 
     const appName = app.name;
 
+    // todo: update filter to accomodate spaces in name
     const appSslVservers = obj.bind?.ssl?.vserver?.filter(s => s.startsWith(appName))
 
     // check ssl bindings
