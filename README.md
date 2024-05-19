@@ -7,7 +7,7 @@ This project aims to explore the process of breaking down, analyzing and abstrac
 
 Future goals include conversion outputs for different supported F5 solutions, including BIG-IP TMOS, NGINX and F5 Distributed Cloud (XC)
 
-> It is recommended to install the ns.conf vscode extension by Tim Denholm (timdenholm.netscaler).  This extension provides nice synctax highlighting for the ns config.  https://marketplace.visualstudio.com/items?itemName=timdenholm.netscaler#overview.  Great work Tim!
+> It is recommended to install the ns.conf vscode extension by Tim Denholm (timdenholm.netscaler).  This extension provides nice synctax highlighting for the ns config.  <https://marketplace.visualstudio.com/items?itemName=timdenholm.netscaler#overview>.  Great work Tim!
 
 ![Project Flipper](project-flipper-dophin.png)
 
@@ -50,7 +50,7 @@ This information may possibly get fed back into the abstration process to help i
 
 This phase is focused on utilizing the information gathered from the diagnostics and abstraction process to provide the beginning of deploying a similar application on F5 technology (XC/TMOS/NGINX).
 
-This phase will begin once we have more confidence that phases two and three are providing solid output to base the conversions on.  This is the major request for feedback.  To help fine tune the abstraction and analytics.   
+This phase will begin once we have more confidence that phases two and three are providing solid output to base the conversions on.  This is the major request for feedback.  To help fine tune the abstraction and analytics.
 
 The goal here is to provide details about the applications current features on NS/ADC and some output to begin deploying that application in the different F5 technologies.  A single click, production grade application conversion is the goal, but realistically, an understanding of the features and a path/assistance getting there is probably more of where things will land.
 
@@ -72,8 +72,6 @@ There is currently a report to output all the details from the tool.  This inclu
 There are additional stats to understand numbers of applications, breakdown of the different types of applications and supporting configuration objects.  High level diagnostic stats, along with per-app diagnostics are also included.
 
 The goal for this report is to provide a full output to easily search, reference and add notes to when working through the process
-
-### 
 
 # How to get started using the extension
 
@@ -109,6 +107,7 @@ The goal for this report is to provide a full output to easily search, reference
     - everything else gets left behind
 
 example
+
 ```json
 {
     "add": {
@@ -193,11 +192,13 @@ flowchart TD
     asg-->bsg[bind serviceGroup]
     bsg-->aserver
     bsg-->albm[add lb monitor]
+    albm-->blbm[bind lb monitor]
+    aservice-->albm
 ```
 
 ## add cs vserver
 
-https://developer-docs.netscaler.com/en-us/adc-command-reference-int/13/cs/cs-vserver.html#synopsis-9
+<https://developer-docs.netscaler.com/en-us/adc-command-reference-int/13/cs/cs-vserver.html#synopsis-9>
 
 add cs vserver <traffic-domain> <serviceType/Protocol>
 
@@ -208,89 +209,89 @@ Integer value that uniquely identifies the traffic domain in which you want to c
 ### Possible ServiceTypes/protocols
 
 NS ServiceType | F5 Profiles | Additional Optional F5 profiles
-| :--- | ---: | :---: |
-HTTP | TCP/HTTP |
+ :--- | ---: | :---:
+HTTP | TCP/HTTP | -
 SSL | TCP/HTTP/clientssl | serverssl
-TCP | TCP |
-FTP | TCP |
-RTSP | TCP/RTSP
+TCP | TCP | -
+FTP | TCP | -
+RTSP | TCP/RTSP | -
 SSL_TCP | TCP/clientssl | serverssl
-UDP | UDP
+UDP | UDP | -
 DNS | UDP | dns
 SIP_UDP | UDP | SIP
 SIP_TCP | TCP | SIP
 SIP_SSL | TCP/clientssl | SIP
-ANY | TCP
+ANY | TCP | -
 RADIUS | UDP | RADIUS
-RDP | TCP
-MYSQL | TCP
-MSSQL | TCP
+RDP | TCP | -
+MYSQL | TCP | -
+MSSQL | TCP | -
 DIAMETER | TCP | Diameter
 SSL_DIAMETER | TCP/clientssl | Diameter
 DNS_TCP | TCP | DNS
-ORACLE | TCP
-SMPP | TCP
-PROXY | ?
-MONGO | ?
-MONGO_TLS | TCP/clientssl
-MQTT | 
-MQTT_TLS | TCP/clientssl
-HTTP_QUIC |
+ORACLE | TCP | -
+SMPP | TCP | -
+PROXY | ? | -
+MONGO | ? | -
+MONGO_TLS | TCP/clientssl | -
+MQTT | - | -
+MQTT_TLS | TCP/clientssl | -
+HTTP_QUIC | - | -
 
 ## add lb vserver
 
-https://developer-docs.netscaler.com/en-us/adc-command-reference-int/13/lb/lb-vserver#add-lb-vserver
+<https://developer-docs.netscaler.com/en-us/adc-command-reference-int/13/lb/lb-vserver#add-lb-vserver>
 
 add lb vserver <name> <serviceType/Protocol> <ip_address>
 
 ### Possible ServiceTypes/Protocols
 
 NS ServiceType | F5 Profiles | Additional Optional F5 profiles
-| :--- | ---: | :---: |
-HTTP | TCP/HTTP
-FTP | TCP
-TCP | TCP
-UDP | UDP
+:--- | ---: | :---:
+HTTP | TCP/HTTP | -
+FTP | TCP | -
+TCP | TCP | -
+UDP | UDP | -
 SSL | TCP/clientssl | serverssl/HTTP?
 SSL_BRIDGE | TCP/clientssl | FastL4?/serverssl
 SSL_TCP | TCP/clietssl | serverssl
-DTLS | UDP/clientssl?
-NNTP | TCP
-DNS | UDP
+DTLS | UDP/clientssl? | -
+NNTP | TCP | -
+DNS | UDP | -
 DHCPRA | TCP | dhcpv4
-ANY | tcp
-SIP_UDP | 
-SIP_TCP | 
-SIP_SSL | 
-DNS_TCP | 
-RTSP | 
-PUSH | 
-SSL_PUSH | 
-RADIUS | 
-RDP | 
-MYSQL | 
-MSSQL | 
-DIAMETER | 
-SSL_DIAMETER | 
-TFTP | 
-ORACLE | 
-SMPP | 
-SYSLOGTCP | 
-SYSLOGUDP | 
-FIX | 
-SSL_FIX | 
-PROXY | 
-USER_TCP | 
-USER_SSL_TCP | 
-QUIC | 
-IPFIX | 
-LOGSTREAM | 
-MONGO | 
-MONGO_TLS | 
-MQTT | 
-MQTT_TLS | 
-QUIC_BRIDGE | 
-HTTP_QUIC |
+ANY | tcp | -
+SIP_UDP | - | -
+SIP_TCP | - | -
+SIP_SSL | - | -
+DNS_TCP | - | -
+RTSP | - | -
+PUSH | - | -
+SSL_PUSH | - | -
+RADIUS |- | -
+RDP | - | -
+MYSQL | - | -
+MSSQL | - | -
+DIAMETER | - | -
+SSL_DIAMETER | - | -
+TFTP | - | -
+ORACLE | - | -
+SMPP | - | -
+SYSLOGTCP | - | -
+SYSLOGUDP | - | -
+FIX | - | -
+SSL_FIX | - | -
+PROXY | - | -
+USER_TCP | - | -
+USER_SSL_TCP | - | -
+QUIC | - | -
+IPFIX | - | -
+LOGSTREAM | - | -
+MONGO | - | -
+MONGO_TLS | - | -
+MQTT | - | -
+MQTT_TLS | - | -
+QUIC_BRIDGE | - | -
+HTTP_QUIC | - | -
 
 
 # Notes
@@ -328,23 +329,23 @@ HTTP_QUIC |
 
 ## NGINX
 
-https://docs.nginx.com/nginx/deployment-guides/migrate-hardware-adc/citrix-adc-configuration/
+<https://docs.nginx.com/nginx/deployment-guides/migrate-hardware-adc/citrix-adc-configuration/>
 
 ## John Alam
 
-https://community.f5.com/t5/codeshare/citrix-netscaler-to-f5-big-ip/ta-p/277635
+<https://community.f5.com/t5/codeshare/citrix-netscaler-to-f5-big-ip/ta-p/277635>
 
 ## Carl Stalhood
 
-https://github.com/cstalhood/Get-ADCVServerConfig 
+<https://github.com/cstalhood/Get-ADCVServerConfig>
 
-https://www.carlstalhood.com/netscaler-scripting/ 
+<https://www.carlstalhood.com/netscaler-scripting/>
 
 ## Citrix ADC
 
 ### Citrix ADC Firmware Release Cycle
 
-https://support.citrix.com/article/CTX241500/citrix-adc-firmware-release-cycle
+<https://support.citrix.com/article/CTX241500/citrix-adc-firmware-release-cycle>
 
 
 Citrix has announced following updates to the Citrix ADC firmware release cycle.
@@ -365,10 +366,10 @@ Citrix has announced following updates to the Citrix ADC firmware release cycle.
 
 ### Citrix Product Lifecycle Matrix
 
-https://www.citrix.com/support/product-lifecycle/product-matrix.html
+<https://www.citrix.com/support/product-lifecycle/product-matrix.html>
 
 Product | Version | Language | NSC* | EOS* | EOM* | EOL*
-| :--- | ---: | :---: | :---: | :---: | :---: | :---:
+:--- | ---: | :---: | :---: | :---: | :---: | :---:
 NetScaler Firmware | 13.1 (GA: 15-Sep-21) | EN | N/A | N/A | 15-Sep-25 | 15-Sep-26
 NetScaler Firmware | 13.0 (GA: 15-May-19) | EN | N/A | N/A | 15-Jul-23 | 15-Jul-24
 NetScaler Firmware | 12.1 (GA: 25-May-18) | EN | N/A | N/A | 30-May-22 | 30-May-23
@@ -376,27 +377,27 @@ NetScaler Firmware | 12.1 (GA: 25-May-18) | EN | N/A | N/A | 30-May-22 | 30-May-
 
 ### How to Upload a Collector File from a NetScaler Appliance to cis.citrix.com Website Directly Without Retrieving it from the Appliance
 
-https://support.citrix.com/article/CTX135876/how-to-upload-a-collector-file-from-a-netscaler-appliance-to-ciscitrixcom-website-directly-without-retrieving-it-from-the-appliance
+<https://support.citrix.com/article/CTX135876/how-to-upload-a-collector-file-from-a-netscaler-appliance-to-ciscitrixcom-website-directly-without-retrieving-it-from-the-appliance>
 
 ### File Synchronization in NetScaler High Availability Setup
 
-https://support.citrix.com/article/CTX138748/file-synchronization-in-netscaler-high-availability-setup
+<https://support.citrix.com/article/CTX138748/file-synchronization-in-netscaler-high-availability-setup>
 
 ### How to obtain nsconf file from NetScaler
 
-https://support.citrix.com/article/CTX222891/how-to-obtain-nsconf-file-from-netscaler
+<https://support.citrix.com/article/CTX222891/how-to-obtain-nsconf-file-from-netscaler>
 
 ### NetScaler : How to copy config from Old Device to New Device
 
-https://support.citrix.com/article/CTX216729/netscaler-how-to-copy-config-from-old-device-to-new-device
+<https://support.citrix.com/article/CTX216729/netscaler-how-to-copy-config-from-old-device-to-new-device>
 
 ### Custome Monitors Configured on NetScaler missing after an upgrade
 
-https://support.citrix.com/article/CTX206715/custom-monitors-configured-on-netscaler-missing-after-an-upgrade
+<https://support.citrix.com/article/CTX206715/custom-monitors-configured-on-netscaler-missing-after-an-upgrade>
 
 ### Citrix Gateway Virtual Servers
 
-https://docs.netscaler.com/en-us/citrix-gateway/current-release/install-citrix-gateway/configure-citrix-gateway-settings/create-gateway-virtual-servers.html
+<https://docs.netscaler.com/en-us/citrix-gateway/current-release/install-citrix-gateway/configure-citrix-gateway-settings/create-gateway-virtual-servers.html>
 
 
 
@@ -441,23 +442,23 @@ Below are some questions and items to consider when looking to migrate.
 
 ## links
 
-https://support.citrix.com/article/CTX476864/notice-of-change-announcement-for-perpetual-citrix-adc-eos
-https://www.citrix.com/support/product-lifecycle/product-matrix.html
+<https://support.citrix.com/article/CTX476864/notice-of-change-announcement-for-perpetual-citrix-adc-eos>
+<https://www.citrix.com/support/product-lifecycle/product-matrix.html>
 
 
-https://www.techtarget.com/searchenterprisedesktop/news/252529104/Thousands-of-Citrix-Tibco-employees-laid-off-following-merger
-https://www.reuters.com/business/finance/banks-brave-junk-debt-jitters-with-38-bln-citrix-bond-sale-2023-04-03/
-https://www.theregister.com/2023/03/03/citrix_universal_license/
+<https://www.techtarget.com/searchenterprisedesktop/news/252529104/Thousands-of-Citrix-Tibco-employees-laid-off-following-merger>
+<https://www.reuters.com/business/finance/banks-brave-junk-debt-jitters-with-38-bln-citrix-bond-sale-2023-04-03/>
+<https://www.theregister.com/2023/03/03/citrix_universal_license/>
 
-https://www.crn.com/news/cloud/-brutal-citrix-tibco-layoffs-hit-thousands-of-employees-sources
+<https://www.crn.com/news/cloud/-brutal-citrix-tibco-layoffs-hit-thousands-of-employees-sources>
 
 # ChatGPT
 
 As I started this journey, and knowing very little about NetScaler, I decided to ask ChatGPT and see just how much help it would be.
 
-So, while none of the configs it produced were a straight copy/paste into the respective technologies, it did get most of the way.  Enought to provide a ton of value and help me quickly understand what I was working with. 
+So, while none of the configs it produced were a straight copy/paste into the respective technologies, it did get most of the way.  Enought to provide a ton of value and help me quickly understand what I was working with.
 
 Here is a document outlining the conversation
 
-https://github.com/f5devcentral/vscode-f5-flipper/blob/main/chatGPT.md
+<https://github.com/f5devcentral/vscode-f5-flipper/blob/main/chatGPT.md>
 

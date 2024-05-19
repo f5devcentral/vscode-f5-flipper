@@ -40,6 +40,7 @@ import { logger } from './logger';
 import path from 'path';
 import { AdcConfObj, Explosion, AdcApp } from './models';
 import ADC from './CitrixADC';
+import { mungeNS2FAST } from './ns2FastParams';
 
 // remodel everything here like this example:  https://github.com/microsoft/vscode-extension-samples/blob/master/tree-view-sample/src/testView.ts
 // it will provide a working 'reveal' function and a browsable tmos config tree in the view
@@ -546,26 +547,28 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
      * bulk convert all known apps cs/lb
      */
     async bulk() {
+
+        window.showErrorMessage('AFTON functionality in development - not working right now')
         // gather all the ns apps into an array
         const apps = this.explosion.config.apps;
 
         // create an array to put the converted apps
         const as3Apps = []
 
-        // loop through the array and convert each app
-        for await (const app of apps) {
+        // // loop through the array and convert each app
+        // for await (const app of apps) {
 
-            // // mutate the ns json app params to fast template params
-            // const fastTempParams = await ext.fast.panel.mungeNS2FAST(app)
+        //     // // mutate the ns json app params to fast template params
+        //     // const fastTempParams = await ext.fast.panel.mungeNS2FAST(app)
 
-            const fastTempParams = await ext.fast.panel.autoRenderHTML(app)
+        //     const fastTempParams = await ext.fast.panel.autoRenderHTML(app)
 
-            await ext.fast.panel.renderAS3(fastTempParams)
-                .then(a => as3Apps.push(a))
-                .catch(e => {
-                    as3Apps.push(e)
-                })
-        }
+        //     await ext.fast.panel.renderAS3(fastTempParams)
+        //         .then(a => as3Apps.push(a))
+        //         .catch(e => {
+        //             as3Apps.push(e)
+        //         })
+        // }
 
         await commands.executeCommand("f5-flipper.cfgExplore-show", as3Apps);
     }
@@ -587,7 +590,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
         } else if (output === 'full') {
 
             // add FAST template params
-            const fastTempParams = ext.fast.panel.mungeNS2FAST(items)
+            const fastTempParams = mungeNS2FAST(items)
 
             items.fastTempParams = fastTempParams;
 
@@ -621,7 +624,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             docName = 'app.ns.json'
 
             // add FAST template params
-            const fastTempParams = ext.fast.panel.mungeNS2FAST(items)
+            const fastTempParams = mungeNS2FAST(items)
 
             items.fastTempParams = fastTempParams;
 

@@ -20,6 +20,18 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.10.1] - (05-19-2024)
+
+### Fixed
+
+- Added monitor abstraction and mutation for templates
+  - Updated tests for this abstraction
+- Added virtual server and pool port mutation from "*" (NS) to "0" (F5)
+- Moved mungeNS2FAST function to it's own file for easier reference
+- Updated some of the filters to search for specific object names, not just objects that "startWith" the name
+
+---
+
 ## [1.10.0] - (04-30-2024)
 
 ### Added
@@ -89,10 +101,12 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ## [1.5.0] - (03-25-2024)
 
 ### Added
+
 - A second report that is better formated for capturing application output
 - added line count to application description in view list
 
 ### Changed
+
 - sorting application list by name (alpha-descending)
 
 ---
