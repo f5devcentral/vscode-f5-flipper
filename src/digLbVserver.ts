@@ -223,7 +223,6 @@ export async function digServiceGroup(serviceName: string, app: AdcApp, obj: Adc
 
     // 'bind serviceGroup <serviceName>'
     obj.bind?.serviceGroup?.filter(s => s.split(' ')[0] === serviceName)
-    obj.bind?.serviceGroup?.filter(s => s.split(' ')[0] === serviceName)
         .forEach(async x => {
             const parent = 'bind serviceGroup';
             const originalString = parent + ' ' + x;
