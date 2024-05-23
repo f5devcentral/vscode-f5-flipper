@@ -31,7 +31,8 @@ export function
             protocol: nsApp.protocol,
             virtual_address: nsApp.ipAddress,
             virtual_port: nsApp.port === '*' ? '0' : nsApp.port,
-            pool_members: []
+            pool_members: [],
+            monitors: []
         };
 
         if (nsApp?.opts?.['-persistenceType']) {
