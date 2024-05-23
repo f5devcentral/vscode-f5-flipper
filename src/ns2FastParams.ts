@@ -142,11 +142,14 @@ export function
         if (nsFastJson.pool_members.length === 0) delete nsFastJson.pool_members;
 
         // remap health monitors for fast templates
-        nsFastJson.monitors = nsFastJson?.monitors.map(monitor => {
 
-            // todo:  get details for new mapping
-            return monitor;
-        })
+        // Comment out work in progress map - workaround monitor preventing parsing
+        
+        // nsFastJson.monitors = nsFastJson?.monitors.map(monitor => {
+
+        //     // todo:  get details for new mapping
+        //     return monitor;
+        // })
 
         // return the new params
         return nsFastJson;
