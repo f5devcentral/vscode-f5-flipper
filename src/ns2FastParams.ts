@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 /* eslint-disable @typescript-eslint/naming-convention */
->>>>>>> 85a7316 (stash)
 
 
 
@@ -23,11 +20,7 @@ mungeNS2FAST(nsApp: AdcApp) {
     if (nsApp.fastTempParams) {
 
         // if we already have the munged params, send those since they could have been modified by the user
-<<<<<<< HEAD
-        return nsApp.fastTempParams
-=======
         return nsApp.fastTempParams;
->>>>>>> 85a7316 (stash)
 
     } else {
 
@@ -44,65 +37,37 @@ mungeNS2FAST(nsApp: AdcApp) {
 
         if (nsApp?.opts?.['-persistenceType']) {
             const persistType = nsApp.opts['-persistenceType'] as string;
-<<<<<<< HEAD
-            nsFastJson.persistence = { [persistType]: persistType }
-=======
             nsFastJson.persistence = { [persistType]: persistType };
->>>>>>> 85a7316 (stash)
         }
 
         if (nsApp?.opts?.['-lbMethod']) {
             const lbMethod = nsApp.opts['-lbMethod'] as string;
-<<<<<<< HEAD
-            nsFastJson.lbMethod = { [lbMethod]: lbMethod }
-=======
             nsFastJson.lbMethod = { [lbMethod]: lbMethod };
->>>>>>> 85a7316 (stash)
         }
 
         if (nsApp?.opts?.['-cltTimeout']) {
             const cltTimeout = nsApp.opts['-cltTimeout'] as string;
-<<<<<<< HEAD
-            nsFastJson.cltTimeout = { [cltTimeout]: cltTimeout }
-=======
             nsFastJson.cltTimeout = { [cltTimeout]: cltTimeout };
->>>>>>> 85a7316 (stash)
         }
-
+        
         if (nsApp?.opts?.['-timeout']) {
             const timeout = nsApp.opts['-timeout'] as string;
-<<<<<<< HEAD
-            nsFastJson.timeout = { [timeout]: timeout }
-=======
             nsFastJson.timeout = { [timeout]: timeout };
->>>>>>> 85a7316 (stash)
         }
 
         if (nsApp?.opts?.['-redirectURL']) {
             const redirectURL = nsApp.opts['-redirectURL'] as string;
-<<<<<<< HEAD
-            nsFastJson.redirectURL = { redirectURL }
-=======
             nsFastJson.redirectURL = { redirectURL };
->>>>>>> 85a7316 (stash)
         }
 
         if (nsApp?.opts?.['-backupVServer']) {
             const backupVServer = nsApp.opts['-backupVServer'] as string;
-<<<<<<< HEAD
-            nsFastJson.backupVServer = { [backupVServer]: backupVServer }
-=======
             nsFastJson.backupVServer = { [backupVServer]: backupVServer };
->>>>>>> 85a7316 (stash)
         }
 
         if (nsApp?.opts?.['-tcpProfileName']) {
             const tcpProfileName = nsApp.opts['-tcpProfileName'] as string;
-<<<<<<< HEAD
-            nsFastJson.tcpProfileName = { [tcpProfileName]: tcpProfileName }
-=======
             nsFastJson.tcpProfileName = { [tcpProfileName]: tcpProfileName };
->>>>>>> 85a7316 (stash)
         }
 
 
