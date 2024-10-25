@@ -45,7 +45,7 @@ export type NsFastTempParams = {
     virtual_port: string;
     persistence?: { [key: string]: string };
     lbMethod?: { [key: string]: string };
-    cltTimeout?: { [key: string]: string };
+    idleTimeout?: { [key: string]: string } | string;
     timeout?: { [key: string]: string };
     redirectURL?: { [key: string]: string };
     backupVServer?: { [key: string]: string };
@@ -252,6 +252,7 @@ export type AdcRegExTree = {
         'bind serviceGroup': RegExp;
         'bind lb vserver': RegExp;
         'bind cs vserver': RegExp;
+        'bind ssl service': RegExp;
         'bind ssl vserver': RegExp;
         'bind gslb vserver': RegExp;
     }
@@ -344,10 +345,12 @@ export type AdcConfObj = {
         gslb?: {
             vserver?: string[];
         }
+        service?: string[]
         serviceGroup?: string[];
         audit?: string;
         tunnel?: string;
         ssl?: {
+            service?: string[];
             vserver?: string[];
         };
     };

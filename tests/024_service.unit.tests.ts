@@ -30,7 +30,7 @@ describe('service abstraction tests', function () {
     before(async function () {
         // log test file name - makes it easer for troubleshooting
         console.log('       file:', __filename)
-        testFile = await archiveMake() as string;
+        testFile = await archiveMake('apple.ns.conf') as string;
         // clear the events arrays
         parsedFileEvents.length = 0
         parsedObjEvents.length = 0
@@ -69,6 +69,30 @@ describe('service abstraction tests', function () {
 
         assert.deepStrictEqual(app!.bindings!.service!.length, 3, "should have three service bindings")
         assert.deepStrictEqual(app!.lines!.length, 16, "should have 16 total lines of ns config")
+        
+    })
+
+    it(`basic service reference non ssl with monitor`, async () => {
+
+        // this app should have three different service bindings and 15 total line of config
+
+        // get application we are looking for
+        const app = expld.config.apps?.find(x => x.name === "\"2 APPLE_80_HTTP\"")
+
+        assert.deepStrictEqual(app!.bindings!.service!.length, 1, "should have three service bindings")
+        assert.deepStrictEqual(app!.lines!.length, 6, "should have 16 total lines of ns config")
+        
+    })
+
+    it(`basic service reference ssl`, async () => {
+
+        // this app should have three different service bindings and 15 total line of config
+
+        // get application we are looking for
+        const app = expld.config.apps?.find(x => x.name === "\"3 APPLE_443_HTTPS\"")
+
+        assert.deepStrictEqual(app!.bindings!.service!.length, 1, "should have one service bindings")
+        assert.deepStrictEqual(app!.lines!.length, 9, "should have 16 total lines of ns config")
         
     })
 

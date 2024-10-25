@@ -268,7 +268,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                             desc,
                             'nsApp', icon,
                             TreeItemCollapsibleState.None, {
-                            command: 'f5-flipper.render',
+                            command: 'f5-flipper.viewNsJson',
                             title: '',
                             arguments: [app]
                         }
@@ -319,7 +319,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                         '',
                         'nsGSLB', icon,
                         TreeItemCollapsibleState.None, {
-                        command: 'f5-flipper.render',
+                        command: 'f5-flipper.viewNsJson',
                         title: '',
                         arguments: [app]
                     }
@@ -400,7 +400,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                         `lines: ${source.content.split('\n').length.toString()}`,
                         'nsFile', '',
                         TreeItemCollapsibleState.None, {
-                        command: 'f5-flipper.render',
+                        command: 'f5-flipper.viewNsLines',
                         title: '',
                         arguments: [source.content]
                     }
@@ -512,7 +512,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                 this.explosion.config.sources.length.toString(),
                 '', '',
                 TreeItemCollapsibleState.Collapsed, {
-                command: 'f5-flipper.cfgExplore-show',
+                command: 'f5-flipper.viewNsLines',
                 title: '',
                 arguments: [allSources]
             }

@@ -8,13 +8,11 @@ import {
 } from "./models";
 
 
-
-export function
-    /**
-     * mutate ns app json to a form easier for FAST/mustache to work with
-     * @param nsApp NS app as json
-     */
-    mungeNS2FAST(nsApp: AdcApp) {
+/**
+ * mutate ns app json to a form easier for FAST/mustache to work with
+ * @param nsApp NS app as json
+ */
+export function mungeNS2FAST(nsApp: AdcApp) {
 
     if (nsApp.fastTempParams) {
 
@@ -31,7 +29,8 @@ export function
             protocol: nsApp.protocol,
             virtual_address: nsApp.ipAddress,
             virtual_port: nsApp.port === '*' ? '0' : nsApp.port,
-            pool_members: []
+            pool_members: [],
+            monitors: []
         };
 
         if (nsApp?.opts?.['-persistenceType']) {
@@ -46,7 +45,7 @@ export function
 
         if (nsApp?.opts?.['-cltTimeout']) {
             const cltTimeout = nsApp.opts['-cltTimeout'] as string;
-            nsFastJson.cltTimeout = { [cltTimeout]: cltTimeout }
+            nsFastJson.idleTimeout = cltTimeout;
         }
 
         if (nsApp?.opts?.['-timeout']) {
@@ -138,15 +137,20 @@ export function
             })
         }
 
-        // if no pool members, remove empty array
-        if (nsFastJson.pool_members.length === 0) delete nsFastJson.pool_members;
-
         // remap health monitors for fast templates
         nsFastJson.monitors = nsFastJson?.monitors.map(monitor => {
 
             // todo:  get details for new mapping
             return monitor;
         })
+
+
+        // if no pool members, remove empty array
+        if (nsFastJson.pool_members.length === 0) delete nsFastJson.pool_members;
+
+        // if no monitors, remove empty array
+        if (nsFastJson.monitors.length === 0) delete nsFastJson.monitors;
+
 
         // return the new params
         return nsFastJson;

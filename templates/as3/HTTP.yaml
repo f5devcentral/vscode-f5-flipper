@@ -21,9 +21,9 @@ template: |
             "translateServerPort": true,
             "class": "Service_HTTP",
             {{#persistence}}
-              {{#SOURCEIP}}"persistenceMethods": [{"bigip": "/Common/source_addr"}],{{/SOURCEIP}}
-              {{#COOKIEINSERT}}"persistenceMethods": [{"bigip": "/Common/cookie"}],{{/COOKIEINSERT}}
-              {{#SSLSESSION}}"persistenceMethods": [{"bigip": "/Common/ssl"}],{{/SSLSESSION}}
+              {{#SOURCEIP}}"persistenceMethods": [{"bigip": "/Common/source_addr"}]{{/SOURCEIP}}
+              {{#COOKIEINSERT}}"persistenceMethods": [{"bigip": "/Common/cookie"}]{{/COOKIEINSERT}}
+              {{#SSLSESSION}}"persistenceMethods": [{"bigip": "/Common/ssl"}]{{/SSLSESSION}}
               {{#NONE}}"persistenceMethods" : [],{{/NONE}}
             {{/persistence}}
             "virtualAddresses": [
@@ -52,15 +52,15 @@ template: |
             ],
             "class": "Pool",
             {{#lbMethod}}
-                {{#ROUNDROBIN}}
-                "loadBalancingMode":"round-robin",
-                {{/ROUNDROBIN}}
-                {{#LEASTCONNECTION}}
-                "loadBalancingMode":"least-connections-member",
-                {{/LEASTCONNECTION}}
-            {{/lbMethod}}
-            {{^lbMethod}}
-                "loadBalancingMode":"least-connections-member",
+              {{#ROUNDROBIN}}
+              "loadBalancingMode":"round-robin",
+              {{/ROUNDROBIN}}
+              {{#LEASTCONNECTION}}
+              "loadBalancingMode":"least-connections-member",
+              {{/LEASTCONNECTION}}
+              {{#NONE}}
+              "loadBalancingMode":"least-connections-member",
+              {{/NONE}}
             {{/lbMethod}}
             "monitors": [
               "http"

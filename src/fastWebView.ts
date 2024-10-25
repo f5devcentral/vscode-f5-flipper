@@ -18,8 +18,8 @@ import { ext } from './extensionVariables';
 import { logger } from './logger';
 import fast from '@f5devcentral/f5-fast-core';
 import path from 'path';
-import { AdcApp, NsFastTempParams } from './models';
-import { mungeNS2FAST } from './ns2FastParams';
+import { AdcApp } from './models';
+
 
 const fast = require('@f5devcentral/f5-fast-core');
 
@@ -138,7 +138,7 @@ export class FastWebView {
                 // mutate ns app params into a better format for FAST templates
                 const temp = app.fastTempParams;
 
-                // merge with FAST template default params
+                // merge with FAST template default params (overwriting default)
                 const fastParams = Object.assign(defaultParams, temp)
 
                 logger.debug(`ns app ${app.name} FAST Template params: `, fastParams);

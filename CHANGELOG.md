@@ -20,6 +20,18 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.11.0] - (10-24-2024)
+
+### Fixed
+
+- [RFE] Add another iteration for monitors and ssl settings #39
+  - monitors, ssl and pool members can be applied at the "service" level
+    - Most of the time they are applied at the "service group"
+- [RFE] Processing vservers using IPv6 addresses #43
+- [RFE] ns json output to main work flow #45
+
+---
+
 ## [1.10.1] - (05-19-2024)
 
 ### Fixed
