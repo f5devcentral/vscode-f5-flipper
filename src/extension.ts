@@ -282,7 +282,7 @@ export async function activateInternal(context: ExtensionContext) {
             
             const app = ext.nsCfgProvider.explosion.config.apps.find(a => a.name === appName)
             
-            ext.nsCfgProvider.render(x, 'lines');
+            ext.nsCfgProvider.render(app, 'lines');
         }
     }));
 

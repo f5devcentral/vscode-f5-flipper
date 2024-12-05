@@ -44,6 +44,9 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
             /* istanbul ignore next */
             return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
         }
+
+        // rxMatch.groups.name = rxMatch.groups.name.match(rx.trimQuotes)[1];
+
         const opts = parseNsOptions(rxMatch.groups?.opts, rx);
 
         const app: AdcApp = {

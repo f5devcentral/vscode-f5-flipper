@@ -219,6 +219,7 @@ export type AdcRegExTree = {
     cfgOptions: RegExp;
     cfgOptionsQuotes: RegExp;
     verbs: RegExp;
+    trimQuotes: RegExp;
     parents: {
         'add ns ip': RegExp;
         'add ns ip6': RegExp;

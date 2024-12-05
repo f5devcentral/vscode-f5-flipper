@@ -1,6 +1,9 @@
 title: Simple TCP Application
-description: Layer 4 Passthrough TCP Application - Includes Persistence
+description: Layer 4 Passthrough TCP Application - Includes Persistence 22-OCT-2024
 contentType: application/json
+definitions:
+    idleTimeout:
+        default: 300
 template: |
   {
     "$schema": "https://raw.githubusercontent.com/F5Networks/f5-appsvcs-extension/master/schema/latest/as3-schema.json",
@@ -14,22 +17,31 @@ template: |
             "{{app_name}}-app": {
                 "class": "Application",
                 "template": "shared",
+                "sa_{{virtual_address}}": {
+                    "class": "Service_Address",
+                    "icmpEcho": "enable",
+                    "arpEnabled": true,
+                    "virtualAddress": "{{virtual_address}}"
+                },
                 "{{app_name}}": {
                     "layer4": "tcp",
                     "pool": "pool_{{app_name}}",
                     "translateServerAddress": true,
                     "translateServerPort": true,
                     "class": "Service_TCP",
+                    {{#comment}}
+                      "description": {{comment}},
+                    {{/comment}}
                     {{#persistence}}
                         {{#SOURCEIP}}"persistenceMethods": [{"bigip": "/Common/source_addr"}],{{/SOURCEIP}}
                         {{#SSLSESSION}}"persistenceMethods": [{"bigip": "/Common/ssl"}],{{/SSLSESSION}}
                         {{#NONE}}"persistenceMethods" : [],{{/NONE}}
                     {{/persistence}}
                     "profileTCP": {
-                        "use": "{{app_name}}-tcp_idle_9000"
+                        "use": "{{app_name}}-tcp"
                     },
                     "virtualAddresses": [
-                        "{{virtual_address}}"
+                        { "use": "sa_{{virtual_address}}" }
                     ],
                     "virtualPort": {{virtual_port}},
                     "snat": "auto"
@@ -39,15 +51,15 @@ template: |
                     {{#pool_members}}
                         {
                         {{#address}}
+                        "hostname": {{name}},
                         "serverAddresses": ["{{address}}"],
+                        "servicePort": {{port}},
                         {{/address}}
-                        {{#hostname}}
+                        {{#fqdn}}
                         "addressDiscovery": "fqdn",
                         "hostname": "{{hostname}}",
-                        {{/hostname}}
-                        {{#port}}
                         "servicePort": {{port}},
-                        {{/port}}
+                        {{/fqdn}}
                         "shareNodes": true
                         },
                     {{/pool_members}}
@@ -70,10 +82,10 @@ template: |
                     {{/lbMethod}}
                     "class": "Pool"
                 },
-                "{{app_name}}-tcp_idle_9000": {
-                  "idleTimeout": 9000,
+                "{{app_name}}-tcp": {
+                  "idleTimeout": 300,
                   "class": "TCP_Profile"
-              }
+                }
             }
         }
     }

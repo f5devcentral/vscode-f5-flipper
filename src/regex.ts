@@ -57,6 +57,7 @@ export class RegExTree {
         cfgOptions: this.cfgOptions,
         cfgOptionsQuotes: this.cfgOptionsQuotes,
         verbs: /^(add|set|bind|link|enable|disable) /,
+        trimQuotes: /^"(.*)"$/,
         parents: {
             'add ns ip': /(?<name>\S+) (?<mask>\S+) (?<opts>[\S ]+)/,
             'add ns ip6': /(?<name>\S+) (?<opts>[\S ]+)/,
