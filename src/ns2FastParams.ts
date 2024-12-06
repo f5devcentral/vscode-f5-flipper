@@ -13,8 +13,7 @@ import {
  * mutate ns app json to a form easier for FAST/mustache to work with
  * @param nsApp NS app as json
  */
-export function mungeNS2FAST(nsApp: AdcApp, rx: AdcRegExTree
-) {
+export function mungeNS2FAST(nsApp: AdcApp) {
 
     if (nsApp.fastTempParams) {
 
