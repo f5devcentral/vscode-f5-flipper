@@ -69,7 +69,7 @@ describe('service abstraction tests', function () {
 
         assert.deepStrictEqual(app!.bindings!.service!.length, 3, "should have three service bindings")
         assert.deepStrictEqual(app!.lines!.length, 16, "should have 16 total lines of ns config")
-        
+
     })
 
     it(`basic service reference non ssl with monitor`, async () => {
@@ -81,7 +81,7 @@ describe('service abstraction tests', function () {
 
         assert.deepStrictEqual(app!.bindings!.service!.length, 1, "should have three service bindings")
         assert.deepStrictEqual(app!.lines!.length, 6, "should have 16 total lines of ns config")
-        
+
     })
 
     it(`basic service reference ssl`, async () => {
@@ -93,7 +93,7 @@ describe('service abstraction tests', function () {
 
         assert.deepStrictEqual(app!.bindings!.service!.length, 1, "should have one service bindings")
         assert.deepStrictEqual(app!.lines!.length, 9, "should have 16 total lines of ns config")
-        
+
     })
 
 
@@ -115,27 +115,27 @@ describe('service abstraction tests', function () {
             port: "82",
             server: "SERVERCORE1",
             opts: {
-              "-gslb": "NONE",
-              "-maxClient": "0",
-              "-maxReq": "0",
-              "-cip": "ENABLED",
-              "-ip": "-usip",
-              "-useproxyport": "YES",
-              "-sp": "OFF",
-              "-cltTimeout": "180",
-              "-svrTimeout": "360",
-              "-CKA": "NO",
-              "-TCPB": "NO",
-              "-CMP": "YES",
+                "-gslb": "NONE",
+                "-maxClient": "0",
+                "-maxReq": "0",
+                "-cip": "ENABLED client-ip",
+                "-usip": "NO",
+                "-useproxyport": "YES",
+                "-sp": "OFF",
+                "-cltTimeout": "180",
+                "-svrTimeout": "360",
+                "-CKA": "NO",
+                "-TCPB": "NO",
+                "-CMP": "YES",
             },
             hostname: "sevcore1.jonny.dev",
-          }, "should have three service bindings")
+        }, "should have three service bindings")
 
         const addressService = appServices!.filter(x => x.address === "10.240.21.115")[0]
 
         // this just confirms that we got back the service with the right "address" and "name"
         assert.deepStrictEqual(addressService.name, "FUJI02_HTTPS_SVC")
-        
+
     })
 
 

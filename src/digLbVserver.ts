@@ -59,20 +59,6 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
             lines: [originalString]
         }
 
-        // app.name = app.name.replace(/"/g, '')
-
-        // if (app.name === '"1 APPLE_443_HTTPS"') {
-
-        //     debugger;
-        //     const x = RegExp(/\w+|"[\w\s]*"/);
-        //     const y = x.test(app.name)
-        //     const v = app.name.split(/\w+|"[\w\s]*"/gm)
-        //     const z = y;
-        // }
-
-        // function nameFilter()
-
-
 
         // start with 'bind lb vserver'
         // todo:  update this filter to accomodate names with spaces, see above;
@@ -103,66 +89,72 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
                 const serviceName = rxMatch.groups?.service;
 
                 // dig "add service with supporting bind service lines"
+                await digService(serviceName, app, coa, rx)
 
                 // dig service details -> do we have a service with this name?
                 // there should only be one "add service" with this name since we are looking in this specific "bind lb vserver"
-                const serviceD = coa.add?.service?.filter(s => {
-                    const name = serviceName;
-                    const addServices = coa.add.service;
-                    // pull out the app name from the binding
-                    const sname = s.match(/^(?<name>("[\w.\- ]+"|[\w.\-]+)) (?<service>("[\w.\- ]+"|[\w.\-]+))?/)?.groups?.name;
-                    // does the app name match the bind lb object?
-                    const y = name === sname;
-                    return y;
-                });
-                for await (const x of serviceD) {
-                    const parent = 'add service';
-                    const originalString = parent + ' ' + serviceD;
-                    app.lines.push(originalString);
-                    const rxMatch = x.match(rx.parents[parent])
-                    const opts = parseNsOptions(rxMatch.groups?.opts, rx);
-                    if (!rxMatch) {
-                        /* istanbul ignore next */
-                        return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
-                    }
-
-                    // if we have service details create array to put them
-                    if (!app.bindings.service) {
-                        app.bindings.service = [];
-                    }
-
-                    let serviceDetails = {
-                        name: serviceName,
-                        protocol: rxMatch.groups.protocol,
-                        port: rxMatch.groups.port,
-                        server: rxMatch.groups.server,
-                        opts
-                    }
-
-                    // todo: is this where we should dig the service binding options for -monitor references?
-
-                    // dig "bind service <name> ..."
-                    await digBindService(serviceName, app, coa, rx)
+                // const serviceD = coa.add?.service?.filter(s => {
+                //     const name = serviceName;
+                //     const addServices = coa.add.service;
+                //     // pull out the app name from the binding
+                //     const sname = s.match(/^(?<name>("[\w.\- ]+"|[\w.\-]+)) (?<service>("[\w.\- ]+"|[\w.\-]+))?/)?.groups?.name;
+                //     // does the app name match the bind lb object?
+                //     const y = name === sname;
+                //     return y;
+                // });
 
 
-                    // dig "bind ssl service <name> ..."
-                    await digBindSslService(serviceName, app, coa, rx)
+                // if(serviceD.length > 0) {
 
-                    // also get server reference under 'add server <name>'
-                    if (rxMatch.groups.server) {
+                // for await (const x of serviceD) {
+                //     const parent = 'add service';
+                //     const originalString = parent + ' ' + serviceD;
+                //     app.lines.push(originalString);
+                //     const rxMatch = x.match(rx.parents[parent])
+                //     const opts = parseNsOptions(rxMatch.groups?.opts, rx);
+                //     if (!rxMatch) {
+                //         /* istanbul ignore next */
+                //         return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
+                //     }
 
-                        // dig server from serviceGroup server reference
-                        await digServer(rxMatch.groups.server, app, coa, rx)
-                            .then(i => {
-                                if (i) {
-                                    serviceDetails = Object.assign(serviceDetails, i)
-                                }
-                            })
-                    }
+                //     // if we have service details create array to put them
+                //     if (!app.bindings.service) {
+                //         app.bindings.service = [];
+                //     }
 
-                    // push service details to app config
-                    app.bindings.service.push(serviceDetails)
-                }
+                //     let serviceDetails = {
+                //         name: serviceName,
+                //         protocol: rxMatch.groups.protocol,
+                //         port: rxMatch.groups.port,
+                //         server: rxMatch.groups.server,
+                //         opts
+                //     }
+
+                //     // todo: is this where we should dig the service binding options for -monitor references?
+
+                //     // dig "bind service <name> ..."
+                //     await digBindService(serviceName, app, coa, rx)
+
+
+                //     // dig "bind ssl service <name> ..."
+                //     await digBindSslService(serviceName, app, coa, rx)
+
+                //     // also get server reference under 'add server <name>'
+                //     if (rxMatch.groups.server) {
+
+                //         // dig server from serviceGroup server reference
+                //         await digServer(rxMatch.groups.server, app, coa, rx)
+                //             .then(i => {
+                //                 if (i) {
+                //                     serviceDetails = Object.assign(serviceDetails, i)
+                //                 }
+                //             })
+                //     }
+
+                //     // push service details to app config
+                //     app.bindings.service.push(serviceDetails)
+                // }
+                // }
 
                 // dig serviceGroup details
                 await digServiceGroup(serviceName, app, coa, rx)
@@ -172,6 +164,8 @@ export async function digLbVserver(coa: AdcConfObj, rx: AdcRegExTree) {
                 const opts = parseNsOptions(rxMatch.groups?.opts, rx);
                 if (opts['-policyName']) {
                     const pName = opts['-policyName'];
+
+                    // initialize the policy array
                     if (!app.bindings['-policyName']) {
                         app.bindings['-policyName'] = [];
                     }
@@ -206,7 +200,7 @@ export async function digBindService(serviceName: string, app: AdcApp, obj: AdcC
         const bindServicesList = obj.bind.service;
 
         const sName = s.split(' ')[0] === serviceName
-        
+
         return sName;
     })
 
@@ -297,11 +291,11 @@ export async function digBindService(serviceName: string, app: AdcApp, obj: AdcC
  */
 export async function digPolicy(name: string, app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) {
 
+    // todo: add support for spaces in names
+    const rwPolicies = obj.add?.rewrite?.policy?.filter(s => s.split(' ')[0] === name)
 
-    const policies = obj.add?.rewrite?.policy?.filter(s => s.split(' ')[0] === name)
-
-    if (policies?.length > 0) {
-        for await (const x of policies) {
+    if (rwPolicies?.length > 0) {
+        for await (const x of rwPolicies) {
             const parent = 'add rewrite policy';
             const originalString = parent + ' ' + x;
             const rxMatch = x.match(rx.parents[parent]);
@@ -310,6 +304,24 @@ export async function digPolicy(name: string, app: AdcApp, obj: AdcConfObj, rx: 
                 return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
             }
             const opts = parseNsOptions(rxMatch.groups?.opts, rx);
+            app.lines.push(originalString);
+        }
+    }
+
+    const rsPolicies = obj.add?.responder?.policy?.filter(s => s.split(' ')[0] === name)
+
+    if (rsPolicies?.length > 0) {
+        for await (const x of rsPolicies) {
+            const parent = 'add responder policy';
+            const originalString = parent + ' ' + x;
+            const rxMatch = x.match(rx.parents[parent]);
+            if (!rxMatch) {
+                /* istanbul ignore next */
+                return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
+            }
+            const opts = parseNsOptions(rxMatch.groups?.opts, rx);
+
+            // todo: dig the responder policie actions from namaste app
             app.lines.push(originalString);
         }
     }
@@ -324,7 +336,7 @@ export async function digPolicy(name: string, app: AdcApp, obj: AdcConfObj, rx: 
  * @param obj 
  * @param rx 
  */
-export async function digService(serviceName: string, app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) {
+export async function digService(serviceName: string, app: AdcApp, coa: AdcConfObj, rx: AdcRegExTree) {
 
 
     // this should be a single service name
@@ -336,7 +348,7 @@ export async function digService(serviceName: string, app: AdcApp, obj: AdcConfO
     // filter out the services (single) we need
     // 
 
-    const serviceD = obj.add?.service?.filter(s => {
+    const serviceD = coa.add?.service?.filter(s => {
         const name = serviceName;
         // pull out the app name from the binding
         const sname = s.match(/^(?<name>("[\w.\- ]+"|[\w.\-]+)) (?<service>("[\w.\- ]+"|[\w.\-]+))?/)?.groups?.name;
@@ -368,6 +380,27 @@ export async function digService(serviceName: string, app: AdcApp, obj: AdcConfO
             server: rxMatch.groups.server,
             opts
         }
+
+        // dig "bind service <name> ..."
+        await digBindService(serviceName, app, coa, rx)
+
+        // dig "bind ssl service <name> ..."
+        await digBindSslService(serviceName, app, coa, rx)
+
+        // also get server reference under 'add server <name>'
+        if (rxMatch.groups.server) {
+
+            // dig server from serviceGroup server reference
+            await digServer(rxMatch.groups.server, app, coa, rx)
+                .then(i => {
+                    if (i) {
+                        serviceDetails = Object.assign(serviceDetails, i)
+                    }
+                })
+        }
+
+        // push service details to app config
+        app.bindings.service.push(serviceDetails)
     }
 }
 
@@ -386,74 +419,100 @@ export async function digServiceGroup(serviceName: string, app: AdcApp, obj: Adc
     const serviceGroup: any = {};
 
     // 'add serviceGroup <serviceName>'
-    const sgs = obj.add?.serviceGroup?.filter(s => s.split(' ')[0] === serviceName)
+    const serviceGroupString = obj.add?.serviceGroup?.filter(s => {
+        const name = serviceName;
+        // pull out the app name from the binding
+        const sname = s.match(/^(?<name>("[\w.\- ]+"|[\w.\-]+)) (?<service>("[\w.\- ]+"|[\w.\-]+))?/)?.groups?.name;
+        // does the app name match the bind lb object?
+        const y = name === sname;
+        return y;
+    })[0]
+
     // should produce one since each "add serviceGroup" will be unique
     // there is a 1:many with "add serviceGroup" to "bind serviceGroup"
-    if (sgs?.length > 0) {
+    if (serviceGroupString) {
 
-        for await (const x of sgs) {
-            const parent = 'add serviceGroup';
-            const originalString = parent + ' ' + x;
-            const rxMatch = x.match(rx.parents[parent])
-            if (!rxMatch) {
-                /* istanbul ignore next */
-                return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
-            }
-            const opts = parseNsOptions(rxMatch.groups?.opts, rx);
-            app.lines.push(originalString);
-            serviceGroup.name = rxMatch.groups.name;
-            serviceGroup.protocol = rxMatch.groups.protocol;
-            deepmergeInto(serviceGroup, opts)
+        const parent = 'add serviceGroup';
+        const originalString = parent + ' ' + serviceGroupString;
+        const rxMatch = serviceGroupString.match(rx.parents[parent])
+        if (!rxMatch) {
+            /* istanbul ignore next */
+            return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
         }
+        const opts = parseNsOptions(rxMatch.groups?.opts, rx);
+        app.lines.push(originalString);
+        serviceGroup.name = rxMatch.groups.name;
+        serviceGroup.protocol = rxMatch.groups.protocol;
+        deepmergeInto(serviceGroup, opts)
     }
 
     // 'bind serviceGroup <serviceName>'
-    obj.bind?.serviceGroup?.filter(s => s.split(' ')[0] === serviceName)
-        .forEach(async x => {
+    // can have multiple bingings
+    const serviceGroupBindings = obj.bind?.serviceGroup?.filter(s => {
+        const name = serviceName;
+        // pull out the app name from the binding
+        const sname = s.match(/^(?<name>("[\w.\- ]+"|[\w.\-]+)) (?<service>("[\w.\- ]+"|[\w.\-]+))?/)?.groups?.name;
+        // does the app name match the bind lb object?
+        const y = name === sname;
+        return y;
+    })
+    if(serviceGroupBindings?.length > 0) {
+
+        for await (const x of serviceGroupBindings) {
             const parent = 'bind serviceGroup';
             const originalString = parent + ' ' + x;
+            // demo/test at following site
+            // https://regex101.com/r/uEGKaI/1
             const rxMatch = x.match(rx.parents[parent])
-
+    
             if (!rxMatch) {
                 /* istanbul ignore next */
                 return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
             }
-
+            const sgbOpts = parseNsOptions(rxMatch?.groups?.opts, rx)
+    
             app.lines.push(originalString);
-            if (rxMatch.groups.serv) {
-
-
-                const memberRef = rxMatch.groups.serv.split(' ');
-
+            if (rxMatch?.groups?.serv) {
+    
+                // const memberRef = rxMatch.groups.serv.split(' ');
+                const sgMemberName = rxMatch.groups.serv;
+                const sgMemberPort = rxMatch.groups.port;
+    
+                const sgmOpts = parseNsOptions(rxMatch.groups.mbrOpts, rx)
+    
                 // dig server from serviceGroup server reference
-                await digServer(memberRef[0], app, obj, rx)
+                await digServer(sgMemberName, app, obj, rx)
                     .then(i => {
-
+    
                         const serverDetails = {
-                            name: memberRef[0],
-                            port: memberRef[1]
+                            name: sgMemberName,
+                            port: sgMemberPort
                         }
+                        
                         if (!serviceGroup.servers) serviceGroup.servers = []
-
-                        serviceGroup.servers.push(Object.assign(serverDetails, i))
+                        // merge all the details together and push to app.json
+                        serviceGroup.servers.push(
+                            Object.assign(serverDetails, i, sgmOpts)
+                        )
                     })
-
-
-            } else if (rxMatch.groups.monitor) {
-
-                const monitorName = rxMatch.groups.monitor.split(' ').pop();
-
+    
+    
+            } else if (sgbOpts["-monitorName"]) {
+    
+                const monitorName = sgbOpts["-monitorName"];
+    
                 // add the object param/array if not already there
                 if (!serviceGroup.monitors) serviceGroup.monitors = [];
-
+    
                 //todo: get a list of the default monitor names and add them to the config somehow
-
+    
                 // create the serviceGroup monitor object with the name
                 const monitorObj = {
                     name: monitorName
                 };
-
+    
                 // get monitor config line
+                // todo: add support for monitors with spaces in name
                 obj.add?.lb?.monitor?.filter(m => m.split(' ')[0] === monitorName)
                     .forEach(x => {
                         const parent = 'add lb monitor';
@@ -465,28 +524,24 @@ export async function digServiceGroup(serviceName: string, app: AdcApp, obj: Adc
                             return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
                         }
                         const opts = parseNsOptions(rxMatch.groups.opts, rx);
-
+    
                         // add any monitor object options
                         deepmergeInto(monitorObj, opts)
                     })
-
+    
                 // push the full monitor object to the serviceGroup
                 serviceGroup.monitors.push(monitorObj);
-
-            } else if (rxMatch.groups.opts) {
-                deepmergeInto(
-                    serviceGroup,
-                    parseNsOptions(rxMatch.groups.opts, rx)
-                )
+    
             }
-        })
+        }
+    }
 
+    // if we discovered serviceGroup details, push them to the app.json
     if (Object.keys(serviceGroup).length > 0) {
         if (!app.bindings.serviceGroup) app.bindings.serviceGroup = [];
         app.bindings.serviceGroup.push(serviceGroup)
     }
 
-    // sortNsLines(app.lines, rx)
     digSslBinding(app, obj, rx)
 
     return;

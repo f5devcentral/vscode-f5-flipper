@@ -216,8 +216,8 @@ export type Stats = {
 export type AdcRegExTree = {
     adcVersion: RegExp;
     adcBuild: RegExp;
-    cfgOptions: RegExp;
-    cfgOptionsQuotes: RegExp;
+    // cfgOptions: RegExp;
+    // cfgOptionsQuotes: RegExp;
     verbs: RegExp;
     trimQuotes: RegExp;
     parents: {
@@ -238,8 +238,10 @@ export type AdcRegExTree = {
         'add gslb vserver': RegExp;
         'add gslb service': RegExp;
         'add gslb site': RegExp;
-        'add rewrite action': RegExp;
         'add rewrite policy': RegExp;
+        'add rewrite action': RegExp;
+        'add responder policy': RegExp;
+        'add responder action': RegExp;
         'add appflow policy': RegExp;
         'add appflow action': RegExp;
         'add appflow collector': RegExp;
@@ -287,8 +289,12 @@ export type AdcConfObj = {
             service?: string[];
         }
         rewrite?: {
-            action?: string[];
             policy?: string[];
+            action?: string[];
+        };
+        responder?: {
+            policy?: string[];
+            action?: string[];
         };
         cache?: string;
         dns?: {
