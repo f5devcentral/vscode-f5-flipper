@@ -29,45 +29,45 @@
     },
     {
         "code": "a2ea",
-        "severity": "Error",
-        "title": "App with match across services",
-        "message": "XC cannot match across services, like ftp, control on tcp/21, data on tcp/22",
-        "regex": "match-across-(pools|services|virtuals) enabled"
+        "severity": "Warning",
+        "title": "Content Policy detected",
+        "message": "NS Content Policies inspect and manipulate traffic based on application layer options like headers/URL.  Convert to F5 iRule/Traffic Policies",
+        "regex": " -policyName "
     },
     {
         "code": "6a1e",
         "severity": "Warning",
-        "title": "Static NAT not supported",
+        "title": "XC-Static NAT not supported",
         "message": "XC can nat, but uses a range of sources -- refine the regex ",
         "regex": "snat"
     },
     {
         "code": "2245",
         "severity": "Warning",
-        "title": "snat pool object detected",
+        "title": "XC-snat pool object detected",
         "message": "NATs are supported, but not statics",
         "regex": "ltm snatpool"
     },
     {
         "code": "3a67",
         "severity": "Error",
-        "title": "Supporting APM profile detected",
-        "message": "While not a direct APM profile, these profiles on the VS indicate that an APM profile is applied",
-        "regex": "(/Common/websso { }|/Common/rba { })"
+        "title": "",
+        "message": "",
+        "regex": ""
     },
     {
         "code": "4987",
         "severity": "Error",
-        "title": "no classmatch allowed in iRule",
-        "message": "not really XC but will cause problems",
-        "regex": "classmatch"
+        "title": "",
+        "message": "",
+        "regex": ""
     },
     {
         "code": "5a5a",
         "severity": "Error",
-        "title": "iRule stream profile detected",
-        "message": "F5 TMOS stream profile functionality not supported",
-        "regex": "stream::"
+        "title": "",
+        "message": "",
+        "regex": ""
     },
     {
         "code": "0780",

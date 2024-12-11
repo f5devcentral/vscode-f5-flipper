@@ -1,6 +1,5 @@
-
-title: RDP Application Template
-description: RDP Application Template - Includes Long TCP Timeout and Persistence 24-OCT-2024
+title: Simple TFTP Application
+description: TFTP Application - Includes Persistence and TCP Timers 24-OCT-2024
 contentType: application/json
 definitions:
     idleTimeout:
@@ -25,13 +24,24 @@ template: |
                     "virtualAddress": "{{virtual_address}}"
                 },
                 "{{app_name}}": {
-                    "layer4": "tcp",
+                    "layer4": "udp",
                     "pool": "pool_{{app_name}}",
                     "translateServerAddress": true,
                     "translateServerPort": true,
-                    "class": "Service_TCP",
-                    "profileTCP": {
-                        "use": "{{app_name}}-tcp"
+                    "class": "Service_UDP",
+                    {{#comment}}
+                      "description": {{comment}},
+                    {{/comment}}
+                    {{#persistence}}
+                        {{#SOURCEIP}}"persistenceMethods": [{"bigip": "/Common/source_addr"}],{{/SOURCEIP}}
+                        {{#SSLSESSION}}"persistenceMethods": [{"bigip": "/Common/ssl"}],{{/SSLSESSION}}
+                        {{#NONE}}"persistenceMethods" : [],{{/NONE}}
+                    {{/persistence}}
+                    "profileUDP": {
+                        "use": "{{app_name}}-udp"
+                    },
+                    "profileTFTP": {
+                        "use": "{{app_name}}-udp"
                     },
                     "virtualAddresses": [
                         { "use": "sa_{{virtual_address}}" }
@@ -40,7 +50,7 @@ template: |
                     "snat": "auto"
                 },
                 "pool_{{app_name}}": {
-                  "members": [
+                    "members": [
                     {{#pool_members}}
                         {
                         {{#address}}
@@ -75,9 +85,12 @@ template: |
                     {{/lbMethod}}
                     "class": "Pool"
                 },
-                "{{app_name}}-tcp": {
-                    "idleTimeout": {{idleTimeout}},
-                    "class": "TCP_Profile"
+                "{{app_name}}-udp": {
+                  "idleTimeout": {{idleTimeout}},
+                  "class": "UDP_Profile"
+                },
+                "{{app_name}}-tftp": {
+                  "class": "TFTP_Profile"
                 }
             }
         }

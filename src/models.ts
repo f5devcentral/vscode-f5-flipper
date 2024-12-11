@@ -45,7 +45,7 @@ export type NsFastTempParams = {
     virtual_port: string;
     persistence?: { [key: string]: string };
     lbMethod?: { [key: string]: string };
-    cltTimeout?: { [key: string]: string };
+    idleTimeout?: { [key: string]: string } | string;
     timeout?: { [key: string]: string };
     redirectURL?: { [key: string]: string };
     backupVServer?: { [key: string]: string };
@@ -216,9 +216,10 @@ export type Stats = {
 export type AdcRegExTree = {
     adcVersion: RegExp;
     adcBuild: RegExp;
-    cfgOptions: RegExp;
-    cfgOptionsQuotes: RegExp;
+    // cfgOptions: RegExp;
+    // cfgOptionsQuotes: RegExp;
     verbs: RegExp;
+    trimQuotes: RegExp;
     parents: {
         'add ns ip': RegExp;
         'add ns ip6': RegExp;
@@ -237,8 +238,10 @@ export type AdcRegExTree = {
         'add gslb vserver': RegExp;
         'add gslb service': RegExp;
         'add gslb site': RegExp;
-        'add rewrite action': RegExp;
         'add rewrite policy': RegExp;
+        'add rewrite action': RegExp;
+        'add responder policy': RegExp;
+        'add responder action': RegExp;
         'add appflow policy': RegExp;
         'add appflow action': RegExp;
         'add appflow collector': RegExp;
@@ -252,6 +255,7 @@ export type AdcRegExTree = {
         'bind serviceGroup': RegExp;
         'bind lb vserver': RegExp;
         'bind cs vserver': RegExp;
+        'bind ssl service': RegExp;
         'bind ssl vserver': RegExp;
         'bind gslb vserver': RegExp;
     }
@@ -285,8 +289,12 @@ export type AdcConfObj = {
             service?: string[];
         }
         rewrite?: {
-            action?: string[];
             policy?: string[];
+            action?: string[];
+        };
+        responder?: {
+            policy?: string[];
+            action?: string[];
         };
         cache?: string;
         dns?: {
@@ -344,10 +352,12 @@ export type AdcConfObj = {
         gslb?: {
             vserver?: string[];
         }
+        service?: string[]
         serviceGroup?: string[];
         audit?: string;
         tunnel?: string;
         ssl?: {
+            service?: string[];
             vserver?: string[];
         };
     };

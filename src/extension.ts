@@ -22,6 +22,7 @@ import { Hovers } from './hovers';
 import { NsCodeLensProvider } from './codeLens';
 import { FastCore } from './fastCore';
 import { NsTemplateProvider } from './templateViewProvider';
+import { isArray } from 'f5-conx-core';
 
 ext.logger = logger;
 
@@ -131,8 +132,17 @@ export async function activateInternal(context: ExtensionContext) {
             // this is an unsaved file in vscode
 
             // one spot to setup direct text to engine
+            const editors = window.activeTextEditor;;
 
+            const editorText = editors.document.getText();
 
+            // save the text the a local temp file
+
+            // then return the filePath of the temp file
+            filePath = ''
+
+            window.showErrorMessage('f5-flipper.cfgExplore -> save file first:  feature in development');
+            return logger.error('f5-flipper.cfgExplore -> save file first:  feature in development');
 
 
         } else if (item?.path) {
@@ -207,9 +217,9 @@ export async function activateInternal(context: ExtensionContext) {
     }));
 
 
-    context.subscriptions.push(commands.registerCommand('f5-flipper.viewJson', async (x) => {
-        ext.telemetry.capture({ command: 'f5-flipper.viewJson' });
-        const appName = x.label;
+    context.subscriptions.push(commands.registerCommand('f5-flipper.viewNsJson', async (x) => {
+        ext.telemetry.capture({ command: 'f5-flipper.viewNsJson' });
+        const appName = x.label || x.name;
 
         const app = ext.nsCfgProvider.explosion.config.apps.find(a => a.name === appName)
 
@@ -251,9 +261,29 @@ export async function activateInternal(context: ExtensionContext) {
     }));
 
 
-    context.subscriptions.push(commands.registerCommand('f5-flipper.render', async (text) => {
+    context.subscriptions.push(commands.registerCommand('f5-flipper.viewNsLines', async (x) => {
+        ext.telemetry.capture({ command: 'f5-flipper.viewNsLines' });
 
-        ext.nsCfgProvider.render(text, 'lines');
+        if(typeof x === "string") {
+
+            // single ns app as text string > from view app item
+            ext.nsCfgProvider.render(x, 'lines');
+        } else if ( isArray(x) ) {
+
+            // "Sources header item" should be an array of the ns configs
+            // render function will collapse arrays
+            ext.nsCfgProvider.render(x, 'lines');
+            
+        } else { 
+            
+            // got an app view item reference or app ns def
+            // lookup the app and return the details as needed
+            const appName = x.label || x.name;
+            
+            const app = ext.nsCfgProvider.explosion.config.apps.find(a => a.name === appName)
+            
+            ext.nsCfgProvider.render(app, 'lines');
+        }
     }));
 
 

@@ -268,7 +268,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                             desc,
                             'nsApp', icon,
                             TreeItemCollapsibleState.None, {
-                            command: 'f5-flipper.render',
+                            command: 'f5-flipper.viewNsJson',
                             title: '',
                             arguments: [app]
                         }
@@ -319,7 +319,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                         '',
                         'nsGSLB', icon,
                         TreeItemCollapsibleState.None, {
-                        command: 'f5-flipper.render',
+                        command: 'f5-flipper.viewNsJson',
                         title: '',
                         arguments: [app]
                     }
@@ -328,66 +328,66 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
                 sortTreeItems(treeItems);
 
-            } else if (element.label === 'FAST Templates') {
+            // } else if (element.label === 'FAST Templates') {
 
-                // list fast template files
-                // list all the files in the templates folder
-                const files = readdirSync(path.join(this.ctx.extensionPath, 'templates'), { withFileTypes: true });
-
-
-                files.forEach(file => {
-                    // is file or folder?
-
-                    const filePath = path.join(file.path, file.name);
-                    const isFile = lstatSync(filePath).isFile();
-
-                    if (isFile) {
-
-                        // create template object
-                        // const filePath = path.join(this.ctx.extensionPath, 'templates', 'ns', file.name);
-                        // treeItems.push(new NsCfgApp(file.name, ``, ``, 'nsFile', '', TreeItemCollapsibleState.None, {
-                        //     command: 'vscode.open',
-                        //     title: '',
-                        //     arguments: [Uri.file(filePath)]
-                        // }));
-                    } else {
-                        // get number of templates in folder
-                        const filesCount = readdirSync(path.join(this.ctx.extensionPath, 'templates', file.name))
-                        // create folder
-                        treeItems.push(new NsCfgApp(file.name, ``, filesCount.length.toString(), 'nsFolder', '', TreeItemCollapsibleState.Collapsed));
-                    }
+            //     // list fast template files
+            //     // list all the files in the templates folder
+            //     const files = readdirSync(path.join(this.ctx.extensionPath, 'templates'), { withFileTypes: true });
 
 
-                })
+            //     files.forEach(file => {
+            //         // is file or folder?
 
-            } else if (element.contextValue === 'nsFolder') {
+            //         const filePath = path.join(file.path, file.name);
+            //         const isFile = lstatSync(filePath).isFile();
 
-                // list templates in folder
-                const x = element;
-                const files = readdirSync(path.join(this.ctx.extensionPath, 'templates', element.label), { withFileTypes: true });
+            //         if (isFile) {
 
-                files.forEach(file => {
-                    // is file or folder?
-
-                    const filePath = path.join(file.path, file.name);
-                    const isFile = lstatSync(filePath).isFile();
-
-                    if (isFile) {
-
-                        // create template object
-                        // const filePath = path.join(this.ctx.extensionPath, 'templates', 'ns', file.name);
-                        treeItems.push(new NsCfgApp(file.name, ``, ``, 'fastTemplate', '', TreeItemCollapsibleState.None, {
-                            command: 'vscode.open',
-                            title: '',
-                            arguments: [Uri.file(filePath)]
-                        }));
-                    } else {
-                        // create folder
-                        // treeItems.push(new NsCfgApp(file.name, ``, ``, 'nsFolder', '', TreeItemCollapsibleState.Collapsed));
-                    }
+            //             // create template object
+            //             // const filePath = path.join(this.ctx.extensionPath, 'templates', 'ns', file.name);
+            //             // treeItems.push(new NsCfgApp(file.name, ``, ``, 'nsFile', '', TreeItemCollapsibleState.None, {
+            //             //     command: 'vscode.open',
+            //             //     title: '',
+            //             //     arguments: [Uri.file(filePath)]
+            //             // }));
+            //         } else {
+            //             // get number of templates in folder
+            //             const filesCount = readdirSync(path.join(this.ctx.extensionPath, 'templates', file.name))
+            //             // create folder
+            //             treeItems.push(new NsCfgApp(file.name, ``, filesCount.length.toString(), 'nsFolder', '', TreeItemCollapsibleState.Collapsed));
+            //         }
 
 
-                })
+            //     })
+
+            // } else if (element.contextValue === 'nsFolder') {
+
+            //     // list templates in folder
+            //     const x = element;
+            //     const files = readdirSync(path.join(this.ctx.extensionPath, 'templates', element.label), { withFileTypes: true });
+
+            //     files.forEach(file => {
+            //         // is file or folder?
+
+            //         const filePath = path.join(file.path, file.name);
+            //         const isFile = lstatSync(filePath).isFile();
+
+            //         if (isFile) {
+
+            //             // create template object
+            //             // const filePath = path.join(this.ctx.extensionPath, 'templates', 'ns', file.name);
+            //             treeItems.push(new NsCfgApp(file.name, ``, ``, 'fastTemplate', '', TreeItemCollapsibleState.None, {
+            //                 command: 'vscode.open',
+            //                 title: '',
+            //                 arguments: [Uri.file(filePath)]
+            //             }));
+            //         } else {
+            //             // create folder
+            //             // treeItems.push(new NsCfgApp(file.name, ``, ``, 'nsFolder', '', TreeItemCollapsibleState.Collapsed));
+            //         }
+
+
+            //     })
 
             } else if (element.label === 'Sources') {
 
@@ -400,7 +400,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                         `lines: ${source.content.split('\n').length.toString()}`,
                         'nsFile', '',
                         TreeItemCollapsibleState.None, {
-                        command: 'f5-flipper.render',
+                        command: 'f5-flipper.viewNsLines',
                         title: '',
                         arguments: [source.content]
                     }
@@ -512,7 +512,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                 this.explosion.config.sources.length.toString(),
                 '', '',
                 TreeItemCollapsibleState.Collapsed, {
-                command: 'f5-flipper.cfgExplore-show',
+                command: 'f5-flipper.viewNsLines',
                 title: '',
                 arguments: [allSources]
             }
@@ -533,7 +533,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             }
 
             // todo: possibly move all the fast template stuff to a separate view
-            treeItems.push(new NsCfgApp('FAST Templates', 'Conversion Templates', '', 'fastHeader', '', TreeItemCollapsibleState.Collapsed));
+            // treeItems.push(new NsCfgApp('FAST Templates', 'Conversion Templates', '', 'fastHeader', '', TreeItemCollapsibleState.Collapsed));
 
             // display ns config as json object
             treeItems.push(new NsCfgApp('JSON', 'Parent NS.Conf objects as JSON', '', '', '', TreeItemCollapsibleState.None,

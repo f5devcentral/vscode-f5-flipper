@@ -75,7 +75,7 @@ describe('ssl certificate tests', function () {
             "-key": "www.star.groot_2022.pfx",
             "-inform": "PFX",
             "-passcrypt": "XXXX",
-            "-encrypted": "-encryptmethod",
+            "-encrypted": "-encryptmethod ENCMTHD_3",
             profileName: "star.groot.cer",
         })
         

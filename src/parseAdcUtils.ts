@@ -17,35 +17,62 @@ import { AdcRegExTree } from "./models";
  * @param rx regex tree for specific ns adc version
  * @returns options as an object
  */
-export function parseNsOptions(str: string, rx: AdcRegExTree): { [k: string]: string } {
+export function parseNsOptions(str: string = "", rx: AdcRegExTree): { [k: string]: string } {
     const obj = {}
 
-    // grep out all the options with quotes/spaces
-    str.match(rx.cfgOptionsQuotes)?.forEach(el => {
+    // if(str === undefined) return obj;
+
+    // 12.11.2024:  this is a hack to get the regex working for now. 
+    // The current rx doesn't pick up the last "-key value" since it uses forward lookups.
+    str = str.concat(" -devno 12345")
+
+    // grep out all the options with quotes/spaces/normal
+    // tested with https://regex101.com/r/WCU928/1
+    const matches = str.match(/(?<key>-\S+) (?<value>.*?) (?=-\S+)/g);
+    
+    matches?.forEach(el => {
         // split the name off by the first space
-        const [k, v] = el.split(/ (.*)/)
-        obj[k] = v;
+        const k = el.substring(0, el.indexOf(' '));
+        // everything after the first space and trim any trailing white space
+        const v = el.substring(el.indexOf(' ') + 1).trimEnd().replaceAll(/^\"|\"$/g, "");
+
+        if(k === '-devno') {
+
+            // skip adding it to the return object
+        } else {
+
+            obj[k] = trimQuotes(v);
+        }
         str = str.replace(el, '')
     })
 
-    // capture everything else without spaces
-    str.match(rx.cfgOptions)?.forEach(el => {
-        const [k, v] = el.split(' ')
-        if (k === '-devno') {
-            // no nothing, devno is not needed
-        } else {
-            // add to object
-            obj[k] = v;
-            str = str.replace(el, '')
-        }
-    })
-
-    // // turn certain object values to arrays
-    // if () {
-
-    // }
+    // only thing left in the string should be '-devno 123456'
+    // todo: add some logic to check if other things are left outside -devno and log those details for visibility
 
     return obj;
+}
+
+
+/**
+ * detects and trims quotes at the beginning and end of string
+ * @param s string
+ * @returns 
+ */
+export function trimQuotes(s: string): string {
+
+    // what is the index of the first "
+    const first = s.indexOf('"');
+    // what is the index of the last "
+    const last = s.lastIndexOf('"');
+    // get the total length of string
+    const stringL = s.length;
+
+    // Do we have a quote at the beginning and end?
+    if(first === 0 && last === s.length-1) {
+        // return the string between the first and last char (")
+        s = s.substring(1, s.length-1)
+    }
+    return s;
 }
 
 

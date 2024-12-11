@@ -17,6 +17,22 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ### Fixed
 
+[BUG] clean up quotes from strings with spaces #47
+
+
+---
+
+## [1.11.1] - (12-11-2024)
+
+### Fixed
+
+- [RFE] Add another iteration for monitors and ssl settings #39
+  - monitors, ssl and pool members can be applied at the "service" level
+    - Most of the time they are applied at the "service group"
+- [RFE] Processing vservers using IPv6 addresses #43
+- [RFE] ns json output to main work flow #45
+- [BUG] options parsing breaks with spaces/quotes/special-chars #46
+- [BUG] not capturing DISABLED state of serviceGroup/service members #49
 
 ---
 

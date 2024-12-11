@@ -22,7 +22,7 @@ import { execSync } from 'child_process';
  * @type 
  * @returns 
  */
-export async function archiveMake(): Promise<fs.PathLike | string> {
+export async function archiveMake(file: string = '*'): Promise<fs.PathLike | string> {
 
     const filesInArchive: any[] = [];
     const baseArchiveName = 'f5_flipper_test';
@@ -32,9 +32,13 @@ export async function archiveMake(): Promise<fs.PathLike | string> {
    
     const baseArchiveDir = path.join(__dirname, 'artifacts', 'apps');
 
+    if(file !== "*") {
+        return path.join(baseArchiveDir, file)
+    }
+
     // start building the list of filePaths to include in the archive
     // config dir should always be in the archive
-    let filesPaths: string[] = globSync('*', { cwd: baseArchiveDir })
+    let filesPaths: string[] = globSync(file, { cwd: baseArchiveDir })
 
 
 

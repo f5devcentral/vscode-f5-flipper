@@ -43,8 +43,8 @@ export class RegExTree {
      * example;  "set ns config -IPAddress 192.168.86.140 -netmask 255.255.255.0"
      * captures ['-IPAddress 192.168.86.140', '-netmask 255.255.255.0']
      */
-    public cfgOptions = /-\w+ \S+/g;
-    public cfgOptionsQuotes = /-\w+ "[\S ]+"/g;
+    // public cfgOptions = /-\w+ \S+/g;
+    // public cfgOptionsQuotes = /-\w+ "[\S ]+"/g;
 
     private ipAddr = /(?:[0-9]{1,3}\.){3}[0-9]{1,3}/;
 
@@ -54,29 +54,32 @@ export class RegExTree {
     private regexTree: AdcRegExTree = {
         adcVersion: this.adcVersionBaseReg,
         adcBuild: this.adcVersionBuildReg,
-        cfgOptions: this.cfgOptions,
-        cfgOptionsQuotes: this.cfgOptionsQuotes,
+        // cfgOptions: this.cfgOptions,
+        // cfgOptionsQuotes: this.cfgOptionsQuotes,
         verbs: /^(add|set|bind|link|enable|disable) /,
+        trimQuotes: /^"(.*)"$/,
         parents: {
             'add ns ip': /(?<name>\S+) (?<mask>\S+) (?<opts>[\S ]+)/,
             'add ns ip6': /(?<name>\S+) (?<opts>[\S ]+)/,
             'add ns rpcNode': /(?<name>\S+) (?<opts>[\S ]+)/,
             'add route': /(?<opts>\S+)/,
             'add dns nameServer': /(?<server>\S+)/,
-            'add lb vserver': /(?<name>("[\S ]+"|[\S]+)) (?<protocol>\S+) (?<ipAddress>[\d.]+) (?<port>(\d+|\*)) (?<opts>[\S ]+)/,
+            'add lb vserver': /(?<name>("[\S ]+"|[\S]+)) (?<protocol>\S+) (?<ipAddress>[\d\w.:]+) (?<port>(\d+|\*)) (?<opts>[\S ]+)/,
             'add lb monitor': /(?<name>\S+) (?<protocol>\S+) (?<opts>[\S ]+)/,
             'add ssl certKey': /(?<name>\S+) (?<opts>[\S ]+)/,
             'add server': /(?<name>\S+) (?<dest>\S+) ?(?<opts>[\S ]+)?/,
             'add service': /(?<name>\S+) (?<server>\S+) (?<protocol>\S+) (?<port>(\d+|\*)) (?<opts>[\S ]+)/,
             'add serviceGroup': /(?<name>\S+) (?<protocol>\S+) (?<opts>[\S ]+)/,
-            'add cs vserver': /(?<name>("[\S ]+"|[\S]+)) (?<protocol>\S+) (?<ipAddress>[\d.]+) (?<port>(\d+|\*)) (?<opts>[\S ]+)/,
+            'add cs vserver': /(?<name>("[\S ]+"|[\S]+)) (?<protocol>\S+) (?<ipAddress>[\d\w.:]+) (?<port>(\d+|\*)) (?<opts>[\S ]+)/,
             'add cs action': /(?<name>\S+) (?<opts>[\S ]+)/,
             'add cs policy': /(?<name>\S+) (?<opts>[\S ]+)/,
             'add gslb vserver': /(?<name>("[\S ]+"|[\S]+)) (?<protocol>\S+) (?<opts>[\S ]+)/,
             'add gslb service': /(?<name>("[\S ]+"|[\S]+)) (?<server>\S+) (?<protocol>\S+) (?<port>(\d+|\*)) (?<opts>[\S ]+)/,
             'add gslb site': /(?<name>("[\S ]+"|[\S]+)) (?<server>\S+) (?<opts>[\S ]+)/,
-            'add rewrite action': /(?<name>\S+) (?<opts>[\S ]+)/,
             'add rewrite policy': /(?<name>\S+) (?<opts>[\S ]+)/,
+            'add rewrite action': /(?<name>\S+) (?<opts>[\S ]+)/,
+            'add responder policy': /(?<name>\S+) (?<opts>[\S ]+)/,
+            'add responder action': /(?<name>\S+) (?<opts>[\S ]+)/,
             'add appflow policy': /(?<name>\S+) (?<rule>[\S]+) (?<action>[\S]+)/,
             'add appflow action': /(?<name>\S+) (?<opts>[\S ]+)/,
             'add appflow collector': /(?<name>\S+) (?<opts>[\S ]+)/,
@@ -86,10 +89,11 @@ export class RegExTree {
             'set ns param': /(?<opts>[\S ]+)/,
             'set ns hostName': /(?<hostName>[\S ]+)/,
             'set gslb vserver': /(?<name>\S+) (?<opts>[\S ]+)/,
-            'bind service': /(?<opts>[\S ]+)/,
-            'bind serviceGroup': /(?<name>("[\S ]+"|[\S]+)) ((?<serv>\S+ (\d+|\*))|(?<monitor>-monitorName \S+)|(?<opts>[\S ]+))/,
-            'bind lb vserver': /(?<name>("[\S ]+"|[\S]+)) ((?<opts>-[\S ]+)|(?<service>[\S]+))/,
+            'bind service': /(?<name>("[\S ]+"|[\S]+)) ((?<serv>\S+ (\d+|\*))|(?<monitor>-monitorName \S+)|(?<opts>[\S ]+))/,
+            'bind serviceGroup': /(?<name>("[\S ]+"|[\S]+)) ((?<serv>\S+) (?<port>\d+|\*))?(?<opts>[\S ]+)?/,
+            'bind lb vserver': /(?<name>("[\S ]+"|[\S]+)) ((?<opts>-[\S ]+)|(?<service>("[\S ]+"|[\S]+)))/,
             'bind cs vserver': /(?<name>("[\S ]+"|[\S]+)) (?<opts>[\S ]+)/,
+            'bind ssl service': /(?<name>("[\S ]+"|[\S]+)) (?<opts>[\S ]+)/,
             'bind ssl vserver': /(?<name>("[\S ]+"|[\S]+)) (?<opts>[\S ]+)/,
             'bind gslb vserver': /(?<name>("[\S ]+"|[\S]+)) (?<opts>[\S ]+)/,
         }
