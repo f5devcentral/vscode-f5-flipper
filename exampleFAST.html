@@ -1,23 +1,163 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <title>Template Preview</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+        integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
     <!-- <link rel="stylesheet" href="./styles/vscode.css"> -->
 </head>
 
 <body>
     <div id="editor"></div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+        crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@2.5.1/dist/jsoneditor.min.js"></script>
+
     <script>
-        const schema = {"type":"object","properties":{"tenant_name":{"type":"string","title":"Tenant Name","description":"The *tenant* is the high-level grouping in an AS3 declaration. FAST deploys all configuration for a given tenant in a BIG-IP partition of the same name.","minLength":1,"maxLength":255,"pattern":"^[A-Za-z][0-9A-Za-z_.-]*$","immutable":true,"propertyOrder":0},"app_name":{"type":"string","title":"Application Name","description":"The *application* is the low-level grouping in an AS3 declaration. FAST deploys all configuration for a given application in a BIG-IP folder within the tenant partition.","minLength":1,"maxLength":255,"pattern":"^[A-Za-z][0-9A-Za-z_.-]*$","immutable":true,"propertyOrder":1},"virtual_address":{"type":"string","title":"Virtual Server IP Address","description":"This IP address, combined with the port you specify below, becomes the BIG-IP virtual server address and port, which clients use to access the application. The system uses this IP:Port for distributing requests to the web servers.","propertyOrder":2},"virtual_port":{"type":"integer","minimum":0,"maximum":65535,"title":"Virtual Server Port","default":443,"propertyOrder":3},"pool_members":{"type":"array","title":"Pool Members","description":"The pool members are the servers that receive traffic from the virtual server (upstream). To share nodes between pools see K88250015: AS3 expected behavior of 'shareNodes' in declarations.   https://my.f5.com/manage/s/article/K88250015","uniqueItems":true,"items":{"type":"object","properties":{"serverAddress":{"type":"string","title":"Server Address"},"servicePort":{"type":"integer","minimum":0,"maximum":65535,"title":"Server Port","default":80},"shareNodes":{"type":"boolean","title":"Share Node","default":false,"format":"checkbox"}},"required":["serverAddress"]},"skip_xform":true,"propertyOrder":4,"format":"table"}},"required":["tenant_name","app_name","virtual_address","pool_members"],"dependencies":{"serverAddress":["pool_members"],"servicePort":["pool_members"],"shareNodes":["pool_members"]},"title":"Flipper -> AS3 HTTP Application Template","description":"This template aims to provide a jumping point for taking an NS app config and converting it to AS3.","definitions":{}};
-        const defaults = {"virtual_port":"443","tenant_name":"starlord_offload_lb_vs","app_name":"starlord_offload_lb_vs","virtual_address":"192.168.86.142","pool_members":[{"serverAddress":"1.2.3.5","servicePort":"80"},{"serverAddress":"1.2.3.4","servicePort":"80"}]};
+
+        const as3 = { "$schema": "https://raw.githubusercontent.com/F5Networks/f5-appsvcs-extension/HEAD/schema/latest/as3-schema.json", "class": "AS3", "action": "deploy", "persist": true, "declaration": { "class": "ADC", "schemaVersion": "3.0.0", "id": "urn:uuid:33045210-3ab8-4636-9b2a-c98d22ab915d", "label": "Sample 1", "remark": "Simple HTTP application with RR pool", "Sample_01": { "class": "Tenant", "A1": { "class": "Application", "template": "http", "serviceMain": { "class": "Service_HTTP", "virtualAddresses": ["10.0.1.10"], "pool": "web_pool" }, "web_pool": { "class": "Pool", "monitors": ["http"], "members": [{ "servicePort": 80, "serverAddresses": ["192.0.1.10", "192.0.1.11"] }] } } } } }
+
+        // given above as3, abstract pool details
+        // find the pool reference in the app
+
+
+        // list apps in the declaration
+
+        // test pool
+        const poolMembers = [
+            {
+                "servicePort": 80,
+                "serverAddresses": [
+                    "192.0.1.10",
+                    "192.0.1.11"
+                ]
+            }
+        ]
+
+        const poolMembers2 = [
+            {
+                "servicePort": 80,
+                "serverAddresses": [
+                    "192.0.1.11"
+                ],
+                "enable": false
+            },
+            {
+                "servicePort": 8080,
+                "servers": [
+                    {
+                        "address": "192.0.5.50",
+                        "name": "serv15"
+                    }
+                ],
+                "enable": true
+            },
+            {
+                "servicePort": 8081,
+                "servers": [
+                    {
+                        "address": "192.0.6.50",
+                        "name": "serv16"
+                    }
+                ],
+                "enable": true
+            }
+        ]
+
+        const poolMembers3 = [
+            {
+                "serverAddress": "192.0.5.50",
+                "servicePort": "80",
+                "enabled": true,
+                "shareNodes": false
+            },
+            {
+                "serverAddress": "192.0.5.51",
+                "servicePort": "81",
+                "enabled": true,
+                "shareNodes": false
+            },
+            {
+                "serverAddress": "192.0.5.51",
+                "servicePort": "8080",
+                "enabled": false,
+                "shareNodes": false
+            }
+        ]
+
+        const newSchema = {
+            "type": "object",
+            "properties": {
+                "pool_members": {
+                    "type": "array",
+                    "title": "Pool Members",
+                    "description": "The pool members are the servers that receive traffic from the virtual server (upstream). To share nodes between pools see K88250015: AS3 expected behavior of 'shareNodes' in declarations.   https://my.f5.com/manage/s/article/K88250015",
+                    "uniqueItems": true,
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "serverAddress": {
+                                "type": "string",
+                                "title": "Server Address"
+                            },
+                            "servicePort": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 65535,
+                                "title": "Server Port",
+                                "default": 80
+                            },
+                            "enabled": {
+                                "type": "boolean",
+                                "title": "Enabled",
+                                "default": true,
+                                "format": "checkbox"
+                            },
+                            "shareNodes": {
+                                "type": "boolean",
+                                "title": "Share Node",
+                                "default": false,
+                                "format": "checkbox"
+                            }
+                        },
+                        "required": [
+                            "serverAddress"
+                        ]
+                    },
+                    "skip_xform": true,
+                    "propertyOrder": 4,
+                    "format": "table"
+                }
+            },
+            "required": [
+                "pool_members"
+            ],
+            "dependencies": {
+                "serverAddress": [
+                    "pool_members"
+                ],
+                "servicePort": [
+                    "pool_members"
+                ],
+                "shareNodes": [
+                    "pool_members"
+                ]
+            },
+            "title": "pool capn",
+            "description": "stuff",
+            "definitions": {}
+        };
+        const schema = { "type": "object", "properties": { "tenant_name": { "type": "string", "title": "Tenant Name", "description": "The *tenant* is the high-level grouping in an AS3 declaration. FAST deploys all configuration for a given tenant in a BIG-IP partition of the same name.", "minLength": 1, "maxLength": 255, "pattern": "^[A-Za-z][0-9A-Za-z_.-]*$", "immutable": true, "propertyOrder": 0 }, "app_name": { "type": "string", "title": "Application Name", "description": "The *application* is the low-level grouping in an AS3 declaration. FAST deploys all configuration for a given application in a BIG-IP folder within the tenant partition.", "minLength": 1, "maxLength": 255, "pattern": "^[A-Za-z][0-9A-Za-z_.-]*$", "immutable": true, "propertyOrder": 1 }, "virtual_address": { "type": "string", "title": "Virtual Server IP Address", "description": "This IP address, combined with the port you specify below, becomes the BIG-IP virtual server address and port, which clients use to access the application. The system uses this IP:Port for distributing requests to the web servers.", "propertyOrder": 2 }, "virtual_port": { "type": "integer", "minimum": 0, "maximum": 65535, "title": "Virtual Server Port", "default": 443, "propertyOrder": 3 }, "pool_members": { "type": "array", "title": "Pool Members", "description": "The pool members are the servers that receive traffic from the virtual server (upstream). To share nodes between pools see K88250015: AS3 expected behavior of 'shareNodes' in declarations.   https://my.f5.com/manage/s/article/K88250015", "uniqueItems": true, "items": { "type": "object", "properties": { "serverAddress": { "type": "string", "title": "Server Address" }, "servicePort": { "type": "integer", "minimum": 0, "maximum": 65535, "title": "Server Port", "default": 80 }, "shareNodes": { "type": "boolean", "title": "Share Node", "default": false, "format": "checkbox" } }, "required": ["serverAddress"] }, "skip_xform": true, "propertyOrder": 4, "format": "table" } }, "required": ["tenant_name", "app_name", "virtual_address", "pool_members"], "dependencies": { "serverAddress": ["pool_members"], "servicePort": ["pool_members"], "shareNodes": ["pool_members"] }, "title": "Flipper -> AS3 HTTP Application Template", "description": "This template aims to provide a jumping point for taking an NS app config and converting it to AS3.", "definitions": {} };
+        const defaults = { "virtual_port": "443", "tenant_name": "starlord_offload_lb_vs", "app_name": "starlord_offload_lb_vs", "virtual_address": "192.168.86.142", "pool_members": [{ "serverAddress": "1.2.3.5", "servicePort": "80" }, { "serverAddress": "1.2.3.4", "servicePort": "80" }] };
         const editor = new JSONEditor(document.getElementById('editor'), {
-            schema,
-            startval: defaults,
+            schema: newSchema,
+            startval: { pool_members: poolMembers3 },
             compact: true,
             show_errors: 'always',
             disable_edit_json: true,
@@ -28,4 +168,5 @@
         });
     </script>
 </body>
+
 </html>

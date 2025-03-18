@@ -20,7 +20,7 @@ let testFile: string;
 const parsedFileEvents: any[] = []
 const parsedObjEvents: any[] = []
 
-describe('serviceGroup abstraction tests', function () {
+describe('Namaste App tests', function () {
 
   let adc: ADC;
   let expld: Explosion;
@@ -30,7 +30,7 @@ describe('serviceGroup abstraction tests', function () {
   before(async function () {
     // log test file name - makes it easer for troubleshooting
     console.log('       file:', __filename)
-    testFile = await archiveMake('fn-2187.ns.conf') as string;
+    testFile = await archiveMake('namaste.conf') as string;
     // clear the events arrays
     parsedFileEvents.length = 0
     parsedObjEvents.length = 0
@@ -60,41 +60,46 @@ describe('serviceGroup abstraction tests', function () {
 
 
 
-  it(`basic serviceGroup reference`, async () => {
+  it(`basic serviceGroup reference (spaces in name)`, async () => {
 
     // cs -> bind ssl vserver groot-cs-vsvr -certkeyName star.groot.cer
 
     // get application we are looking for
-    const app = expld.config.apps?.find(x => x.name === 'fn-2187-vip_http')
+    const app = expld.config.apps?.find(x => x.name === '"namaste 443 vip"')
 
     // get the serviceGroup details
     const appServiceGroup = app!.bindings!.serviceGroup![0]
 
-    assert.deepStrictEqual(appServiceGroup.name, 'fn-2187_http_svg');
+    assert.deepStrictEqual(appServiceGroup.name, '"namaste 8443 svg"');
 
   })
 
 
-  it(`serviceGroup with Multiple Monitors`, async () => {
+  it(`serviceGroup with Multiple Detailed Monitors`, async () => {
 
     // lb -> bind ssl vserver starlord_offload_lb_vs -certkeyName starlord.galaxy.io_cert
 
-    const app = expld.config.apps?.find(x => x.name === 'fn-2187-vip_http');
+    const app = expld.config.apps?.find(x => x.name === '"namaste 443 vip"');
 
     // get the cert details
     const appServiceGroupMonitors = app?.bindings?.serviceGroup![0].monitors;
 
     // serviceGroup Monitors
     assert.deepStrictEqual(appServiceGroupMonitors, [
-      {
-        name: "HTTP",
-      },
-      {
-        name: "tcp",
-      },
-      {
-        name: "ping",
-      },
+        {
+          name: "namaste_custome_tcp_mon",
+          "-LRTM": "DISABLED",
+          "-interval": "30",
+          "-resptimeout": "15",
+          "-secure": "YES",
+        },
+        {
+          name: "namaste_awaken_http8443_mon",
+          "-send": "GET /look/within",
+          "-recv": "\\\"find\\\":love",
+          "-LRTM": "DISABLED",
+          "-secure": "YES",
+        },
     ])
   })
 
@@ -102,7 +107,7 @@ describe('serviceGroup abstraction tests', function () {
   it(`serviceGroup servers count`, async () => {
 
     // get application we are looking for
-    const app = expld.config.apps?.find(x => x.name === 'fn-2187-vip_http');
+    const app = expld.config.apps?.find(x => x.name === '"namaste 443 vip"');
 
     // get a serviceGroup server details
     const appServiceGroupServers = app?.bindings?.serviceGroup![0].servers;
@@ -110,27 +115,28 @@ describe('serviceGroup abstraction tests', function () {
     const appServiceGroupServersLength = appServiceGroupServers?.length
 
     // serviceGroup Monitors
-    assert.deepStrictEqual(appServiceGroupServersLength, 7)
+    assert.deepStrictEqual(appServiceGroupServersLength, 6)
   })
 
   it(`serviceGroup server details with disabled`, async () => {
 
     // get application we are looking for
-    const app = expld.config.apps?.find(x => x.name === 'fn-2187-vip_http');
+    const app = expld.config.apps?.find(x => x.name === '"namaste 443 vip"');
 
     // get a serviceGroup server details
     const appServiceGroupServers = app?.bindings?.serviceGroup![0].servers;
 
     // filter out bb8-01 server details
-    const appServiceGroupServer = appServiceGroupServers?.find(x => x.name === 'bb8-01.jaku.dev')
+    const appServiceGroupServer = appServiceGroupServers?.find(x => x.name === 'dragonfly1.yoga.in')
 
     // serviceGroup Monitors
     assert.deepStrictEqual(appServiceGroupServer, {
-      name: "bb8-01.jaku.dev",
-      port: "80",
-      hostname: "bb8-01.jaku.dev",
+      name: "dragonfly1.yoga.in",
+      port: "8443",
+      address: "10.240.24.215",
       "-state": "DISABLED",
     })
   })
+
 
 });
