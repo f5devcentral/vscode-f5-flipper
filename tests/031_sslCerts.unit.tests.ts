@@ -76,8 +76,14 @@ describe('ssl certificate tests', function () {
             "-inform": "PFX",
             "-passcrypt": "XXXX",
             "-encrypted": "-encryptmethod ENCMTHD_3",
-            profileName: "star.groot.cer",
-        })
+            "-certkeyName": "star.groot.cer",
+            "-eccCurveName": [
+              "P_256",
+              "P_384",
+              "P_224",
+              "P_521",
+            ],
+          })
         
     })
 
@@ -94,7 +100,14 @@ describe('ssl certificate tests', function () {
         assert.deepStrictEqual(appCert, {
             "-cert": "foo.crt",
             "-key": "foo.key",
-            profileName: "starlord.galaxy.io_cert",
+            "-cipherName": "ECDHE",
+            "-certkeyName": "starlord.galaxy.io_cert",
+            "-eccCurveName": [
+              "P_256",
+              "P_384",
+              "P_224",
+              "P_521",
+            ],
           })
     })
 
