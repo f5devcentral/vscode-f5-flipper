@@ -26,7 +26,8 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ### Fixed
 
-- Had to rework [BUG] not capturing DISABLED state of serviceGroup/service members #49
+- [BUG] state missing from abstraction #52
+  - rework [BUG] not capturing DISABLED state of serviceGroup/service members #49
   - adjust parsing of options and make sure opts are added back into the json object for the app
   - update the munge functin to carry params through fqdn/address branch logic
 - Added more ssl parsing
