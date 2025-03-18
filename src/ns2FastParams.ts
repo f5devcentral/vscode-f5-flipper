@@ -90,7 +90,6 @@ export function mungeNS2FAST(nsApp: AdcApp) {
             for (const sg of nsApp.bindings.serviceGroup) {
 
                 if (sg.servers) {
-                    // push all the monitors we found on this serviceGroup
                     // @ts-expect-error
                     nsFastJson.pool_members.push(...sg.servers);
                 }
@@ -120,6 +119,11 @@ export function mungeNS2FAST(nsApp: AdcApp) {
                         name: poolMember.name,
                         port: poolMember.port
                     }
+                    
+                    // move over pool member state if defined
+                    if(poolMember['-state']) {
+                        tempMemberObj.fqdn.state = poolMember['-state'];
+                    }
 
                 } else {
                     
@@ -129,6 +133,10 @@ export function mungeNS2FAST(nsApp: AdcApp) {
                         port: tempMemberObj.port === '*' ? '0' : nsApp.port
                     }
 
+                    // move over pool member state if defined
+                    if(poolMember['-state']) {
+                        tempMemberObj.address.state = poolMember['-state'];
+                    }
                 }
 
                 // overwrite the new member details

@@ -22,6 +22,23 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.12.0] - (03-17-2025)
+
+### Fixed
+
+- [BUG] state missing from abstraction #52
+  - rework [BUG] not capturing DISABLED state of serviceGroup/service members #49
+  - adjust parsing of options and make sure opts are added back into the json object for the app
+  - update the munge functin to carry params through fqdn/address branch logic
+- Added more ssl parsing
+- Added more parsing of objects with space in name
+  - continuation of #46
+- Added more tests to support serviceGroup details for extended details
+- Added tests for Namaste app to round out advanced features;
+  - Health monitors details
+
+---
+
 ## [1.11.1] - (12-11-2024)
 
 ### Fixed
