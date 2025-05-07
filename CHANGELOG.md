@@ -22,6 +22,14 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.12.1] - (03-26-2025)
+
+### Fixed
+
+- [BUG] monitor details missing protocol
+
+---
+
 ## [1.12.0] - (03-17-2025)
 
 ### Fixed

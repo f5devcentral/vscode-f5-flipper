@@ -10,6 +10,61 @@
     background-color: var(--vscode-editor-background) !important;
 }
 
+
+
+
+
+
+nav {
+    background-color: #252526;
+    /* VSCode sidebar background */
+    margin: 2px;
+    overflow: hidden;
+}
+
+nav ul {
+    margin: 2px;
+    padding: 5px;
+}
+
+nav ul li {
+    display: inline-block;
+    list-style-type: none;
+}
+
+/* Create a style for the first level items */
+nav>ul>li>a {
+    color: #ffffff;
+    /* VSCode button foreground */
+    background-color: #0e639c;
+    /* VSCode button background */
+    display: block;
+    line-height: 2em;
+    padding: 2em 2em;
+    text-decoration: none;
+}
+
+button {
+    color: #ffffff;
+    /* VSCode button foreground */
+    background-color: #0e639c;
+    /* VSCode button background */
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #1177bb;
+    /* VSCode button hover background */
+}
+
+
+
+
+
+
+
 body {
     padding: 0 var(--container-paddding);
     color: var(--vscode-foreground);
@@ -24,8 +79,8 @@ ul {
     padding-left: var(--container-paddding);
 }
 
-body > *,
-form > * {
+body>*,
+form>* {
     margin-block-start: var(--input-margin-vertical);
     margin-block-end: var(--input-margin-vertical);
 }
@@ -50,7 +105,7 @@ a:active {
     font-size: var(--vscode-font-size);
     font-weight: var(--vscode-font-weight);
     font-family: var(--vscode-font-family);
-  }
+}
 
 code {
     font-size: var(--vscode-editor-font-size);

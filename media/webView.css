@@ -1,5 +1,51 @@
 @charset "UTF-8";
 
+
+
+
+body {
+  margin: 5px;
+  padding: 5px;
+  font-size: 15px;
+  background-color: #1e1e1e; /* VSCode editor background */
+  color: #d4d4d4; /* VSCode editor foreground */
+}
+nav {
+  background-color: #252526; /* VSCode sidebar background */
+  margin: 2px;
+  overflow: hidden;
+}
+nav ul {
+  margin: 2px;
+  padding: 5px;
+}
+nav ul li {
+  display: inline-block;
+  list-style-type: none;
+}
+
+/* Create a style for the first level items */
+nav > ul > li > a {
+  color: #ffffff; /* VSCode button foreground */
+  background-color: #0e639c; /* VSCode button background */
+  display: block;
+  line-height: 2em;
+  padding: 2em 2em;
+  text-decoration: none;
+}
+button {
+  color: #ffffff; /* VSCode button foreground */
+  background-color: #0e639c; /* VSCode button background */
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #1177bb; /* VSCode button hover background */
+}
+
+
+
 body.vscode-light {
   background-color: inherit;
 }
