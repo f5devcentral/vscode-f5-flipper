@@ -22,6 +22,14 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.13.0] - (09-11-2025)
+
+### Fixed
+
+- [BUG] abstraction error dalvarez #61
+
+---
+
 ## [1.12.1] - (03-26-2025)
 
 ### Fixed

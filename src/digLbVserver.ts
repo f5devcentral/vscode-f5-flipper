@@ -137,6 +137,9 @@ export async function digBindService(serviceName: string, app: AdcApp, obj: AdcC
         return sName;
     })
 
+    //if no bindservices, break/return
+    if(!bindServices) return;
+
     // loop through services and dig additional details
     for await (const x of bindServices) {
         const parent = 'bind service';
