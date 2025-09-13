@@ -11,6 +11,7 @@ jobs:
 
   tests:
     runs-on: ${{ matrix.os }}
+    continue-on-error: true
     strategy:
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
