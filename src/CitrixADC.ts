@@ -302,7 +302,7 @@ export default class ADC extends EventEmitter {
             return [version[1], build];
         } else {
             const msg = 'citrix adc/ns version not detected, defaulting to v13.0'
-            logger.error(msg)
+            logger.warn(msg)
             return ['13.0', '000'];
             // throw new Error(msg)
         }
