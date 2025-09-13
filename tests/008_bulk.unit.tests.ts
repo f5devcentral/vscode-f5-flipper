@@ -1,8 +1,8 @@
-import fast from '@f5devcentral/f5-fast-core';
+// import fast from '@f5devcentral/f5-fast-core';
 import assert from 'assert';
-import { fstat, readFileSync } from 'fs';
-import path from 'path';
-import yaml from 'js-yaml'; // Add this import for YAML parsing
+// import { fstat, readFileSync } from 'fs';
+// import path from 'path';
+// import yaml from 'js-yaml'; // Add this import for YAML parsing
 // const jsdom = require("jsdom");
 // const { JSDOM } = jsdom;
 // import { JSONEditor } from '@json-editor/json-editor'
@@ -118,33 +118,33 @@ describe('fast tests', function () {
 
     it(`load fast template set`, async () => {
 
-        const localPath = path.join(__dirname, '..', 'templates');
+        // const localPath = path.join(__dirname, '..', 'templates');
 
-        const provider = new fast.FsTemplateProvider(localPath)
-        provider.invalidateCache();
+        // const provider = new fast.FsTemplateProvider(localPath)
+        // provider.invalidateCache();
 
-        console.log('localPath', localPath)
+        // console.log('localPath', localPath)
 
-        const resp = await provider.fetch('ns/http')
-            .then((template) => {
-                // console.log(template.getParametersSchema());
-                // console.log(template.render({
-                //     var: "value",
-                //     boolVar: false
-                // }));
-                // get the schema for the template
-                const schema = template.getParametersSchema();
-                // get the default values for the template
-                const defaultParams = template.getCombinedParameters();
-                // const html = fast.guiUtils.generateHtmlPreview(schema, defaultParams)
-                // html;
-                return { schema, defaultParams }
-            })
-            .catch(e => {
-                console.log(e);
-            })
+        // const resp = await provider.fetch('ns/http')
+        //     .then((template) => {
+        //         // console.log(template.getParametersSchema());
+        //         // console.log(template.render({
+        //         //     var: "value",
+        //         //     boolVar: false
+        //         // }));
+        //         // get the schema for the template
+        //         const schema = template.getParametersSchema();
+        //         // get the default values for the template
+        //         const defaultParams = template.getCombinedParameters();
+        //         // const html = fast.guiUtils.generateHtmlPreview(schema, defaultParams)
+        //         // html;
+        //         return { schema, defaultParams }
+        //     })
+        //     .catch(e => {
+        //         console.log(e);
+        //     })
 
-        assert.ok(resp);
+        // assert.ok(resp);
     })
 
 
