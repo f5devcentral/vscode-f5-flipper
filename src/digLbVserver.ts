@@ -137,6 +137,9 @@ export async function digBindService(serviceName: string, app: AdcApp, obj: AdcC
         return sName;
     })
 
+    //if no bindservices, break/return
+    if(!bindServices) return;
+
     // loop through services and dig additional details
     for await (const x of bindServices) {
         const parent = 'bind service';
@@ -457,7 +460,11 @@ export async function digServiceGroup(serviceName: string, app: AdcApp, obj: Adc
                             return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
                         }
                         const opts = parseNsOptions(rxMatch.groups.opts, rx);
-    
+                        
+                        if(rxMatch?.groups?.protocol) {
+                            // if we got the monitor type (protocol) from the rx, inject it into the opts object
+                            opts.protocol = rxMatch.groups?.protocol
+                        }
                         // add any monitor object options
                         deepmergeInto(monitorObj, opts)
                     })

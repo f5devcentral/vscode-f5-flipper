@@ -3,7 +3,7 @@
   "displayName": "F5 Flipper",
   "description": "Breaking down Citrix NetScaler ADC configs",
   "publisher": "F5DevCentral",
-  "version": "1.12.0",
+  "version": "1.13.0",
   "keywords": [
     "F5",
     "F5Networks",
@@ -92,9 +92,7 @@
       {
         "command": "f5-flipper.report",
         "title": "Flipper Report",
-        "category": "F5-Flipper",
-        "icon": "$(output)",
-        "enablement": "view == nsConfigView"
+        "category": "F5-Flipper"
       },
       {
         "command": "f5-flipper.report2",
@@ -160,11 +158,6 @@
         }
       ],
       "view/item/context": [
-        {
-          "command": "f5-flipper.report",
-          "when": "view == nsConfigView && viewItem == nsReport",
-          "group": "inline"
-        },
         {
           "command": "f5-flipper.csv",
           "when": "view == nsConfigView && viewItem =~ /(appsHeader|gslbHeader)/",
@@ -232,12 +225,13 @@
     "typescript": "^5.1.3"
   },
   "dependencies": {
-    "@f5devcentral/f5-fast-core": "^0.23.0",
+    "@f5devcentral/f5-fast-core": "^0.25.0",
     "deepmerge-ts": "^5.1.0",
     "f5-conx-core": "^1.0.0",
     "glob": "^10.3.12",
     "js-yaml": "^4.1.0",
     "lodash.get": "^4.4.2",
+    "mustache": "^4.2.0",
     "tar": "^6.2.1",
     "tar-stream": "^3.1.7",
     "uuid": "^9.0.1"

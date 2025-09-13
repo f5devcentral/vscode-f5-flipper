@@ -1,0 +1,136 @@
+{
+    "class": "AS3",
+    "action": "deploy",
+    "persist": true,
+    "declaration": {
+        "class": "ADC",
+        "schemaVersion": "3.50.0",
+        "label": "TCP Listen Policy Multi-Port Application",
+        "remark": "NetScaler wildcard VS with listen policy converted to AS3",
+        "MultiPortApp": {
+            "class": "Tenant",
+            "defaultRouteDomain": 0,
+            "Application": {
+                "class": "Application",
+                "template": "generic",
+                "serviceMain": {
+                    "class": "Service_Generic",
+                    "virtualAddresses": ["192.168.1.15"],
+                    "virtualPort": 80,
+                    "pool": "app_multiport_pool",
+                    "persistenceMethods": ["source-address"]
+                },
+                "serviceHTTPS": {
+                    "class": "Service_Generic",
+                    "virtualAddresses": ["192.168.1.15"],
+                    "virtualPort": 443,
+                    "pool": "app_multiport_pool",
+                    "persistenceMethods": ["source-address"]
+                },
+                "service4040": {
+                    "class": "Service_Generic",
+                    "virtualAddresses": ["192.168.1.15"],
+                    "virtualPort": 4040,
+                    "pool": "app_multiport_pool",
+                    "persistenceMethods": ["source-address"]
+                },
+                "service4050": {
+                    "class": "Service_Generic",
+                    "virtualAddresses": ["192.168.1.15"],
+                    "virtualPort": 4050,
+                    "pool": "app_multiport_pool",
+                    "persistenceMethods": ["source-address"]
+                },
+                "service4065": {
+                    "class": "Service_Generic",
+                    "virtualAddresses": ["192.168.1.15"],
+                    "virtualPort": 4065,
+                    "pool": "app_multiport_pool",
+                    "persistenceMethods": ["source-address"]
+                },
+                "service4545": {
+                    "class": "Service_Generic",
+                    "virtualAddresses": ["192.168.1.15"],
+                    "virtualPort": 4545,
+                    "pool": "app_multiport_pool",
+                    "persistenceMethods": ["source-address"]
+                },
+                "service4555": {
+                    "class": "Service_Generic",
+                    "virtualAddresses": ["192.168.1.15"],
+                    "virtualPort": 4555,
+                    "pool": "app_multiport_pool",
+                    "persistenceMethods": ["source-address"]
+                },
+                "service5656": {
+                    "class": "Service_Generic",
+                    "virtualAddresses": ["192.168.1.15"],
+                    "virtualPort": 5656,
+                    "pool": "app_multiport_pool",
+                    "persistenceMethods": ["source-address"]
+                },
+                "service6050": {
+                    "class": "Service_Generic",
+                    "virtualAddresses": ["192.168.1.15"],
+                    "virtualPort": 6050,
+                    "pool": "app_multiport_pool",
+                    "persistenceMethods": ["source-address"]
+                },
+                "service6555": {
+                    "class": "Service_Generic",
+                    "virtualAddresses": ["192.168.1.15"],
+                    "virtualPort": 6555,
+                    "pool": "app_multiport_pool",
+                    "persistenceMethods": ["source-address"]
+                },
+                "service7050": {
+                    "class": "Service_Generic",
+                    "virtualAddresses": ["192.168.1.15"],
+                    "virtualPort": 7050,
+                    "pool": "app_multiport_pool",
+                    "persistenceMethods": ["source-address"]
+                },
+                "service7555": {
+                    "class": "Service_Generic",
+                    "virtualAddresses": ["192.168.1.15"],
+                    "virtualPort": 7555,
+                    "pool": "app_multiport_pool",
+                    "persistenceMethods": ["source-address"]
+                },
+                "service9696": {
+                    "class": "Service_Generic",
+                    "virtualAddresses": ["192.168.1.15"],
+                    "virtualPort": 9696,
+                    "pool": "app_multiport_pool",
+                    "persistenceMethods": ["source-address"]
+                },
+                "app_multiport_pool": {
+                    "class": "Pool",
+                    "loadBalancingMode": "round-robin",
+                    "monitors": [
+                        {"use": "app_multiport_monitor"}
+                    ],
+                    "members": [
+                        {
+                            "servicePort": 80,
+                            "serverAddresses": ["10.1.1.205"],
+                            "shareNodes": true
+                        },
+                        {
+                            "servicePort": 80,
+                            "serverAddresses": ["10.1.1.203"],
+                            "shareNodes": true
+                        }
+                    ]
+                },
+                "app_multiport_monitor": {
+                    "class": "Monitor",
+                    "monitorType": "tcp",
+                    "interval": 15,
+                    "timeout": 8,
+                    "targetPort": 5656
+                }
+            }
+        }
+    }
+}

@@ -11,7 +11,7 @@ Future goals include conversion outputs for different supported F5 solutions, in
 
 ![Project Flipper](project-flipper-dophin.png)
 
-# I need help
+## I need help
 
 Greetings, I need help to grow this tool.  It is at a point where I need feeback from the field about the application abstraction process and diagnostic rules.  Please, use the tool and provide any feedback/issues via github.  ANY and ALL feedback is respected and appreciated.  Thank you.
 
@@ -26,19 +26,19 @@ If your looking to contribute a little more, here are some ways;
   - Helping to map NS features to F5 features
   - Help design and implement output templating
 
-# Roadmap
+## Roadmap
 
-## Phase 1: Archive unpack and config Parsing (Complete)
+### Phase 1: Archive unpack and config Parsing (Complete)
 
 This phase is about unpacking an archive and/or parsing the ns.conf file.  
 
 Parsing includes the process of organizing and converting the important config lines into a structure that is a bit more predictable and searchable.  This process basically breaks down the config file into a json structure that allows subsequent processes to realiably search for and access key data when needed. (see breakdown process)
 
-## Phase 2: Application Abstraction (~60% complete)
+### Phase 2: Application Abstraction (~60% complete)
 
 This phase of the roadmap is focused on crawling the parsed config and abstracting applications.  In these early phases of the project, we have tested with v10 through v13.1.  There is currently no deviation from this process based on these version.  This will probably change as the project progresses.
 
-## Phase 3: Analytics/Diagnostics (~10%)
+### Phase 3: Analytics/Diagnostics (~10%)
 
 This phase is focused on analyzing the individual applications produced by the abstraction process.
 
@@ -46,7 +46,7 @@ The foundation is to use vscode diagnostics and supporting ruleset to provide fe
 
 This information may possibly get fed back into the abstration process to help identify key application features for converstion outputs.
 
-## Phase 4: Conversion outputs for XC/TMOS/NGINX (pending)
+### Phase 4: Conversion outputs for XC/TMOS/NGINX (pending)
 
 This phase is focused on utilizing the information gathered from the diagnostics and abstraction process to provide the beginning of deploying a similar application on F5 technology (XC/TMOS/NGINX).
 
@@ -56,7 +56,7 @@ The goal here is to provide details about the applications current features on N
 
 These outputs will probably include basic AS3 for TMOS/NEXT, JSON body for deployment on F5 Distributed Cloud, and possibly configuration snippets for NGINX (or declarative json)
 
-## other features
+### other features
 
 Please check out the github issues for details on bugs and enhancements.  Don't hesitate to open an issue to request a feature, ask a question, or provide feedback.
 
@@ -65,7 +65,7 @@ Please check out the github issues for details on bugs and enhancements.  Don't 
 - a more detailed breakdown of the different rules in the diagnostics ruleset
   - the idea is to prefix each rule to which F5 technology it applies to, "XC-" for F5 Distributed cloud rules, "TMOS-" for F5 TMOS rules, and "NX-"? for NGINX rules
 
-### Report output
+#### Report output
 
 There is currently a report to output all the details from the tool.  This include all the details about the unpacking/parsing/app-abstraction process and details about the diagnstics.
 
@@ -73,7 +73,7 @@ There are additional stats to understand numbers of applications, breakdown of t
 
 The goal for this report is to provide a full output to easily search, reference and add notes to when working through the process
 
-# How to get started using the extension
+## How to get started using the extension
 
 1. Install the extension via the VSCode extension marketplace
 2. Open a folder with a Citrix ADC/NS archive/.conf or use the button to browse for the file
@@ -84,9 +84,9 @@ The goal for this report is to provide a full output to easily search, reference
 
 <img src="./images/flipper-2.gif" alt="drawing" width="100%"/>
 
-# Breakdown Process
+## Breakdown Process
 
-## 1. Archive unpack
+### 1. Archive unpack
 
 > if file is .conf, skip to next step...
 
@@ -96,7 +96,7 @@ The goal for this report is to provide a full output to easily search, reference
   - logs?
 
 
-## 2. Breakdown/parse config
+### 2. Breakdown/parse config
 
 - sort the config lines by all the verbs in the following order
   - ['add','set','bind','link','enable','disable']
@@ -144,9 +144,9 @@ example
 ```
 
 
-## 3. Abstract applications
+### 3. Abstract applications
 
-### walk cs vservers
+#### walk cs vservers
 
 This second phase will loop through each 'add vs vserver' and 'add lb vserver' to walk the config tree and abstract each application's config
 
@@ -157,56 +157,82 @@ This second phase will loop through each 'add vs vserver' and 'add lb vserver' t
 5. add pool bingdings with 'bind serviceGroup'
 6. add monitor from service pool binginds 'add lb monitor'
 
-### walk lb vserver
+#### walk lb vserver
 
 Add walking details...
 
-### walk gslb
+#### walk gslb
 
 Add walking details...
 
-# Mapping
+## Mapping
 
 ```mermaid
 flowchart TD
     A[Incoming request]-->C{CS or LB?}
-    C -->acv[add cs verser]
+    
+    %% Content Switching Path
+    C -->acv[add cs vserver]
     acv -->bcsvs[bind cs vserver]
-    bcsvs-->|"-policyName"|acsp[add cs policy]
-    acsp-->|"-action"|acsa[add cs action]
-    acsa-->albvs
+    bcsvs-->|policyName|acsp[add cs policy]
+    acsp-->|rule|acsa[add cs action]
+    acsa-->|targetLBVserver|albvs
+    bcsvs-->|lbvserver|albvs
+    
+    %% SSL Certificate bindings for CS
+    acv-->bcsssl[bind cs vserver certkeyName]
+    bcsssl-->asck[add ssl certKey]
+    
+    %% AppFlow integration
+    bcsvs-->|policyName|aafp[add appflow policy]
+    aafp-->|action|aafa[add appflow action]
+    aafa-->|collectors|aafc[add appflow collector]
 
-    bcsvs-->|"-lbvserver"|albvs
-
-    acsp-->aafp[add appflow policy]
-    aafp-->aafa[add appflow action]
-    aafa-->aafc[add appflow collector]
-
-
+    %% Load Balancing Path
     C -->albvs[add lb vserver]
-    albvs-->ssvserver[set ssl verver]
+    albvs-->sslvs[set ssl vserver]
+    albvs-->blbssl[bind ssl vserver certkeyName]
+    blbssl-->asck
     albvs-->blbvs[bind lb vserver]
-    blbvs-->aservice[add service]
+    
+    %% Service binding options
+    blbvs-->|serviceName|aservice[add service]
+    blbvs-->|serviceGroupName|asg[add serviceGroup]
+    
+    %% Service to Server mapping
     aservice-->aserver[add server]
-    blbvs-->asg[add serverGroup]
     asg-->bsg[bind serviceGroup]
-    bsg-->aserver
-    bsg-->albm[add lb monitor]
-    albm-->blbm[bind lb monitor]
-    aservice-->albm
+    bsg-->|serverName|aserver
+    
+    %% Monitor bindings
+    bsg-->|monitorName|albm[add lb monitor]
+    aservice-->|monitorName|albm
+    blbvs-->|monitorName|albm
+    
+    %% Authentication policies
+    blbvs-->|policyName|aap[add authentication policy]
+    aap-->|action|aaa[add authentication action]
+    
+    %% Rewrite policies
+    blbvs-->|policyName|arp[add rewrite policy]
+    arp-->|action|ara[add rewrite action]
+    
+    %% Responder policies
+    blbvs-->|policyName|resp[add responder policy]
+    resp-->|action|resa[add responder action]
 ```
 
-## add cs vserver
+### add cs vserver
 
 <https://developer-docs.netscaler.com/en-us/adc-command-reference-int/13/cs/cs-vserver.html#synopsis-9>
 
 add cs vserver <traffic-domain> <serviceType/Protocol>
 
-### traffic-domain
+#### traffic-domain
 
 Integer value that uniquely identifies the traffic domain in which you want to configure the entity. If you do not specify an ID, the entity becomes part of the default traffic domain, which has an ID of 0. Minimum value: 0 Maximum value: 4094
 
-### Possible ServiceTypes/protocols
+#### Possible ServiceTypes/protocols
 
 NS ServiceType | F5 Profiles | Additional Optional F5 profiles
  :--- | ---: | :---:
@@ -238,13 +264,13 @@ MQTT | - | -
 MQTT_TLS | TCP/clientssl | -
 HTTP_QUIC | - | -
 
-## add lb vserver
+### add lb vserver
 
 <https://developer-docs.netscaler.com/en-us/adc-command-reference-int/13/lb/lb-vserver#add-lb-vserver>
 
 add lb vserver <name> <serviceType/Protocol> <ip_address>
 
-### Possible ServiceTypes/Protocols
+#### Possible ServiceTypes/Protocols
 
 NS ServiceType | F5 Profiles | Additional Optional F5 profiles
 :--- | ---: | :---:
@@ -294,7 +320,7 @@ QUIC_BRIDGE | - | -
 HTTP_QUIC | - | -
 
 
-# Notes
+## Notes
 
 - All of the 'add' operations need to happen before the 'bind' operations
 - the 0.0.0.0:0 in the Netscaler World mean Non-Addressable, the only way to access it is to go through a Content Switching VServer
@@ -325,25 +351,25 @@ HTTP_QUIC | - | -
   - seems that **'add lb vserver'** and **'add cs vserver'** are the two to indicate the front door for an app
 
 
-# Resources
+## Resources
 
-## NGINX
+### NGINX
 
 <https://docs.nginx.com/nginx/deployment-guides/migrate-hardware-adc/citrix-adc-configuration/>
 
-## John Alam
+### John Alam
 
 <https://community.f5.com/t5/codeshare/citrix-netscaler-to-f5-big-ip/ta-p/277635>
 
-## Carl Stalhood
+### Carl Stalhood
 
 <https://github.com/cstalhood/Get-ADCVServerConfig>
 
 <https://www.carlstalhood.com/netscaler-scripting/>
 
-## Citrix ADC
+### Citrix ADC
 
-### Citrix ADC Firmware Release Cycle
+#### Citrix ADC Firmware Release Cycle
 
 <https://support.citrix.com/article/CTX241500/citrix-adc-firmware-release-cycle>
 
@@ -364,7 +390,7 @@ Citrix has announced following updates to the Citrix ADC firmware release cycle.
 
 > For now, focus will be on v12.1+ since it was the most recent to fall off maintenance
 
-### Citrix Product Lifecycle Matrix
+#### Citrix Product Lifecycle Matrix
 
 <https://www.citrix.com/support/product-lifecycle/product-matrix.html>
 
@@ -375,33 +401,33 @@ NetScaler Firmware | 13.0 (GA: 15-May-19) | EN | N/A | N/A | 15-Jul-23 | 15-Jul-
 NetScaler Firmware | 12.1 (GA: 25-May-18) | EN | N/A | N/A | 30-May-22 | 30-May-23
 
 
-### How to Upload a Collector File from a NetScaler Appliance to cis.citrix.com Website Directly Without Retrieving it from the Appliance
+#### How to Upload a Collector File from a NetScaler Appliance to cis.citrix.com Website Directly Without Retrieving it from the Appliance
 
 <https://support.citrix.com/article/CTX135876/how-to-upload-a-collector-file-from-a-netscaler-appliance-to-ciscitrixcom-website-directly-without-retrieving-it-from-the-appliance>
 
-### File Synchronization in NetScaler High Availability Setup
+#### File Synchronization in NetScaler High Availability Setup
 
 <https://support.citrix.com/article/CTX138748/file-synchronization-in-netscaler-high-availability-setup>
 
-### How to obtain nsconf file from NetScaler
+#### How to obtain nsconf file from NetScaler
 
 <https://support.citrix.com/article/CTX222891/how-to-obtain-nsconf-file-from-netscaler>
 
-### NetScaler : How to copy config from Old Device to New Device
+#### NetScaler : How to copy config from Old Device to New Device
 
 <https://support.citrix.com/article/CTX216729/netscaler-how-to-copy-config-from-old-device-to-new-device>
 
-### Custome Monitors Configured on NetScaler missing after an upgrade
+#### Custome Monitors Configured on NetScaler missing after an upgrade
 
 <https://support.citrix.com/article/CTX206715/custom-monitors-configured-on-netscaler-missing-after-an-upgrade>
 
-### Citrix Gateway Virtual Servers
+#### Citrix Gateway Virtual Servers
 
 <https://docs.netscaler.com/en-us/citrix-gateway/current-release/install-citrix-gateway/configure-citrix-gateway-settings/create-gateway-virtual-servers.html>
 
 
 
-# Items to consider
+## Items to consider
 
 Below are some questions and items to consider when looking to migrate.
 
@@ -440,7 +466,7 @@ Below are some questions and items to consider when looking to migrate.
 - What is the automation strategy?
 - What is the DR/Backup strategy?
 
-## links
+### links
 
 <https://support.citrix.com/article/CTX476864/notice-of-change-announcement-for-perpetual-citrix-adc-eos>
 <https://www.citrix.com/support/product-lifecycle/product-matrix.html>
@@ -452,7 +478,7 @@ Below are some questions and items to consider when looking to migrate.
 
 <https://www.crn.com/news/cloud/-brutal-citrix-tibco-layoffs-hit-thousands-of-employees-sources>
 
-# ChatGPT
+## ChatGPT
 
 As I started this journey, and knowing very little about NetScaler, I decided to ask ChatGPT and see just how much help it would be.
 

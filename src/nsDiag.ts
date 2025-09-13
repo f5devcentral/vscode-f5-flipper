@@ -26,6 +26,9 @@ export type DiagRule = {
     title: string;
     message: string;
     regex: string;
+    category?: "ssl_tls" | "load_balancing" | "persistence" | "monitoring" | "security" | "performance" | "compatibility" | "networking" | "policies";
+    technology?: "XC" | "TMOS" | "NGINX" | "General";
+    description?: string;
 };
 
 
@@ -111,10 +114,11 @@ export class NsDiag {
                     // if rule empty, pass
                     if (rule.regex === '') { return; }
 
-                    // look for rule regex
-                    const match = value.match(rule.regex);
+                    try {
+                        // look for rule regex
+                        const match = value.match(rule.regex);
 
-                    if (match) {
+                        if (match) {
 
                         // set rule severity
                         const severity
@@ -134,7 +138,10 @@ export class NsDiag {
                             severity
                         });
 
-
+                        }
+                    } catch (error) {
+                        // Log regex error but don't crash the diagnostic process
+                        logger.warn(`Diagnostic rule ${rule.code} has invalid regex: ${rule.regex}. Error: ${error}`);
                     }
                 });
             });
@@ -190,6 +197,58 @@ export class NsDiag {
             }
 
 
+        });
+
+        return stats;
+    }
+
+    /**
+     * Get rule statistics by category and technology
+     * @returns Object with rule counts by category and technology
+     */
+    getRuleStats() {
+        const stats = {
+            total: this.rules.length,
+            byTechnology: { XC: 0, TMOS: 0, NGINX: 0, General: 0 },
+            byCategory: {
+                ssl_tls: 0,
+                load_balancing: 0,
+                persistence: 0,
+                monitoring: 0,
+                security: 0,
+                performance: 0,
+                compatibility: 0,
+                networking: 0,
+                policies: 0
+            },
+            bySeverity: { Error: 0, Warning: 0, Information: 0, Hint: 0 },
+            activeRules: 0
+        };
+
+        this.rules.forEach(rule => {
+            // Count severity
+            stats.bySeverity[rule.severity]++;
+
+            // Count active rules (non-empty regex)
+            if (rule.regex && rule.regex.trim() !== '') {
+                stats.activeRules++;
+            }
+
+            // Count by technology (inferred from title prefix)
+            if (rule.title.startsWith('XC-')) {
+                stats.byTechnology.XC++;
+            } else if (rule.title.startsWith('TMOS-')) {
+                stats.byTechnology.TMOS++;
+            } else if (rule.title.startsWith('NGINX-')) {
+                stats.byTechnology.NGINX++;
+            } else {
+                stats.byTechnology.General++;
+            }
+
+            // Count by category (if specified)
+            if (rule.category) {
+                stats.byCategory[rule.category]++;
+            }
         });
 
         return stats;

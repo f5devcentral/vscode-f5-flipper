@@ -40,6 +40,14 @@ export class FastCore {
 
             const docText = JSON.parse(doc.document.getText());
 
+            // Check if this is a GSLB app
+            if (docText.type === 'gslb') {
+                const errorMsg = 'GSLB applications are not supported for AS3 conversion at this time. No FAST templates are available for GSLB configurations.';
+                logger.warn(errorMsg);
+                window.showWarningMessage(errorMsg);
+                return;
+            }
+
             this.panel.renderHTML(docText, doc.template);
 
 

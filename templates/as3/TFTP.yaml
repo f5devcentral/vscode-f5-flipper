@@ -2,8 +2,130 @@ title: Simple TFTP Application
 description: TFTP Application - Includes Persistence and TCP Timers 24-OCT-2024
 contentType: application/json
 definitions:
-    idleTimeout:
-        default: 300
+  tenant_name:
+    title: Tenant name
+    type: string
+    propertyOrder: 1
+  app_name:
+    title: Application name
+    type: string
+    propertyOrder: 2
+    options:
+      input_width: 300px
+  virtual_address:
+    title: Virtual address
+    propertyOrder: 3
+    type: string
+    options:
+      input_width: 300px
+  virtual_port:
+    title: Virtual port
+    propertyOrder: 4
+    default: 80
+    type: integer
+    options:
+      input_width: 300px
+  icmp_echo:
+    type: string
+    title: ICMP echo
+    enum:
+      - enable
+      - disable
+      - selective
+    default: enable
+  arpEnabled:
+    title: ARP enabled
+    type: boolean
+    default: true
+  idleTimeout:
+    type: integer 
+    propertyOrder: 5
+    default: 300
+    title: Idle timeout
+    options:
+      input_width: 300px
+  persistence:
+    title: Persistence
+    propertyOrder: 6
+    type: string
+    enum:
+      - source_addr
+      - cookie
+      - ssl
+    default: cookie
+    options:
+      input_width: 200px
+  lbMethod:
+    title: Load balancing method
+    type: string
+    enum:
+      - round-robin
+      - least-connections-member
+    default: least-connections-member
+    propertyOrder: 7
+    options:
+      input_width: 300px
+  pool_members:
+    title: Static Pool members
+    description: List of static pool members
+    uniqueItems: true
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          title: Name
+          type: string
+          propertyOrder: 1
+        address:
+          title: Address
+          type: string
+          propertyOrder: 2
+        port:
+          title: Port
+          type: number
+          propertyOrder: 3
+          options:
+            input_width: 80px
+        shareNodes:
+          title: Shared nodes
+          type: boolean
+          default: false
+          propertyOrder: 4
+        adminState:
+          title: Admin State
+          description: Enabled
+          type: boolean
+          default: true
+      required:
+        - port
+        - address
+  fqdn_members:
+    title: FQDN Pool members
+    description: List of FQDN pool members details
+    uniqueItems: true
+    type: array
+    items:
+      type: object
+      properties:
+        hostname:
+          title: FQDN
+          type: string
+        port:
+          title: Port
+          type: string
+        adminState:
+          title: Admin State
+          description: Enabled
+          type: boolean
+          default: true
+        shareNodes:
+          title: Shared nodes
+          type: boolean
+          default: false
+      required:
+        - hostname
+        - port
 template: |
   {
     "$schema": "https://raw.githubusercontent.com/F5Networks/f5-appsvcs-extension/master/schema/latest/as3-schema.json",
@@ -12,6 +134,8 @@ template: |
         "class": "ADC",
         "schemaVersion": "3.45.0",
         "id": "urn:uuid:8cbab3f1-de39-4944-9459-cea0b3e7f69c",
+        "label": "Converted from NS by F5 fliper",
+        "remark": "be sure to test application thoroughly",
         "t_{{virtual_address}}": {
             "class": "Tenant",
             "{{app_name}}-app": {
@@ -19,8 +143,8 @@ template: |
                 "template": "shared",
                 "sa_{{virtual_address}}": {
                     "class": "Service_Address",
-                    "icmpEcho": "enable",
-                    "arpEnabled": true,
+                    "icmpEcho": {{icmp_echo}},
+                    "arpEnabled": {{arpEnabled}},
                     "virtualAddress": "{{virtual_address}}"
                 },
                 "{{app_name}}": {
@@ -29,14 +153,10 @@ template: |
                     "translateServerAddress": true,
                     "translateServerPort": true,
                     "class": "Service_UDP",
-                    {{#comment}}
-                      "description": {{comment}},
-                    {{/comment}}
                     {{#persistence}}
-                        {{#SOURCEIP}}"persistenceMethods": [{"bigip": "/Common/source_addr"}],{{/SOURCEIP}}
-                        {{#SSLSESSION}}"persistenceMethods": [{"bigip": "/Common/ssl"}],{{/SSLSESSION}}
-                        {{#NONE}}"persistenceMethods" : [],{{/NONE}}
+                    "persistenceMethods": [{"bigip": "/Common/{{persistence}}"}],
                     {{/persistence}}
+                    {{^persistence}}"persistenceMethods": [],{{/persistence}}
                     "profileUDP": {
                         "use": "{{app_name}}-udp"
                     },
@@ -51,21 +171,29 @@ template: |
                 },
                 "pool_{{app_name}}": {
                     "members": [
-                    {{#pool_members}}
+                        {{#pool_members}}
                         {
-                        {{#address}}
-                        "hostname": {{name}},
-                        "serverAddresses": ["{{address}}"],
+                        "addressDiscovery": "static",
+                        "servers": [{
+                        {{#name}}
+                            "name": "{{name}}",
+                        {{/name}}
+                            "address": "{{address}}"
+                        }],
                         "servicePort": {{port}},
-                        {{/address}}
-                        {{#fqdn}}
-                        "addressDiscovery": "fqdn",
-                        "hostname": "{{hostname}}",
-                        "servicePort": {{port}},
-                        {{/fqdn}}
-                        "shareNodes": true
+                        {{#shareNodes}}"shareNodes": true,{{/shareNodes}}
+                        {{^adminState}}"adminState": "disable"{{/adminState}}
                         },
-                    {{/pool_members}}
+                        {{/pool_members}}
+                        {{#fqdn_members}}
+                        {
+                        "addressDiscovery": "fqdn",
+                        "hostname": {{hostname}},
+                        "servicePort": {{port}},
+                        {{#shareNodes}}"shareNodes": true,{{/shareNodes}}
+                        {{^adminState}}"adminState": "disable"{{/adminState}}
+                        },
+                        {{/fqdn_members}}
                     ],
                     "monitors": [
                         {
@@ -73,15 +201,7 @@ template: |
                         }
                     ],
                     {{#lbMethod}}
-                        {{#ROUNDROBIN}}
-                        "loadBalancingMode":"round-robin",
-                        {{/ROUNDROBIN}}
-                        {{#LEASTCONNECTION}}
-                        "loadBalancingMode":"least-connections-member",
-                        {{/LEASTCONNECTION}}
-                    {{/lbMethod}}
-                    {{^lbMethod}}
-                        "loadBalancingMode":"least-connections-member",
+                        "loadBalancingMode":"{{lbMethod}}",
                     {{/lbMethod}}
                     "class": "Pool"
                 },

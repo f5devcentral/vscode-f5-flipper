@@ -1,0 +1,65 @@
+{
+    "class": "ADC",
+    "schemaVersion": "3.45.0",
+    "id": "urn:uuid:0209b091-aec0-47ff-8da0-cdf10eb6daf6",
+    "controls": {
+        "class": "Controls",
+        "userAgent": "vscode-f5/3.18.2",
+        "archiveTimestamp": "2025-09-12T18:06:25.862Z"
+    },
+    "serviceDiscovery_tenant": {
+        "class": "Tenant",
+        "sd_app": {
+            "class": "Application",
+            "sd_pool": {
+                "metadata": {
+                    "description": "Pool with service discovery members, fqdn and static"
+                },
+                "members": [
+                    {
+                        "addressDiscovery": "static",
+                        "servers": [
+                            {
+                                "name": "sdweb1",
+                                "address": "192.168.10.10"
+                            }
+                        ],
+                        "servicePort": 8080,
+                        "adminState": "enable",
+                        "enabled": true
+                    },
+                    {
+                        "addressDiscovery": "static",
+                        "servers": [
+                            {
+                                "address": "192.168.10.12"
+                            }
+                        ],
+                        "servicePort": 8081,
+                        "adminState": "enable",
+                        "enabled": false
+                    },
+                    {
+                        "hostname": "web1.sd.net",
+                        "addressDiscovery": "fqdn",
+                        "servicePort": 443,
+                        "autoPopulate": true,
+                        "adminState": "enable"
+                    },
+                    {
+                        "hostname": "web2.sd.net",
+                        "addressDiscovery": "fqdn",
+                        "servicePort": 443,
+                        "autoPopulate": true,
+                        "adminState": "disable"
+                    }
+                ],
+                "class": "Pool",
+                "loadBalancingMode": "least-connections-member",
+                "monitors": [
+                    "http"
+                ]
+            }
+        }
+    }
+}

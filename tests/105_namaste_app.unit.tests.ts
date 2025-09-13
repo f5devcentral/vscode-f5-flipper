@@ -92,6 +92,7 @@ describe('Namaste App tests', function () {
           "-interval": "30",
           "-resptimeout": "15",
           "-secure": "YES",
+          "protocol": "TCP"
         },
         {
           name: "namaste_awaken_http8443_mon",
@@ -99,6 +100,7 @@ describe('Namaste App tests', function () {
           "-recv": "\\\"find\\\":love",
           "-LRTM": "DISABLED",
           "-secure": "YES",
+          "protocol": "HTTP-ECV"
         },
     ])
   })

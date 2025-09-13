@@ -4,14 +4,14 @@
         "severity": "Warning",
         "title": "XC-Wildcard port on virtual not supported in XC",
         "message": "XC-Multiport LBs are not supported yet",
-        "regex": "(?<=add (?:cs|lb) vserver [\\S]+ [\\S]+ [\\d.]+ )(0)"
+        "regex": "add (?:cs|lb) vserver [\\S]+ [\\S]+ [\\d.]+ (0)"
     },
     {
         "code": "62ff",
         "severity": "Warning",
         "title": "XC-Wildcard VIP not supported",
         "message": "XC-Wildcard VIPs not supported",
-        "regex": "(?<=add (?:cs|lb) vserver [\\S]+ [\\S]+ )(0.0.0.0)(?= \\d{1,5})"
+        "regex": "add (?:cs|lb) vserver [\\S]+ [\\S]+ (0\\.0\\.0\\.0) \\d{1,5}"
     },
     {
         "code": "72fb",
@@ -51,30 +51,30 @@
     {
         "code": "3a67",
         "severity": "Error",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "title": "XC-Client Certificate Authentication",
+        "message": "XC client certificate authentication requires different configuration approach",
+        "regex": "-clientAuth.*ENABLED"
     },
     {
         "code": "4987",
-        "severity": "Error",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Warning",
+        "title": "TMOS-Weak SSL Protocols Detected",
+        "message": "SSL v2/v3 and TLS 1.0/1.1 are deprecated. Consider upgrading to TLS 1.2+",
+        "regex": "(ssl-?v?[23]|tls-?v?1\\.[01])"
     },
     {
         "code": "5a5a",
-        "severity": "Error",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Warning",
+        "title": "XC-Advanced LB Methods Not Supported",
+        "message": "XC doesn't support all advanced LB methods - may need custom logic",
+        "regex": "-lbMethod (LEASTRESPONSETIME|CUSTOMLOAD|SRCIPHASH|CALLIDHASH)"
     },
     {
         "code": "0780",
         "severity": "Warning",
         "title": "XC reserved ports",
         "message": "Http failure response: 400 Bad Request \nFor tcp_loadbalancer dude/test configuration for child object advertise_policy ves-io-tcp-loadbalancer-test-df9979789 is wrong - 8443 is a reserved port, list of reserved ports 28000 - 32767 (kubernetes),28000 - 32767 (volterra),2379,9090,9999,18091,22222,23790,23791,1067,2380,8005,18092,9153,10250,10252,10259,500,8007,8443,10251,18095,23801,5355,8507,9007,68,323,23802,8444,8505,10249,10257,22,4500,8087,18093,53,6443,10256",
-        "regex": "/(?=.*destination)(:(8443|2379|9090|9999|18091|22222|23790|23791|1067|2380|8005|18092|9153|10250|10252|10259|500|8007|10251|18095|23801|5355|8507|9007|68|323|23802|8444|8505|10249|10257|22|4500|8087|18093|53|6443|10256))/si"
+        "regex": ":(8443|2379|9090|9999|18091|22222|23790|23791|1067|2380|8005|18092|9153|10250|10252|10259|500|8007|10251|18095|23801|5355|8507|9007|68|323|23802|8444|8505|10249|10257|22|4500|8087|18093|53|6443|10256)"
     },
     {
         "code": "d2bf",
@@ -95,258 +95,258 @@
         "severity": "Information",
         "title": "vs references backupVServer",
         "message": "In NS points to a backup VS if current pool resources are down, F5 priority group activation is the equivilant",
-        "regex": " -backupVServer (?<name>(\"[\\S ]+\"|[\\S]+))"
+        "regex": " -backupVServer (\"[\\S ]+\"|[\\S]+)"
     },
     {
         "code": "4818",
         "severity": "Warning",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "title": "XC-Custom Persistence Rules",
+        "message": "XC may require different approach for complex persistence scenarios",
+        "regex": "-rule.*persist"
     },
     {
         "code": "681f",
         "severity": "Warning",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "title": "Rate Limiting Configuration",
+        "message": "NS surge protection/rate limiting requires F5 DoS protection profile configuration",
+        "regex": "-(surgeProtection|rateLimitSession)"
     },
     {
         "code": "3955",
         "severity": "Error",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "title": "NGINX-Advanced Monitor Features",
+        "message": "NGINX Plus may not support all NetScaler monitor features - review carefully",
+        "regex": "add lb monitor.*(-scriptName|-scriptArgs|-dispatcherIP)"
     },
     {
         "code": "f6e2",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "SSL Certificate Binding Detected",
+        "message": "SSL certificate found - verify certificate chain and expiration dates in F5",
+        "regex": "bind ssl vserver.*certkey"
     },
     {
         "code": "b02f",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "Load Balancing Method Translation",
+        "message": "NS method maps to F5 equivalent: ROUNDROBIN→round-robin, LEASTCONNECTION→least-connections-member",
+        "regex": "-lbMethod (ROUNDROBIN|LEASTCONNECTION|LEASTRESPONSETIME)"
     },
     {
         "code": "b3c7",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "Session Persistence Detected",
+        "message": "NS persistence type detected - verify F5 equivalent: SOURCEIP→source-addr, COOKIEINSERT→cookie",
+        "regex": "-persistenceType (SOURCEIP|COOKIEINSERT|SSLSESSION)"
     },
     {
         "code": "fd5c",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "Health Monitor Configuration",
+        "message": "Custom health monitors detected - review F5 monitor configuration options",
+        "regex": "add lb monitor"
     },
     {
         "code": "df8b",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "Compression Policy Detected",
+        "message": "NS compression policies map to F5 HTTP compression profiles",
+        "regex": "(add|bind).*comp.*policy"
     },
     {
         "code": "57ef",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "Caching Configuration Found",
+        "message": "NS caching features map to F5 web acceleration/caching policies",
+        "regex": "(add|bind).*(cache|ic).*policy"
     },
     {
         "code": "0f93",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "DDoS Protection Features",
+        "message": "NS DDoS settings need to be configured in F5 DoS protection profiles",
+        "regex": "-(maxReq|maxConn|tcpProfile).*limit"
     },
     {
         "code": "0a0a",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Warning",
+        "title": "GSLB Configuration Complexity",
+        "message": "GSLB configurations require careful F5 DNS/GTM planning and testing",
+        "regex": "add gslb (site|service|domain)"
     },
     {
         "code": "e90c",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "Content Switching Policies",
+        "message": "NS content switching rules map to F5 Local Traffic Policies or iRules",
+        "regex": "add cs (policy|action)"
     },
     {
         "code": "5ca0",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "TCP Profile Configuration",
+        "message": "NS TCP profile settings map to F5 TCP profile configurations",
+        "regex": "(add|set) nstcpProfile"
     },
     {
         "code": "81b2",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "Authentication Policy Detected",
+        "message": "NS authentication policies map to F5 Access Policy Manager (APM) configurations",
+        "regex": "add authentication (policy|action)"
     },
     {
         "code": "016e",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "Rewrite Policy Configuration",
+        "message": "NS rewrite policies map to F5 iRules or Local Traffic Policies for header/URL manipulation",
+        "regex": "add rewrite (policy|action)"
     },
     {
         "code": "232e",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "Responder Policy Found",
+        "message": "NS responder policies map to F5 iRules or Local Traffic Policies for custom responses",
+        "regex": "add responder (policy|action)"
     },
     {
         "code": "33a5",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "HTTP Profile Configuration",
+        "message": "NS HTTP profile settings map to F5 HTTP profile configurations",
+        "regex": "(add|set) nshttpProfile"
     },
     {
         "code": "e1ca",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Warning",
+        "title": "XC-Advanced SSL Features",
+        "message": "XC may not support all advanced SSL features - verify SSL policy compatibility",
+        "regex": "-(sslProfile|cipherSuite|sslRedirect).*advanced"
     },
     {
         "code": "940f",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "Service Group Configuration",
+        "message": "NS service groups map to F5 pool configurations with member definitions",
+        "regex": "add serviceGroup"
     },
     {
         "code": "79ee",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "Server Definition Found",
+        "message": "NS server objects map to F5 node definitions in pool configurations",
+        "regex": "add server [\\S]+ [0-9.]+"
     },
     {
         "code": "9f4b",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Warning",
+        "title": "TMOS-Legacy SSL Ciphers",
+        "message": "Legacy SSL cipher suites detected - consider modern cipher suite configuration",
+        "regex": "-(cipherSuite|cipher).*(des|rc4|md5|sha1)"
     },
     {
         "code": "70c1",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "DNS Configuration Found",
+        "message": "NS DNS settings may require F5 DNS/GTM configuration for advanced features",
+        "regex": "add dns (nameServer|suffix|view)"
     },
     {
         "code": "4c7b",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Warning",
+        "title": "XC-Custom Scripts Not Supported",
+        "message": "XC doesn't support custom scripts - consider alternative implementation approaches",
+        "regex": "-(scriptName|scriptArgs|dispatcherScript)"
     },
     {
         "code": "b3d3",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "Virtual Server State Configuration",
+        "message": "NS virtual server state settings map to F5 virtual server enabled/disabled state",
+        "regex": "-(state|disabled).*ENABLED"
     },
     {
         "code": "849c",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "Connection Limit Detection",
+        "message": "NS connection limits map to F5 virtual server connection limit settings",
+        "regex": "-maxClient (?!0\\b)[0-9]+"
     },
     {
         "code": "b164",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "Timeout Configuration Found",
+        "message": "NS timeout settings map to F5 profile timeout configurations (TCP, HTTP, etc.)",
+        "regex": "-(timeout|clientTimeout|serverTimeout) [0-9]+"
     },
     {
         "code": "06cf",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "VLAN Configuration Detected",
+        "message": "NS VLAN settings may require F5 network configuration adjustments",
+        "regex": "(add|bind) vlan"
     },
     {
         "code": "a0f3",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Warning",
+        "title": "NGINX-Complex Load Balancing",
+        "message": "Complex NS load balancing configurations may require NGINX Plus advanced features",
+        "regex": "-weight [0-9]+.*-priority [0-9]+"
     },
     {
         "code": "ae47",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "Traffic Domain Configuration",
+        "message": "NS traffic domains map to F5 route domain or partition configurations",
+        "regex": "-td [0-9]+"
     },
     {
         "code": "4680",
-        "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "severity": "Information",
+        "title": "Redirect Policy Found",
+        "message": "NS redirect policies map to F5 iRules or HTTP redirect profiles",
+        "regex": "add redirect (policy|action)"
     },
     {
         "code": "bc0c",
         "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "title": "Protocol Configuration Best Practice",
+        "message": "Consider protocol-specific optimizations in F5 profiles (TCP, HTTP, SSL)",
+        "regex": "add (cs|lb) vserver.*(http|https|tcp|ssl)"
     },
     {
         "code": "251f",
         "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "title": "Load Balancing Optimization",
+        "message": "Review F5 load balancing methods for optimal performance based on application requirements",
+        "regex": "-lbMethod"
     },
     {
         "code": "1e73",
         "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "title": "Health Monitoring Best Practice",
+        "message": "Implement comprehensive health monitoring in F5 for optimal traffic management",
+        "regex": "add lb monitor"
     },
     {
         "code": "dd4d",
         "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "title": "Security Policy Review",
+        "message": "Review security policies and consider F5 Application Security Manager (ASM) integration",
+        "regex": "(authentication|authorization|security).*policy"
     },
     {
         "code": "9981",
         "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "title": "Performance Optimization",
+        "message": "Consider F5 performance optimization features for improved application delivery",
+        "regex": "-(compression|caching|optimization)"
     },
     {
         "code": "3790",
         "severity": "Hint",
-        "title": "",
-        "message": "",
-        "regex": ""
+        "title": "Configuration Validation",
+        "message": "Validate all converted configurations thoroughly in F5 environment before production deployment",
+        "regex": "add (cs|lb) vserver"
     }
 ]

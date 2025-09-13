@@ -22,6 +22,82 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.13.0] - (09-12-2025)
+
+### Added
+
+- **Major Diagnostic Rules Enhancement**: Comprehensive expansion of NetScaler to F5 diagnostic rules system
+  - Added 40+ new diagnostic rules covering all major NetScaler features
+  - Technology-specific rule prefixes: XC- (F5 Distributed Cloud), TMOS- (F5 BIG-IP), NGINX- (NGINX Plus)
+  - New rule categories: SSL/TLS, Load Balancing, Persistence, Monitoring, Security, Performance, Networking, Policies
+  - Enhanced rule statistics with `getRuleStats()` method for rule management and reporting
+  - Extended DiagRule type with optional category, technology, and description fields
+  - Comprehensive coverage for SSL certificates, authentication policies, health monitoring, compression, caching, GSLB configurations, and best practices
+
+- **Comprehensive Protocol Test Suite**: Complete NetScaler application testing coverage
+  - SSL_BRIDGE application tests with end-to-end SSL encryption validation
+  - DNS Load Balancer tests with geographic distribution and health monitoring
+  - TCP LDAPS tests for enterprise directory services with multi-site architecture
+  - UDP NTP tests for time synchronization services with weighted load balancing
+  - TCP Listen Policy tests for wildcard virtual servers with selective port filtering
+  - ANY Protocol tests for transparent multi-protocol Exchange server deployments
+
+- **Configuration Sanitization Framework**: Systematic approach to creating secure test fixtures
+  - Sanitized NetScaler configurations for educational and testing purposes
+  - IP address anonymization using RFC 1918 private ranges
+  - Corporate naming convention removal with generic patterns
+  - Comprehensive sanitization documentation with automation guidance
+
+- **AS3 Conversion Examples**: NetScaler to F5 AS3 translation demonstrations
+  - TCP Listen Policy AS3 conversion showing multi-service mapping approach
+  - Production-validated AS3 declarations tested on F5 BIG-IP systems
+
+- **Reports Section**: New view provider section for configuration analysis
+  - Organized reporting interface above Diagnostics section
+  - Enhanced user workflow for NetScaler configuration insights
+
+- **GSLB Conversion Notifications**: User guidance for unsupported conversion scenarios
+  - Warning messages when attempting AS3 conversion of GSLB applications
+  - Informative notifications about GSLB limitation in current FAST template set
+
+### Changed
+
+- Updated diagnostic rule structure to support categorization and technology classification
+- Enhanced diagnostic system architecture for better rule organization and management
+- major template updates to include paremeter definitions for main details
+  - updated ns2FastParams.ts to accomdate template updates
+- Updated models
+- rebuild htmlPreview stub from f5-fast-core
+  - This will allow the extension to customize the html preview as needed
+  - added details about the params fed to fast templates so they are visible in the html page for debugging
+- integrated Claude with claude.md file
+- upgraded f5-fast-core to latest v0.25.0
+- Created a report header in the main view
+  - Moved the main YAML report here
+  - Created a new JSON report
+  - Moved the NS config as JSON here also
+
+### Fixed
+
+- [BUG] abstraction error dalvarez #61
+- Fixed diagnostic rule regex compatibility issues with JavaScript RegExp engine
+  - Removed unsupported inline case-insensitive flags (`(?i)`) that caused "Invalid group" errors
+  - Fixed lookbehind assertions and named capture groups for broader JavaScript compatibility
+  - Enhanced error handling with try-catch blocks for regex compilation failures
+- Fixed port number type assertions in protocol test files
+  - Corrected SSL_BRIDGE, DNS, TCP LDAPS, and UDP NTP tests to expect string port values
+  - Aligned test expectations with actual NetScaler parsing behavior
+
+---
+
+## [1.12.1] - (03-26-2025)
+
+### Fixed
+
+- [BUG] monitor details missing protocol
+
+---
+
 ## [1.12.0] - (03-17-2025)
 
 ### Fixed
