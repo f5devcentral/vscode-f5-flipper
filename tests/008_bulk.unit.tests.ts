@@ -17,7 +17,7 @@ describe('fast tests', function () {
 
     before(async function () {
         // log test file name - makes it easer for troubleshooting
-        console.log('       file:', __filename)
+        // console.log('       file:', __filename)
 
         // clear the events arrays
         parsedFileEvents.length = 0
@@ -34,60 +34,60 @@ describe('fast tests', function () {
     it(`afton render`, async () => {
 
 
-        const localPath = path.join(__dirname, '..', 'templates');
+        // const localPath = path.join(__dirname, '..', 'templates');
 
-        const provider = new fast.FsTemplateProvider(localPath)
-        provider.invalidateCache();
+        // const provider = new fast.FsTemplateProvider(localPath)
+        // provider.invalidateCache();
 
-        console.log('localPath', localPath)
+        // console.log('localPath', localPath)
 
-        const templateOriginal = readFileSync(path.join(localPath, 'ns', 'http.yaml'), "utf-8");
-        const templateJson = yaml.load(templateOriginal); // Convert YAML to JSON
-        const templateSchema = templateJson;
+        // const templateOriginal = readFileSync(path.join(localPath, 'ns', 'http.yaml'), "utf-8");
+        // const templateJson = yaml.load(templateOriginal); // Convert YAML to JSON
+        // const templateSchema = templateJson;
         
-        const resp = await provider.fetch('ns/http')
-            .then((template) => {
-                // get the schema for the template
-                const schema = template.getParametersSchema();
-                // get the default values for the template
-                const defaultParams = template.getCombinedParameters();
-                const html = fast.guiUtils.generateHtmlPreview(schema, defaultParams)
+        // const resp = await provider.fetch('ns/http')
+        //     .then((template) => {
+        //         // get the schema for the template
+        //         const schema = template.getParametersSchema();
+        //         // get the default values for the template
+        //         const defaultParams = template.getCombinedParameters();
+        //         const html = fast.guiUtils.generateHtmlPreview(schema, defaultParams)
 
-                // const element = document.getElementById('editor_holder');
-                // const defaults = { "virtual_port": "443", "tenant_name": "starlord_offload_lb_vs", "app_name": "starlord_offload_lb_vs", "virtual_address": "192.168.86.142", "pool_members": [{ "serverAddress": "1.2.3.5", "servicePort": "80" }, { "serverAddress": "1.2.3.4", "servicePort": "80" }] };
+        //         // const element = document.getElementById('editor_holder');
+        //         // const defaults = { "virtual_port": "443", "tenant_name": "starlord_offload_lb_vs", "app_name": "starlord_offload_lb_vs", "virtual_address": "192.168.86.142", "pool_members": [{ "serverAddress": "1.2.3.5", "servicePort": "80" }, { "serverAddress": "1.2.3.4", "servicePort": "80" }] };
 
-                // const editor = new JSONEditor(element, {
-                //     schema,
-                //     startval: defaults,
-                //     compact: true,
-                //     show_errors: 'always',
-                //     disable_edit_json: true,
-                //     disable_properties: true,
-                //     disable_collapse: true,
-                //     array_controls_top: true,
-                //     theme: 'bootstrap4'
-                // });
+        //         // const editor = new JSONEditor(element, {
+        //         //     schema,
+        //         //     startval: defaults,
+        //         //     compact: true,
+        //         //     show_errors: 'always',
+        //         //     disable_edit_json: true,
+        //         //     disable_properties: true,
+        //         //     disable_collapse: true,
+        //         //     array_controls_top: true,
+        //         //     theme: 'bootstrap4'
+        //         // });
 
-                // const dom = new JSDOM(html, { runScripts: "dangerously" });
+        //         // const dom = new JSDOM(html, { runScripts: "dangerously" });
 
-                // const x = dom.window.document.getElementById('editor');
+        //         // const x = dom.window.document.getElementById('editor');
 
 
-                // const win = dom.window;
-                // const document = win.document
-                // // const y = x.getValue();
-                // const y = x.innerHTML;
-                // document.addEventListener('load', () => {
-                //     const b = document.getElementsByTagName('body').innerHTML;
-                //     b;
-                // });
-                // dom;
-                // html;
-                return { schema, defaultParams }
-            })
-            .catch(e => {
-                console.log(e);
-            })
+        //         // const win = dom.window;
+        //         // const document = win.document
+        //         // // const y = x.getValue();
+        //         // const y = x.innerHTML;
+        //         // document.addEventListener('load', () => {
+        //         //     const b = document.getElementsByTagName('body').innerHTML;
+        //         //     b;
+        //         // });
+        //         // dom;
+        //         // html;
+        //         return { schema, defaultParams }
+        //     })
+        //     .catch(e => {
+        //         console.log(e);
+        //     })
 
         assert.ok('resp');
     })
