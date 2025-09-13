@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+ <style type="text/css">
+  .st0{fill:#E21D38;}
+  .st1{fill:#797979;}
+  .st2{fill:#4A90E2;}
+  .st3{fill:#6BB6FF;}
+  .motion{fill:none;stroke:#B0E0E6;stroke-width:0.6;opacity:0.6;}
+  .dolphin{fill:#4A90E2;}
+  .f5-text{fill:#797979;font-family:Arial,sans-serif;font-weight:bold;font-size:3px;}
+ </style>
+ <g class="layer">
+  <title>background</title>
+  <rect fill="none" height="26" id="canvas_background" width="26" x="-1" y="-1"/>
+ </g>
+ <g class="layer">
+  <title>Layer 1</title>
+
+  <!-- F5 Logo (moved to top right, smaller) -->
+  <text class="f5-text" x="18.5" y="4.5">F5</text>
+
+  <!-- Dolphin diving from left to right with vertical angle -->
+  <!-- Main dolphin body -->
+  <path class="dolphin" d="M 2,5
+                          C 3,7 4.5,9 6.5,11
+                          C 7.5,12.5 9,14 11,15
+                          C 13,15.5 15,15 16,13.5
+                          C 16.5,12 16,10 15,8.5
+                          C 13.5,7 11.5,6 9,5.5
+                          C 6.5,5 4,4.8 2,5 Z"/>
+
+  <!-- Dolphin beak/rostrum -->
+  <path class="dolphin" d="M 15,8.5
+                          C 17,7.5 18.5,6.5 19.5,7
+                          C 20.2,7.3 20.2,8 19.5,8.5
+                          C 18.5,9.2 16.8,9.8 15.2,9.2
+                          C 14.8,9 15,8.7 15,8.5 Z"/>
+
+  <!-- Dolphin eye -->
+  <circle fill="#FFFFFF" cx="12" cy="9.5" r="0.6"/>
+  <circle fill="#000000" cx="12.2" cy="9.3" r="0.3"/>
+
+  <!-- Dorsal fin -->
+  <path class="dolphin" d="M 8,6.5
+                          C 7,4.5 7.5,2.5 8.5,2.8
+                          C 9.5,3.2 9.5,5 8.8,6
+                          C 8.5,6.5 8.2,6.6 8,6.5 Z"/>
+
+  <!-- Pectoral fins -->
+  <path class="dolphin" d="M 7,10
+                          C 5.5,9 4,8.5 3.5,9.5
+                          C 3.2,10.2 3.8,10.8 4.8,10.5
+                          C 5.8,10.2 6.5,10.1 7,10 Z"/>
+
+  <!-- Tail fluke (lower part) -->
+  <path class="dolphin" d="M 2,5
+                          C 0.5,4 -0.5,3 -0.8,4
+                          C -1,5 -0.2,6 1,6.5
+                          C 1.8,6.8 2.2,6 2,5 Z"/>
+
+  <!-- Tail fluke (upper part) -->
+  <path class="dolphin" d="M 2,5
+                          C 0.8,6.5 0,8 -0.2,9
+                          C -0.3,10 0.2,10.2 1,9.5
+                          C 1.8,8.5 2.2,6.8 2,5 Z"/>
+
+  <!-- Motion lines showing swimming movement -->
+  <path class="motion" d="M 1,3 Q 2,2 4,3" stroke-dasharray="1.5,1"/>
+  <path class="motion" d="M 0.5,4 Q 1.5,3 3.5,4" stroke-dasharray="1.5,1"/>
+  <path class="motion" d="M 0,5.5 Q 1,4.5 3,5.5" stroke-dasharray="1.5,1"/>
+
+  <!-- Water splash/bubble effects around dolphin head -->
+  <circle class="st3" cx="18" cy="7.5" r="0.3" opacity="0.6"/>
+  <circle class="st3" cx="17.5" cy="8.5" r="0.2" opacity="0.5"/>
+  <circle class="st3" cx="19" cy="8" r="0.25" opacity="0.4"/>
+  <circle class="st3" cx="16.5" cy="9" r="0.15" opacity="0.6"/>
+  <circle class="st3" cx="18.5" cy="6.5" r="0.2" opacity="0.5"/>
+
+ </g>
+</svg>

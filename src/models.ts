@@ -6,7 +6,7 @@ export type AdcApp = {
     type: Type;
     protocol: Protocol;
     ipAddress?: string;
-    port?: string
+    port?: string;
     opts?: Opts;
     bindings?: {
         '-lbvserver'?: string[];
@@ -42,22 +42,28 @@ export type NsFastTempParams = {
     type: string;
     protocol: string;
     virtual_address: string;
-    virtual_port: string;
-    persistence?: { [key: string]: string };
-    lbMethod?: { [key: string]: string };
-    idleTimeout?: { [key: string]: string } | string;
-    timeout?: { [key: string]: string };
-    redirectURL?: { [key: string]: string };
-    backupVServer?: { [key: string]: string };
-    tcpProfileName?: { [key: string]: string };
+    virtual_port: number;
+    persistence?: string;
+    lbMethod?: string;
+    idleTimeout?: number;
+    timeout?: number;
+    redirectURL?: string;
+    backupVServer?: string;
+    tcpProfileName?: string;
     monitors?: {
         name: string;
     }[];
     pool_members?: {
-        hostname?: { hostname: string };
-        address?: { address: string };
-        port?: { port: string };
-        name?: { name: string };
+        hostname?: string;
+        address?: string | number;
+        port?: string | number;
+        name?: string;
+        adminState?: string;
+    }[];
+    fqdn_members?: {
+        hostname?: string;
+        port?: string | number;
+        adminState?: string;
     }[];
 }
 
@@ -75,7 +81,7 @@ export type Appflow = {
 export type AppflowAction = {
     name: string;
     '-securityInsight'?: string;
-    collectors?: AppflowCollector[] ;
+    collectors?: AppflowCollector[];
 };
 
 export type AppflowCollector = {
@@ -112,7 +118,7 @@ export type ServiceGroup = {
 
 export type Type = 'cs' | 'lb' | 'gslb' | string;
 export type Protocol = 'HTTP' | 'SSL' | 'TCP' | string;
-export type Opts =  { 
+export type Opts = {
     [k: string]: string | unknown;
     '-persistenceType'?: string;
 };
@@ -242,6 +248,8 @@ export type AdcRegExTree = {
         'add rewrite action': RegExp;
         'add responder policy': RegExp;
         'add responder action': RegExp;
+        'add authentication policy': RegExp;
+        'add authentication action': RegExp;
         'add appflow policy': RegExp;
         'add appflow action': RegExp;
         'add appflow collector': RegExp;
@@ -293,6 +301,10 @@ export type AdcConfObj = {
             action?: string[];
         };
         responder?: {
+            policy?: string[];
+            action?: string[];
+        };
+        authentication?: {
             policy?: string[];
             action?: string[];
         };

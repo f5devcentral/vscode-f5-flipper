@@ -17,6 +17,7 @@ import {
 import { ext } from './extensionVariables';
 import { logger } from './logger';
 import fast from '@f5devcentral/f5-fast-core';
+import { generateHtmlPreview } from './localHtmlPreview';
 import path from 'path';
 import { AdcApp } from './models';
 
@@ -143,8 +144,8 @@ export class FastWebView {
 
                 logger.debug(`ns app ${app.name} FAST Template params: `, fastParams);
 
-                // generate the html preview
-                let html: string = fast.guiUtils.generateHtmlPreview(schema, fastParams)
+                // generate the html preview using local implementation
+                let html: string = generateHtmlPreview(schema, fastParams)
 
                 return html;
             })
@@ -260,19 +261,19 @@ export class FastWebView {
 
         // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.f5css)}">
 
-        const htmlSubmitBtn = `
-<link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.vscodeStyleFilePath)}">
-<script>
-(function init() {
-    const vscode = acquireVsCodeApi();
-    document.vscode = vscode;
-})();
-</script>
-<button onclick="vscode.postMessage(editor.getValue())">Render</button>
-<p></p>
-        `;
+//         const htmlSubmitBtn = `
+// <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.vscodeStyleFilePath)}">
+// <script>
+// (function init() {
+//     const vscode = acquireVsCodeApi();
+//     document.vscode = vscode;
+// })();
+// </script>
+// <button onclick="vscode.postMessage(editor.getValue())">Render</button>
+// <p></p>
+//         `;
 
-        html += htmlSubmitBtn;
+        // html += htmlSubmitBtn;
         panel.webview.html = html;
         panel.reveal(viewColumn, !preserveEditorFocus);
         this.activePanel = panel;

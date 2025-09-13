@@ -80,6 +80,8 @@ export class RegExTree {
             'add rewrite action': /(?<name>\S+) (?<opts>[\S ]+)/,
             'add responder policy': /(?<name>\S+) (?<opts>[\S ]+)/,
             'add responder action': /(?<name>\S+) (?<opts>[\S ]+)/,
+            'add authentication policy': /(?<name>\S+) (?<opts>[\S ]+)/,
+            'add authentication action': /(?<name>\S+) (?<opts>[\S ]+)/,
             'add appflow policy': /(?<name>\S+) (?<rule>[\S]+) (?<action>[\S]+)/,
             'add appflow action': /(?<name>\S+) (?<opts>[\S ]+)/,
             'add appflow collector': /(?<name>\S+) (?<opts>[\S ]+)/,

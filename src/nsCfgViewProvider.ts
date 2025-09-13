@@ -389,6 +389,47 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
             //     })
 
+            } else if (element.label === 'Reports') {
+
+                // Main report (existing f5-flipper.report command)
+                treeItems.push(new NsCfgApp(
+                    'Yaml Report',
+                    'Generate the main comprehensive report with all analysis details',
+                    'YAML format',
+                    'reportMain', '',
+                    TreeItemCollapsibleState.None, {
+                    command: 'f5-flipper.report',
+                    title: '',
+                    arguments: []
+                }
+                ));
+
+                // JSON report (new pure JSON format)
+                treeItems.push(new NsCfgApp(
+                    'JSON Report',
+                    'Generate a pure JSON report for programmatic consumption',
+                    'JSON format',
+                    'reportJson', '',
+                    TreeItemCollapsibleState.None, {
+                    command: 'f5-flipper.report2',
+                    title: '',
+                    arguments: []
+                }
+                ));
+
+                // NS config as JSON objects
+                treeItems.push(new NsCfgApp(
+                    'NS as JSON',
+                    'View parent NS.Conf objects as JSON',
+                    'Raw JSON',
+                    'nsJson', '',
+                    TreeItemCollapsibleState.None, {
+                    command: 'f5-flipper.cfgExplore-show',
+                    title: '',
+                    arguments: [this.adc?.configObjectArry]
+                }
+                ));
+
             } else if (element.label === 'Sources') {
 
                 this.explosion.config.sources.forEach(source => {
@@ -491,6 +532,15 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             const diagStatsYml = jsYaml.dump(this.diagStats, { indent: 4 });
             nsTooltip = new MarkdownString().appendCodeblock(diagStatsYml, 'yaml');
 
+            // Reports section
+            treeItems.push(new NsCfgApp(
+                'Reports',
+                'Generate various reports from the analyzed configuration',
+                '',
+                'reportsHeader', '',
+                TreeItemCollapsibleState.Collapsed
+            ));
+
             treeItems.push(new NsCfgApp(
                 'Diagnostics',
                 nsTooltip,
@@ -534,10 +584,6 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
             // todo: possibly move all the fast template stuff to a separate view
             // treeItems.push(new NsCfgApp('FAST Templates', 'Conversion Templates', '', 'fastHeader', '', TreeItemCollapsibleState.Collapsed));
-
-            // display ns config as json object
-            treeItems.push(new NsCfgApp('JSON', 'Parent NS.Conf objects as JSON', '', '', '', TreeItemCollapsibleState.None,
-                { command: 'f5-flipper.cfgExplore-show', title: '', arguments: [this.adc.configObjectArry] }));
 
         }
         return Promise.resolve(treeItems);
