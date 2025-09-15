@@ -17,8 +17,43 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ### Fixed
 
-[BUG] clean up quotes from strings with spaces #47
+---
 
+## [1.14.0] - (01-15-2025)
+
+### Added
+
+- **JSON Button for NS Application View**: Added "View NS App JSON" button alongside existing "View NS App Lines" button
+  - Provides direct access to JSON representation of NetScaler applications
+  - Consistent UI placement and functionality with existing view options
+  - Enhanced user workflow for application data inspection
+
+- **Enhanced FAST Template Webview Interface**: Modernized template preview and editing experience
+  - **Default Template View**: New webview is now the primary interface for FAST template interaction
+  - **AS3 Preview Functionality**: Live preview of AS3 output with dedicated Monaco editor
+  - **Interactive Parameter Editing**: JSON Editor for modifying template parameters with real-time validation
+  - **Schema and Start Values Inspection**: Dedicated Monaco editors for viewing template schema and default values
+  - **Dual Rendering Modes**:
+    - Preview mode for quick AS3 validation within the webview
+    - Editor mode for opening AS3 output in new VS Code editor tabs
+  - **VS Code Integration**: Bidirectional message passing between extension and webview for seamless data flow
+
+### Changed
+
+- **Information Diagnostics Visual Indicator**: Information level diagnostics now display with green indicators instead of yellow
+  - Improved visual hierarchy where Information diagnostics appear less concerning than warnings
+  - Consistent color coding: Red (Error), Orange (Warning), Green (Information/No Issues)
+
+- **FAST Template Processing Architecture**: Modernized template handling with improved user experience
+  - **Async File Operations**: Migrated from synchronous to Promise-based file reading for better performance
+  - **TypeScript Type Safety**: Enhanced type checking with proper AdcApp interface usage and type guards
+  - **Template Parameter Munging**: Improved NetScaler to FAST parameter transformation through mungeNS2FAST function
+  - **HTML Template Refactoring**: Streamlined single-editor layout replacing complex multi-container approach
+  - **Monaco Editor Configuration**: Optimized editor sizing and display with automatic layout management
+
+### Fixed
+
+- [BUG] clean up quotes from strings with spaces #47
 
 ---
 

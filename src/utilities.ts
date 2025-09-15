@@ -4,6 +4,7 @@
 
 
 import { Uri, Webview } from "vscode";
+import { AdcApp } from "./models";
 
 /**
  * A helper function which will get the webview URI of a given file or resource.
@@ -38,6 +39,20 @@ export function getNonce() {
         text += possible.charAt(Math.floor(Math.random() * possible.length));
     }
     return text;
+}
+
+/**
+ * Type guard function to check if an object conforms to the AdcApp interface
+ *
+ * @param obj - The object to check
+ * @returns True if the object matches AdcApp structure, false otherwise
+ */
+export function isAdcApp(obj: any): obj is AdcApp {
+    return obj &&
+           typeof obj === 'object' &&
+           typeof obj.name === 'string' &&
+           typeof obj.type === 'string' &&
+           typeof obj.protocol === 'string';
 }
 
 

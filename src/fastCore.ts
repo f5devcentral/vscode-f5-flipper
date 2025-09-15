@@ -20,6 +20,7 @@ import fast from '@f5devcentral/f5-fast-core';
 import path from 'path';
 import { FastWebView } from './fastWebView';
 import { NsTemplateProvider } from './templateViewProvider';
+import { isAdcApp } from './utilities';
 
 /**
  * Provides command to download github releases of this extension so users can easily access beta versions for testing
@@ -32,23 +33,32 @@ export class FastCore {
 
         this.panel = new FastWebView(ctx);
 
-        ctx.subscriptions.push(commands.registerCommand('f5-flipper.convert2AS3', async (doc) => {
+        ctx.subscriptions.push(commands.registerCommand('f5-flipper.convert2AS3', async (app) => {
 
             ext.telemetry.capture({ command: 'f5-flipper.convert2AS3' });
 
+
             logger.info('f5-flipper.convert2AS3, pulling up fast template');
 
-            const docText = JSON.parse(doc.document.getText());
+            if (app.document) {
+                app = JSON.parse(app.document.getText());
+            }
+
+            // Check if app matches AdcApp structure
+            if (isAdcApp(app)) {
+                // TypeScript now knows app is AdcApp type
+                logger.info(`Processing AdcApp: ${app.name} (${app.type})`);
+            }
 
             // Check if this is a GSLB app
-            if (docText.type === 'gslb') {
+            if (app.type === 'gslb') {
                 const errorMsg = 'GSLB applications are not supported for AS3 conversion at this time. No FAST templates are available for GSLB configurations.';
                 logger.warn(errorMsg);
                 window.showWarningMessage(errorMsg);
                 return;
             }
 
-            this.panel.renderHTML(docText, doc.template);
+            this.panel.renderHTML(app);
 
 
 

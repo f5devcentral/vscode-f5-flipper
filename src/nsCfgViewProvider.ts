@@ -30,7 +30,7 @@ import {
     ExtensionContext,
 } from 'vscode';
 import jsYaml from 'js-yaml';
-import { lstatSync, readdirSync } from 'fs';
+// import { lstatSync, readdirSync } from 'fs';
 
 import { ext } from './extensionVariables';
 
@@ -259,7 +259,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
                             icon = stats?.Error ? this.redDot
                                 : stats?.Warning ? this.orangeDot
-                                    : stats?.Information ? this.yellowDot : this.greenDot;
+                                    : stats?.Information ? this.greenDot : this.greenDot;
                         }
 
                         treeItems.push(new NsCfgApp(
@@ -268,9 +268,9 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                             desc,
                             'nsApp', icon,
                             TreeItemCollapsibleState.None, {
-                            command: 'f5-flipper.viewNsJson',
+                            command: 'f5-flipper.convert2AS3',
                             title: '',
-                            arguments: [app]
+                            arguments: [app as AdcApp]
                         }
                         ));
                     })
@@ -310,7 +310,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
                         icon = stats?.Error ? this.redDot
                             : stats?.Warning ? this.orangeDot
-                                : stats?.Information ? this.yellowDot : this.greenDot;
+                                : stats?.Information ? this.greenDot : this.greenDot;
                     }
 
                     treeItems.push(new NsCfgApp(

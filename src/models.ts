@@ -33,7 +33,7 @@ export type AdcApp = {
     apps?: AdcApp[];
     diagnostics?: Diagnostic[] | string[];
     // mutated params to be feed into the fast template
-    fastTempParams?: unknown;
+    fastTempParams?: NsFastTempParams;
 };
 
 export type NsFastTempParams = {

@@ -118,6 +118,9 @@ template: |
 **NetScaler Documentation**:
 - [NetScaler Gateway Configuration](https://docs.netscaler.com/en-us/netscaler-gateway/13-1/install-citrix-gateway/configure-citrix-gateway-settings/create-gateway-virtual-servers.html) - Official NetScaler documentation for configuration reference and understanding source configuration patterns that Flipper processes.
 
+**VS Code Extension Development**:
+- [VS Code Webview API](https://code.visualstudio.com/api/extension-guides/webview) - Official documentation for VS Code webview communication patterns, message passing between extension and webview, and security considerations. Essential for understanding bidirectional communication between the extension and HTML preview pages.
+
 ### Configuration Files
 
 - Extension settings in `package.json` contributes section

@@ -3,7 +3,7 @@
   "displayName": "F5 Flipper",
   "description": "Breaking down Citrix NetScaler ADC configs",
   "publisher": "F5DevCentral",
-  "version": "1.13.0",
+  "version": "1.14.0",
   "keywords": [
     "F5",
     "F5Networks",
@@ -126,7 +126,7 @@
       },
       {
         "command": "f5-flipper.viewNsJson",
-        "title": "View NS App Lines",
+        "title": "View NS App JSON",
         "category": "F5-Flipper",
         "icon": "$(json)"
       },
@@ -170,6 +170,11 @@
         },
         {
           "command": "f5-flipper.viewNsLines",
+          "when": "view == nsConfigView && viewItem =~ /(nsApp|nsGSLB)/",
+          "group": "inline"
+        },
+        {
+          "command": "f5-flipper.viewNsJson",
           "when": "view == nsConfigView && viewItem =~ /(nsApp|nsGSLB)/",
           "group": "inline"
         },

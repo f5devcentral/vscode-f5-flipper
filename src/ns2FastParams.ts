@@ -14,7 +14,7 @@ import {
  * mutate ns app json to a form easier for FAST/mustache to work with
  * @param nsApp NS app as json
  */
-export function mungeNS2FAST(nsApp: AdcApp) {
+export function mungeNS2FAST(nsApp: AdcApp): NsFastTempParams {
 
     if (nsApp.fastTempParams) {
 
@@ -186,7 +186,7 @@ export function mungeNS2FAST(nsApp: AdcApp) {
                     // REGULAR IP pool member
                     tempMemberObj.name = poolMember.name;
                     tempMemberObj.address = poolMember.address;
-                    tempMemberObj.port = tempMemberObj.port === '*' ? 0 : nsApp.port as unknown as number;
+                    tempMemberObj.port = poolMember.port === '*' ? 0 : nsApp.port as unknown as number;
 
                     // move over pool member state if defined
                     if (poolMember['-state']) {

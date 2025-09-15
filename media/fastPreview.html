@@ -1,0 +1,778 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Template Preview - Enhanced</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link rel="stylesheet" href="./styles/vscode.css">
+    <!-- Monaco Editor CSS -->
+    <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/editor/editor.main.css">
+
+    <style>
+        /* Light Theme - Bootstrap 4 Default Colors */
+        body.light-theme {
+            background-color: #ffffff;
+            color: #212529;
+        }
+
+        body.light-theme .bg-light {
+            background-color: #f8f9fa !important;
+            border: 1px solid #dee2e6;
+        }
+
+        body.light-theme h4, body.light-theme h5 {
+            color: #495057;
+        }
+
+        body.light-theme hr {
+            border-top: 1px solid #dee2e6;
+        }
+
+        body.light-theme details summary {
+            color: #495057;
+            font-weight: 500;
+        }
+
+        /* Dark Theme - Enhanced Bootstrap 4 Inspired Colors */
+        body.dark-theme {
+            background-color: #212529; /* Bootstrap dark */
+            color: #f8f9fa; /* Bootstrap light text */
+        }
+
+        body.dark-theme .bg-light {
+            background-color: #343a40 !important; /* Bootstrap dark variant */
+            color: #f8f9fa;
+            border: 1px solid #495057;
+        }
+
+        body.dark-theme h4, body.dark-theme h5 {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        body.dark-theme hr {
+            border-top: 1px solid #495057;
+        }
+
+        body.dark-theme details summary {
+            color: #f8f9fa;
+            font-weight: 500;
+        }
+
+        body.dark-theme .form-check-label {
+            color: #f8f9fa;
+        }
+
+        body.dark-theme .form-control {
+            background-color: #495057; /* Bootstrap gray-600 */
+            border-color: #6c757d; /* Bootstrap gray-500 */
+            color: #f8f9fa;
+        }
+
+        body.dark-theme .form-control:focus {
+            background-color: #495057;
+            border-color: #17a2b8; /* Bootstrap info color */
+            color: #f8f9fa;
+            box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+        }
+
+        body.dark-theme .form-control option {
+            background-color: #495057;
+            color: #f8f9fa;
+        }
+
+        body.dark-theme .btn {
+            background-color: #17a2b8; /* Bootstrap info */
+            border-color: #17a2b8;
+            color: #ffffff;
+        }
+
+        body.dark-theme .btn:hover {
+            background-color: #138496; /* Bootstrap info hover */
+            border-color: #138496;
+        }
+
+        body.dark-theme .btn:focus {
+            box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.5);
+        }
+
+        /* Monaco Editor containers theming */
+        body.dark-theme #schemaEditor,
+        body.dark-theme #startValEditor {
+            border-color: #495057 !important;
+        }
+
+        body.light-theme #schemaEditor,
+        body.light-theme #startValEditor {
+            border-color: #dee2e6 !important;
+        }
+
+        /* Enhanced form styling */
+        body.dark-theme .form-check-input:checked {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+        }
+
+        body.dark-theme .form-check-input:focus {
+            box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+        }
+
+        /* Better visual hierarchy */
+        body.light-theme .container-fluid {
+            background-color: #ffffff;
+        }
+
+        body.dark-theme .container-fluid {
+            background-color: #212529;
+        }
+
+        /* Card styling for dark theme */
+        body.dark-theme .card {
+            background-color: #343a40;
+            border-color: #495057;
+        }
+
+        body.dark-theme .card-header {
+            background-color: #495057;
+            border-color: #6c757d;
+            color: #f8f9fa;
+        }
+
+        body.dark-theme .card-body {
+            background-color: #343a40;
+        }
+
+        body.light-theme .card {
+            background-color: #ffffff;
+            border-color: #dee2e6;
+        }
+
+        body.light-theme .card-header {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+            color: #495057;
+        }
+    </style>
+</head>
+
+<body style="padding: 20px; padding-bottom: 200px;">
+    <div class="container-fluid">
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">F5 Flipper FAST Template</h4>
+                    <div class="d-flex align-items-center" style="gap: 20px;">
+                        <button class="btn btn-sm btn-outline-info" onclick="location.reload();">
+                            <strong>↻ Refresh</strong>
+                        </button>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="darkModeToggle" checked>
+                            <label class="form-check-label" for="darkModeToggle">
+                                <strong>Dark Mode</strong>
+                            </label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="advancedModeToggle">
+                            <label class="form-check-label" for="advancedModeToggle">
+                                <strong>Advanced Mode</strong>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+            </div>
+        </div>
+        <!-- Single Editor Layout -->
+        <div class="row">
+            <div class="col-12" id="editorColumn">
+                <div id="editor" class="mb-3"></div>
+                <button class="btn btn-info" onclick="handleRender(true)">Render Preview</button>
+                <button class="btn btn-success ml-2" onclick="handleRender(false)">Render in Editor</button>
+            </div>
+            <!-- Advanced Mode Sidebar (Hidden by default) -->
+            <div class="col-md-4 advanced-only" id="optionsColumn" style="display: none;">
+                <div class="mt-0">
+                    <h5><strong>Editor Options</strong></h5>
+                    <div class="mt-2 p-3 bg-light rounded">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input editor-option" type="checkbox" id="compact" checked>
+                            <label class="form-check-label" for="compact">Compact</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input editor-option" type="checkbox" id="show_errors" value="always" checked>
+                            <label class="form-check-label" for="show_errors">Show Errors</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input editor-option" type="checkbox" id="disable_edit_json" checked>
+                            <label class="form-check-label" for="disable_edit_json">Disable Edit JSON</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input editor-option" type="checkbox" id="disable_properties" checked>
+                            <label class="form-check-label" for="disable_properties">Disable Properties</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input editor-option" type="checkbox" id="disable_collapse" checked>
+                            <label class="form-check-label" for="disable_collapse">Disable Collapse</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input editor-option" type="checkbox" id="no_additional_properties" checked>
+                            <label class="form-check-label" for="no_additional_properties">No Additional Properties</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input editor-option" type="checkbox" id="disable_array_reorder" checked>
+                            <label class="form-check-label" for="disable_array_reorder">Disable Array Reorder</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input editor-option" type="checkbox" id="disable_array_delete_last_row" checked>
+                            <label class="form-check-label" for="disable_array_delete_last_row">Disable Array Delete Last Row</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input editor-option" type="checkbox" id="disable_array_add">
+                            <label class="form-check-label" for="disable_array_add">Disable Array Add</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input editor-option" type="checkbox" id="disable_array_delete">
+                            <label class="form-check-label" for="disable_array_delete">Disable Array Delete</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input editor-option" type="checkbox" id="enable_array_copy">
+                            <label class="form-check-label" for="enable_array_copy">Enable Array Copy</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input editor-option" type="checkbox" id="required_by_default">
+                            <label class="form-check-label" for="required_by_default">Required By Default</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input editor-option" type="checkbox" id="display_required_only">
+                            <label class="form-check-label" for="display_required_only">Display Required Only</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input editor-option" type="checkbox" id="show_opt_in">
+                            <label class="form-check-label" for="show_opt_in">Show Opt In</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input editor-option" type="checkbox" id="prompt_before_delete">
+                            <label class="form-check-label" for="prompt_before_delete">Prompt Before Delete</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input editor-option" type="checkbox" id="keep_oneof_values">
+                            <label class="form-check-label" for="keep_oneof_values">Keep OneOf Values</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input editor-option" type="checkbox" id="ajax">
+                            <label class="form-check-label" for="ajax">Enable Ajax</label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input editor-option" type="checkbox" id="ajax_cache_responses">
+                            <label class="form-check-label" for="ajax_cache_responses">Ajax Cache Responses</label>
+                        </div>
+
+                        <hr class="my-3">
+
+                        <div class="form-group mb-3">
+                            <label for="object_layout" class="form-label">Object Layout:</label>
+                            <select class="form-control form-control-sm editor-option" id="object_layout">
+                                <option value="normal">Normal</option>
+                                <option value="grid" selected>Grid</option>
+                                <option value="table">Table</option>
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AS3 Preview Section (Appears when data is available) -->
+        <div class="row" id="as3PreviewSection" style="display: none;">
+            <div class="col-12">
+                <div class="mt-4">
+                    <details class="mt-3 card" open>
+                        <summary class="card-header"><strong>AS3 Preview</strong></summary>
+                        <div class="card-body p-0">
+                            <div id="as3PreviewEditor" class="mt-2 rounded" style="height: 400px; border: 1px solid #ccc;"></div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Mode - Schema and Start Values (Below the main row) -->
+        <div class="row advanced-only" style="display: none;">
+            <div class="col-12">
+                <div class="mt-4">
+                    <details class="mt-3 card" open>
+                        <summary class="card-header"><strong>Schema</strong></summary>
+                        <div class="card-body p-0">
+                            <div id="schemaEditor" class="mt-2 rounded" style="height: 400px; border: 1px solid #ccc;"></div>
+                        </div>
+                    </details>
+
+                    <details class="mt-3 card" open>
+                        <summary class="card-header"><strong>Start Values</strong></summary>
+                        <div class="card-body p-0">
+                            <div id="startValEditor" class="mt-2 rounded" style="height: 300px; border: 1px solid #ccc;"></div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@2.5.1/dist/jsoneditor.min.js"></script>
+    <!-- Monaco Editor JS -->
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+    <script>
+        // JSON Schema for the editor
+        const schema = {"type":"object","properties":{"app_name":{"type":"string","title":"Application name","options":{"input_width":"300px"},"propertyOrder":0},"virtual_address":{"type":"string","title":"Virtual address","options":{"input_width":"300px"},"propertyOrder":1},"virtual_port":{"type":"integer","title":"Virtual port","default":80,"options":{"input_width":"300px"},"propertyOrder":2},"icmp_echo":{"type":"string","title":"ICMP echo","enum":["enable","disable","selective"],"default":"enable","propertyOrder":3},"arpEnabled":{"type":"boolean","title":"ARP enabled","default":true,"propertyOrder":4,"format":"checkbox"},"idleTimeout":{"type":"integer","default":300,"title":"Idle timeout","options":{"input_width":"300px"},"propertyOrder":5},"persistence":{"type":"string","title":"Persistence","enum":["source_addr","cookie","ssl"],"default":"cookie","options":{"input_width":"200px","dependencies":{"persistence":true}},"propertyOrder":6},"lbMethod":{"type":"string","title":"Load balancing method","enum":["round-robin","least-connections-member"],"default":"least-connections-member","options":{"input_width":"300px","dependencies":{"lbMethod":true}},"propertyOrder":7},"pool_members":{"type":"array","title":"Static Pool members","description":"List of static pool members","uniqueItems":true,"items":{"type":"object","properties":{"name":{"type":"string","items":{"type":"object","properties":{"name":{"type":"string"}},"required":["name"]},"skip_xform":true,"title":"Name","propertyOrder":1},"address":{"type":"string","title":"Address","propertyOrder":2},"port":{"type":"number","title":"Port","propertyOrder":3,"options":{"input_width":"80px"}},"shareNodes":{"type":"boolean","items":{"type":"string"},"skip_xform":true,"title":"Shared nodes","default":false,"propertyOrder":4,"format":"checkbox"},"adminState":{"type":"boolean","title":"Admin State","description":"Enabled","default":true,"format":"checkbox"}},"required":["name","address","port"]},"skip_xform":true,"propertyOrder":8,"format":"table"},"fqdn_members":{"type":"array","title":"FQDN Pool members","description":"List of FQDN pool members details","uniqueItems":true,"items":{"type":"object","properties":{"hostname":{"type":"string","title":"FQDN"},"port":{"type":"string","title":"Port"},"shareNodes":{"type":"boolean","items":{"type":"string"},"skip_xform":true,"title":"Shared nodes","default":false,"format":"checkbox"},"adminState":{"type":"boolean","title":"Admin State","description":"Enabled","default":true,"format":"checkbox"}},"required":["hostname","port"]},"skip_xform":true,"propertyOrder":9,"format":"table"}},"required":["virtual_address","app_name","pool_members","fqdn_members"],"dependencies":{"persistence":["persistence"],"name":["pool_members"],"address":["pool_members"],"port":["pool_members","fqdn_members"],"shareNodes":["pool_members","fqdn_members"],"adminState":["pool_members","fqdn_members"],"hostname":["fqdn_members"],"lbMethod":["lbMethod"]},"title":"HTTP Application Template","description":"9/11/2025","definitions":{}};
+        
+        // initial values
+        const startval = {"virtual_port":"80","icmp_echo":"enable","arpEnabled":true,"idleTimeout":"180","persistence":"cookie","lbMethod":"least-connections-member","app_name":"fn-2187-vip_http","virtual_address":"208.208.208.13","pool_members":[{"name":"bb8-05","address":"28.28.28.97","port":"80","adminState":false},{"name":"bb8-06.jaku.dev","address":"28.28.28.96","port":"80"},{"name":"bb8-08","address":"28.28.28.40","port":"80"},{"name":"bb8-07.jaku.dev","address":"28.28.28.39","port":"80"},{"name":"bb8-09.jaku.dev","address":"28.28.28.29","port":"80"}],"fqdn_members":[{"hostname":"bb8-03.jaku.dev","port":"80"},{"hostname":"bb8-01.jaku.dev","port":"80","adminState":false}]};
+
+        // editor options - mutable to persist changes through session
+        const editorOptions = { compact: true, show_errors: 'always', disable_edit_json: true, disable_properties: true, disable_collapse: true, no_additional_properties: true, disable_array_reorder: true, disable_array_delete_last_row: true, object_layout: 'table', theme: 'bootstrap4' };
+
+        // Make schema, startval, and editorOptions globally accessible
+        window.schema = schema;
+        window.startval = startval;
+        window.editorOptions = editorOptions;
+
+        // create the editor (basic mode by default)
+        const editor = new JSONEditor(document.getElementById('editor'), {
+            schema,
+            startval,
+            ...window.editorOptions
+        });
+
+        // Make editor globally accessible
+        window.editor = editor;
+
+        // Function to detect if running in VS Code webview
+        function isRunningInVSCode() {
+            try {
+                // Primary check: Try to acquire VS Code API
+                const vscode = acquireVsCodeApi();
+                return vscode !== undefined;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        function isStandaloneMode() {
+            return !isRunningInVSCode() &&
+                   window === window.top &&
+                   !navigator.userAgent.includes('VSCode');
+        }
+
+        // Handle render button click for both VS Code and standalone modes
+        function handleRender(preview = false) {
+            const editorData = window.editor.getValue();
+
+
+                const message = {
+                    data: editorData,
+                    preview: preview
+                };
+                window.vscode.postMessage(message);
+
+        }
+
+        // initialize VS Code API (only if in VS Code)
+        (function init() {
+            if (true) {
+                const vscode = acquireVsCodeApi();
+                window.vscode = vscode;
+                window.isVSCodeMode = true;
+                console.log('Running in VS Code webview');
+
+                // Listen for messages from the extension
+                window.addEventListener('message', event => {
+                    const message = event.data;
+                    console.log('Received message from extension:', message);
+
+                    if (message.as3Preview) {
+                        handleAS3Preview(message.as3Preview);
+                    } else {
+                        console.log('Unknown message type received:', message);
+                    }
+            });
+            } else {
+                window.isVSCodeMode = false;
+                console.log('Running in standalone mode');
+                // You can add standalone-specific initialization here
+            }
+        })();
+
+        // Function to handle AS3 preview data
+        function handleAS3Preview(as3Data) {
+            console.log('Handling AS3 preview:', as3Data);
+
+            // Save to global variable
+            window.as3Preview = as3Data;
+
+            // Show the AS3 preview section
+            document.getElementById('as3PreviewSection').style.display = 'block';
+
+            // Initialize or update the AS3 preview editor
+            initializeAS3PreviewEditor(as3Data);
+
+            console.log('AS3 preview displayed and saved');
+        }
+
+        // Function to initialize AS3 Preview Monaco editor
+        function initializeAS3PreviewEditor(as3Data) {
+            if (!window.as3PreviewMonacoEditor) {
+                // Initialize Monaco editor for AS3 preview
+                require(['vs/editor/editor.main'], function () {
+                    const isDarkMode = document.getElementById('darkModeToggle').checked;
+                    const monacoTheme = isDarkMode ? 'vs-dark' : 'vs';
+
+                    window.as3PreviewMonacoEditor = monaco.editor.create(document.getElementById('as3PreviewEditor'), {
+                        value: as3Data,
+                        language: 'json',
+                        theme: monacoTheme,
+                        minimap: { enabled: false },
+                        scrollBeyondLastLine: false,
+                        automaticLayout: true,
+                        fontSize: 12,
+                        wordWrap: 'on',
+                        readOnly: true, // AS3 preview should be read-only
+                        scrollbar: {
+                            vertical: 'hidden',
+                            horizontal: 'hidden',
+                            alwaysConsumeMouseWheel: false
+                        }
+                    });
+
+                    // Resize to fit content
+                    setTimeout(() => {
+                        resizeMonacoEditorToContent(window.as3PreviewMonacoEditor, 'as3PreviewEditor');
+                    }, 100);
+                });
+            } else {
+                // Update existing editor
+                window.as3PreviewMonacoEditor.setValue(JSON.stringify(as3Data, null, 4));
+                setTimeout(() => {
+                    resizeMonacoEditorToContent(window.as3PreviewMonacoEditor, 'as3PreviewEditor');
+                }, 100);
+            }
+        }
+
+        // Function to update editor schema from extension
+        function updateEditorSchema(newSchema) {
+            if (window.schemaMonacoEditor) {
+                window.schemaMonacoEditor.setValue(JSON.stringify(newSchema, null, 4));
+            }
+        }
+
+        // Function to update editor values from extension
+        function updateEditorValues(newValues) {
+            if (window.startValMonacoEditor) {
+                window.startValMonacoEditor.setValue(JSON.stringify(newValues, null, 4));
+            }
+            if (window.editor) {
+                window.editor.setValue(newValues);
+            }
+        }
+    </script>
+
+</body>
+</html>
+
+<!-- PROTOTYPE ADDITIONS - START -->
+
+<script>
+    // PROTOTYPE ADDITIONS - JS
+    let schemaMonacoEditor, startValMonacoEditor;
+
+    // Initialize Monaco Editor
+    require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } });
+
+    // Function to calculate Monaco editor height based on content
+    function calculateMonacoEditorHeight(editor) {
+        const lineCount = editor.getModel().getLineCount();
+        const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
+        const padding = 40; // Padding for editor chrome
+        return Math.max(200, lineCount * lineHeight + padding);
+    }
+
+    // Function to resize Monaco editor to fit content
+    function resizeMonacoEditorToContent(editor, containerId) {
+        const height = calculateMonacoEditorHeight(editor);
+        const container = document.getElementById(containerId);
+        container.style.height = height + 'px';
+        container.style.minHeight = height + 'px';
+    }
+
+    // Function to initialize Monaco editors (only when advanced mode is enabled)
+    function initializeMonacoEditors() {
+        if (window.schemaMonacoEditor || window.startValMonacoEditor) {
+            return; // Already initialized
+        }
+
+        require(['vs/editor/editor.main'], function () {
+            // Determine initial theme
+            const isDarkMode = document.getElementById('darkModeToggle').checked;
+            const monacoTheme = isDarkMode ? 'vs-dark' : 'vs';
+
+            // Create schema editor
+            schemaMonacoEditor = monaco.editor.create(document.getElementById('schemaEditor'), {
+                value: JSON.stringify(window.schema || schema, null, 4),
+                language: 'json',
+                theme: monacoTheme,
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+                fontSize: 12,
+                wordWrap: 'on',
+                scrollbar: {
+                    vertical: 'hidden',
+                    horizontal: 'hidden',
+                    alwaysConsumeMouseWheel: false
+                },
+                overviewRulerLanes: 0,
+                hideCursorInOverviewRuler: true,
+                overviewRulerBorder: false
+            });
+
+            // Create start values editor
+            startValMonacoEditor = monaco.editor.create(document.getElementById('startValEditor'), {
+                value: JSON.stringify(window.startval || startval, null, 4),
+                language: 'json',
+                theme: monacoTheme,
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+                fontSize: 12,
+                wordWrap: 'on',
+                scrollbar: {
+                    vertical: 'hidden',
+                    horizontal: 'hidden',
+                    alwaysConsumeMouseWheel: false
+                }
+            });
+
+            // Initial resize for both editors
+            setTimeout(() => {
+                resizeMonacoEditorToContent(schemaMonacoEditor, 'schemaEditor');
+                resizeMonacoEditorToContent(startValMonacoEditor, 'startValEditor');
+            }, 500);
+
+            // Schema editor change handler
+            schemaMonacoEditor.onDidChangeModelContent(function() {
+                // Resize editor to fit new content
+                resizeMonacoEditorToContent(schemaMonacoEditor, 'schemaEditor');
+
+                try {
+                    const newSchema = JSON.parse(schemaMonacoEditor.getValue());
+                    // Update global schema variable
+                    window.schema = newSchema;
+
+                    // Recreate the JSON editor with new schema
+                    document.getElementById('editor').innerHTML = '';
+                    window.editor = new JSONEditor(document.getElementById('editor'), {
+                        schema: newSchema,
+                        startval: window.startval || startval,
+                        ...getCurrentEditorOptions()
+                    });
+                } catch (e) {
+                    console.log('Invalid JSON in schema editor:', e.message);
+                }
+            });
+
+            // Start values editor change handler
+            startValMonacoEditor.onDidChangeModelContent(function() {
+                // Resize editor to fit new content
+                resizeMonacoEditorToContent(startValMonacoEditor, 'startValEditor');
+
+                try {
+                    const newStartVal = JSON.parse(startValMonacoEditor.getValue());
+                    // Update global startval variable
+                    window.startval = newStartVal;
+
+                    // Update the JSON editor with new start values
+                    if (window.editor) {
+                        window.editor.setValue(newStartVal);
+                    }
+                } catch (e) {
+                    console.log('Invalid JSON in start values editor:', e.message);
+                }
+            });
+
+            // Make editors globally accessible
+            window.schemaMonacoEditor = schemaMonacoEditor;
+            window.startValMonacoEditor = startValMonacoEditor;
+        });
+    }
+
+    // Function to get current editor options from form
+    function getCurrentEditorOptions() {
+        const options = {};
+
+        // Get all checkboxes
+        document.querySelectorAll('.editor-option[type="checkbox"]').forEach(checkbox => {
+            if (checkbox.id === 'show_errors') {
+                options[checkbox.id] = checkbox.checked ? 'always' : 'never';
+            } else {
+                options[checkbox.id] = checkbox.checked;
+            }
+        });
+
+        // Get select values
+        document.querySelectorAll('.editor-option:not([type="checkbox"])').forEach(select => {
+            options[select.id] = select.value;
+        });
+
+        // Always include theme
+        options.theme = 'bootstrap4';
+
+        return options;
+    }
+
+    // Function to recreate JSON editor with new options
+    function updateJsonEditor() {
+        const currentOptions = getCurrentEditorOptions();
+
+        // Update the global editorOptions variable to persist changes
+        Object.assign(window.editorOptions, currentOptions);
+
+        // Clear existing editor
+        if (window.editor) {
+            window.editor.destroy();
+        }
+
+        // Recreate editor with new options in the same container
+        window.editor = new JSONEditor(document.getElementById('editor'), {
+            schema: window.schema || schema,
+            startval: window.startval || startval,
+            ...currentOptions
+        });
+    }
+
+    // Function to hydrate form controls from editorOptions
+    function hydrateFormFromEditorOptions() {
+        // Set checkboxes based on editorOptions
+        document.querySelectorAll('.editor-option[type="checkbox"]').forEach(checkbox => {
+            const optionName = checkbox.id;
+            if (window.editorOptions.hasOwnProperty(optionName)) {
+                if (optionName === 'show_errors') {
+                    checkbox.checked = window.editorOptions[optionName] === 'always';
+                } else {
+                    checkbox.checked = window.editorOptions[optionName];
+                }
+            }
+        });
+
+        // Set select values based on editorOptions
+        document.querySelectorAll('.editor-option:not([type="checkbox"])').forEach(select => {
+            const optionName = select.id;
+            if (window.editorOptions.hasOwnProperty(optionName)) {
+                select.value = window.editorOptions[optionName];
+            }
+        });
+    }
+
+
+    // Advanced Mode Toggle Handler
+    function toggleAdvancedMode() {
+        const isAdvanced = document.getElementById('advancedModeToggle').checked;
+        const advancedElements = document.querySelectorAll('.advanced-only');
+        const editorColumn = document.getElementById('editorColumn');
+
+        // Show/hide advanced elements
+        advancedElements.forEach(el => {
+            el.style.display = isAdvanced ? 'block' : 'none';
+        });
+
+        // Adjust editor column width
+        if (isAdvanced) {
+            // Advanced mode: editor takes 8 columns, sidebar takes 4
+            editorColumn.classList.remove('col-12');
+            editorColumn.classList.add('col-md-8');
+        } else {
+            // Basic mode: editor takes full width
+            editorColumn.classList.remove('col-md-8');
+            editorColumn.classList.add('col-12');
+        }
+
+        // Initialize Monaco editors only when advanced mode is first enabled
+        if (isAdvanced && !window.schemaMonacoEditor) {
+            initializeMonacoEditors();
+        }
+
+    }
+
+    // Dark Mode Toggle Handler
+    function toggleDarkMode() {
+        const isDarkMode = document.getElementById('darkModeToggle').checked;
+        const body = document.body;
+
+        if (isDarkMode) {
+            body.classList.remove('light-theme');
+            body.classList.add('dark-theme');
+        } else {
+            body.classList.remove('dark-theme');
+            body.classList.add('light-theme');
+        }
+
+        // Update Monaco editor themes
+        const monacoTheme = isDarkMode ? 'vs-dark' : 'vs';
+        if (window.schemaMonacoEditor) {
+            monaco.editor.setTheme(monacoTheme);
+        }
+        if (window.as3PreviewMonacoEditor) {
+            monaco.editor.setTheme(monacoTheme);
+        }
+    }
+
+    // Add change handlers to all editor option controls
+    document.addEventListener('DOMContentLoaded', function() {
+        // Restore saved states from localStorage
+        const savedDarkMode = localStorage.getItem('darkModeEnabled');
+        const savedAdvancedMode = localStorage.getItem('advancedModeEnabled');
+
+        // Set dark mode based on saved state (default to true if not saved)
+        const darkModeEnabled = savedDarkMode !== null ? JSON.parse(savedDarkMode) : true;
+        document.getElementById('darkModeToggle').checked = darkModeEnabled;
+
+        // Set advanced mode based on saved state (default to false)
+        const advancedModeEnabled = savedAdvancedMode !== null ? JSON.parse(savedAdvancedMode) : false;
+        document.getElementById('advancedModeToggle').checked = advancedModeEnabled;
+
+        // Apply the themes and modes
+        if (darkModeEnabled) {
+            document.body.classList.add('dark-theme');
+        } else {
+            document.body.classList.add('light-theme');
+        }
+
+        // Apply advanced mode if enabled
+        if (advancedModeEnabled) {
+            toggleAdvancedMode();
+        }
+
+        // Hydrate form controls from editorOptions
+        hydrateFormFromEditorOptions();
+
+        // Dark mode toggle handler with persistence
+        document.getElementById('darkModeToggle').addEventListener('change', function() {
+            localStorage.setItem('darkModeEnabled', JSON.stringify(this.checked));
+            toggleDarkMode();
+        });
+
+        // Advanced mode toggle handler with persistence
+        document.getElementById('advancedModeToggle').addEventListener('change', function() {
+            localStorage.setItem('advancedModeEnabled', JSON.stringify(this.checked));
+            toggleAdvancedMode();
+        });
+
+        // Editor option handlers
+        document.querySelectorAll('.editor-option').forEach(control => {
+            control.addEventListener('change', updateJsonEditor);
+        });
+    });
+
+</script>
+<!-- PROTOTYPE ADDITIONS - END -->
