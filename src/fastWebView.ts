@@ -20,7 +20,12 @@ import fast from '@f5devcentral/f5-fast-core';
 import { generateHtmlPreview } from './localHtmlPreview';
 import path from 'path';
 import { AdcApp } from './models';
+import { mungeNS2FAST } from './ns2FastParams';
 
+// create a type that extends WebviewPanel and adds a 'template' property
+interface WebviewPanelWithTemplate extends WebviewPanel {
+    template?: string;
+}
 
 const fast = require('@f5devcentral/f5-fast-core');
 
@@ -103,10 +108,11 @@ export class FastWebView {
 
     /**
      * Renders FAST template HTML output with NS app details as input parameters
-     * @param doc vscode document object
+     * @param app AdcApp object with application details
      * @param template FAST template to render HTML
+     * @returns Promise<WebviewPanel> The webview panel that was created
      */
-    public async renderHTML(app: AdcApp, template: string) {
+    public async renderHTML(app: AdcApp, template?: string): Promise<WebviewPanel> {
 
         const nsAppProtocol = app.protocol;
 
@@ -115,12 +121,14 @@ export class FastWebView {
             template = `as3/${nsAppProtocol}`
         }
 
-        // merget document values with template values/defaults
-
         // save template name so we can fetch it during render
         this.selectedTemplate = template;
 
         logger.debug(`converting ns app ${app.name} with FAST Template ${template}`)
+
+        // munge the AdcApp to FAST template parameters
+        const mungedParams = mungeNS2FAST(app);
+        app.fastTempParams = mungedParams;
 
         // invalidate the cache to load any template changes
         this.fastEngine.invalidateCache();
@@ -155,7 +163,7 @@ export class FastWebView {
 
 
 
-        let title = 'NS App -> FAST AS3';
+        let title = app.fastTempParams.app_name || 'NS App -> FAST AS3';
 
         const newEditorColumn = ext.settings.previewColumn;
         const preserveEditorFocus = ext.settings.preserveEditorFocus;
@@ -164,7 +172,10 @@ export class FastWebView {
 
         viewColumn = viewColumn ? viewColumn : newEditorColumn;
 
-        let panel: WebviewPanel;
+
+
+
+        let panel: WebviewPanelWithTemplate;
         if (this.showResponseInDifferentTab || this.panels.length === 0) {
             panel = window.createWebviewPanel(
                 'fast webView',
@@ -174,7 +185,9 @@ export class FastWebView {
                     enableFindWidget: true,
                     enableScripts: true,
                     retainContextWhenHidden: true
-                });
+                }) as WebviewPanelWithTemplate;
+
+            panel.template = template;
 
             panel.onDidDispose(() => {
                 if (panel === this.activePanel) {
@@ -199,31 +212,50 @@ export class FastWebView {
             });
 
             panel.webview.onDidReceiveMessage(async message => {
-                console.log(message);
+                // console.log(message);
+
+                type Message = {
+                    data: unknown,
+                    preview: boolean
+                };
 
                 // get fast template
-                const template = this.selectedTemplate
+                const template = panel.template;
 
-                try {
-                    const final = await this.renderAS3(message, template);
-                    var vDoc: Uri = Uri.parse("untitled:" + 'nsApp.as3.json');
-                    workspace.openTextDocument(vDoc)
-                        .then((a: TextDocument) => {
-                            window.showTextDocument(a, undefined, false).then(async e => {
-                                await e.edit(async edit => {
-                                    const startPosition = new Position(0, 0);
-                                    const endPosition = a.lineAt(a.lineCount - 1).range.end;
-                                    edit.replace(new Range(startPosition, endPosition), final);
-                                    await commands.executeCommand("cursorTop");
-                                    // await commands.executeCommand("f5.injectSchemaRef");
+                // figure out where to render the output,
+                //   send back to html for preview, or new editor tab
 
+                if ((message as Message).preview) {
+
+                    await this.renderAS3(message.data, template)
+                    .then((as3) => {
+                        // Handle AS3 output for preview
+                        panel.webview.postMessage({ as3Preview: as3 });
+                    });
+                } else {
+
+                    try {
+                        const final = await this.renderAS3(message.data, template);
+                        var vDoc: Uri = Uri.parse("untitled:" + 'nsApp.as3.json');
+                        workspace.openTextDocument(vDoc)
+                            .then((a: TextDocument) => {
+                                window.showTextDocument(a, undefined, false).then(async e => {
+                                    await e.edit(async edit => {
+                                        const startPosition = new Position(0, 0);
+                                        const endPosition = a.lineAt(a.lineCount - 1).range.end;
+                                        edit.replace(new Range(startPosition, endPosition), final);
+                                        await commands.executeCommand("cursorTop");
+                                        // await commands.executeCommand("f5.injectSchemaRef");
+    
+                                    });
                                 });
                             });
-                        });
-                } catch (e) {
-                    logger.error(e);
-                    // window.showErrorMessage(e.message);
+                    } catch (e) {
+                        logger.error(e);
+                        // window.showErrorMessage(e.message);
+                    }
                 }
+
 
             });
 
@@ -261,23 +293,24 @@ export class FastWebView {
 
         // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.f5css)}">
 
-//         const htmlSubmitBtn = `
-// <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.vscodeStyleFilePath)}">
-// <script>
-// (function init() {
-//     const vscode = acquireVsCodeApi();
-//     document.vscode = vscode;
-// })();
-// </script>
-// <button onclick="vscode.postMessage(editor.getValue())">Render</button>
-// <p></p>
-//         `;
+        //         const htmlSubmitBtn = `
+        // <link rel="stylesheet" type="text/css" href="${panel.webview.asWebviewUri(this.vscodeStyleFilePath)}">
+        // <script>
+        // (function init() {
+        //     const vscode = acquireVsCodeApi();
+        //     document.vscode = vscode;
+        // })();
+        // </script>
+        // <button onclick="vscode.postMessage(editor.getValue())">Render</button>
+        // <p></p>
+        //         `;
 
         // html += htmlSubmitBtn;
         panel.webview.html = html;
         panel.reveal(viewColumn, !preserveEditorFocus);
         this.activePanel = panel;
 
+        return panel;
     }
 
     // private getSettingsOverrideStyles(width: number): string {
@@ -286,7 +319,7 @@ export class FastWebView {
     //         // (this.settings.fontFamily || this.settings.fontSize || this.settings.fontWeight ? [
     //         //     'code {',
     //         //     this.settings.fontFamily ? `font-family: ${this.settings.fontFamily};` : '',
-    //         //     this.settings.fontSize ? `font-size: ${this.settings.fontSize}px;` : '',
+    //         //     this.settings.fontSize ? `font-size: ${this.settings.fontSize}px;` : '', 
     //         //     this.settings.fontWeight ? `font-weight: ${this.settings.fontWeight};` : '',
     //         //     '}',
     //         // ] : []).join('\n'),

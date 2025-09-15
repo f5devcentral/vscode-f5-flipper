@@ -6,6 +6,8 @@
 'use strict';
 
 const Mustache = require('mustache');
+const fs = require('fs');
+const path = require('path');
 
 // Disable HTML escaping - matches f5-fast-core behavior
 Mustache.escape = function escape(text: string): string {
@@ -20,100 +22,33 @@ Mustache.escape = function escape(text: string): string {
  */
 export const generateHtmlPreview = (schema: any, view: any): string => {
     schema = modSchemaForJSONEditor(schema);
-    const htmlView = {
-        schema_data: JSON.stringify(schema),
-        default_view: JSON.stringify(filterExtraProperties(view, schema))
-    };
-    const re = Mustache.render(htmlTemplate, htmlView);
+
+    // Read template from file
+    const templatePath = path.join(__dirname, '../media/fastPreview.html');
+    // /home/ted/vscode-f5-flipper/media/fastPreview.html
+    let htmlTemplate: string;
+
+    try {
+        htmlTemplate = fs.readFileSync(templatePath, 'utf8');
+    } catch (error) {
+        console.error('Failed to read template file:', error);
+    }
+
+
+    // create a regex to replace the placeholders entire line
+    const re = htmlTemplate
+        .replace(
+            /^\s+const schema = [\S ]+\n$/m,
+            `const schema = ${JSON.stringify(schema)};`
+        )
+        .replace(
+            /^\s+const startval = [\S ]+\n$/m,
+            `const startval = ${JSON.stringify(filterExtraProperties(view, schema))};`
+        );
+
     return re;
 };
 
-
-// HTML template - copied from f5-fast-core html_stub.js
-const htmlTemplate = `
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Template Preview</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
-    <link rel="stylesheet" href="./styles/vscode.css">
-</head>
-
-<body>
-    <div id="editor"></div>
-    
-    <button onclick="vscode.postMessage(editor.getValue())">Render</button>
-    <p></p>
-    
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@2.5.1/dist/jsoneditor.min.js"></script>
-    <script>
-        // JSON Schema for the editor
-        const schema = {{{schema_data}}};
-        
-        // initial values
-        const startval = {{{default_view}}};
-        
-        // editor options
-        const editorOptions = {
-            compact: true,
-            show_errors: 'always',
-            disable_edit_json: false,
-            disable_properties: false,
-            disable_collapse: true,
-            array_controls_top: true,
-            show_opt_in: true,
-            disable_array_reorder: true,
-            theme: 'bootstrap4'
-        };
-
-        // create the editor
-        const editor = new JSONEditor(document.getElementById('editor'), {
-            schema,
-            startval,
-            ...editorOptions
-        });
-
-        // initialize VS Code API
-        (function init() {
-            const vscode = acquireVsCodeApi();
-            document.vscode = vscode;
-        })();
-
-    </script>
-</body>
-</html>
-
-<!-- PROTOTYPE ADDITIONS - START -->
-<div class="mt-4">
-    <details class="mt-3">
-        <summary><strong>Schema</strong></summary>
-        <pre id="schemaDisplay" class="bg-light p-3 mt-2"></pre>
-    </details>
-
-    <details class="mt-3">
-        <summary><strong>Start Values</strong></summary>
-        <pre id="startValDisplay" class="bg-light p-3 mt-2"></pre>
-    </details>
-
-    <details class="mt-3">
-        <summary><strong>Editor Options</strong></summary>
-        <pre id="editorOptionsDisplay" class="bg-light p-3 mt-2"></pre>
-    </details>
-</div>
-
-<script>
-    // PROTOTYPE ADDITIONS - JS
-    // Populate the display elements
-    document.getElementById('schemaDisplay').textContent = JSON.stringify(schema, null, 2);
-    document.getElementById('startValDisplay').textContent = JSON.stringify(startval, null, 2);
-    document.getElementById('editorOptionsDisplay').textContent = JSON.stringify(editorOptions, null, 2);
-
-</script>
-<!-- PROTOTYPE ADDITIONS - END -->
-`;
 
 const injectFormatsIntoSchema = (schema: any): void => {
     Object.values(schema).forEach((item: any) => {
@@ -218,13 +153,6 @@ const mergeWith = (target: any, ...sources: any[]): any => {
 };
 
 const mergeAllOf = (schema: any): any => {
-    const useObjValue = [
-        'title',
-        'description',
-        'default',
-        'propertyOrder'
-    ];
-
     if (!schema.allOf) {
         return schema;
     }
