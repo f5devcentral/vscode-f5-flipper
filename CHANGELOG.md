@@ -19,6 +19,73 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.15.0] - (10-07-2025)
+
+### Added
+
+- **Comprehensive Regex Tree Test Coverage**: Complete test coverage for all NetScaler v13.1 configuration patterns
+  - Added 44 new regex pattern tests covering all 40 patterns in RegExTree
+  - Tests organized by functional categories: Network, Load Balancing, SSL/TLS, Content Switching, Policies, GSLB, etc.
+  - Realistic NetScaler configuration snippets for each pattern
+  - Comprehensive edge case testing: quoted names, wildcard ports, IPv4/IPv6 addresses, FQDNs, special characters
+  - Validation of named capture groups (name, protocol, ipAddress, port, opts, etc.)
+  - 100% regex pattern coverage (improved from 5% coverage)
+  - Total test count increased from 140 to 186 tests (+33%)
+
+- **Utilities Helper Function Tests**: New test suite for utility functions
+  - 21 new tests for `getNonce()` security token generation
+  - Comprehensive type guard tests for `isAdcApp()` function
+  - Validation of null/undefined handling, primitive types, and object structure
+  - Edge case coverage for empty strings and additional properties
+
+- **Test Coverage Analysis Documentation**: Detailed audit of test coverage across the codebase
+  - Created TEST_COVERAGE_ANALYSIS.md documenting coverage for all 29 source files
+  - Identified 14 modules with 0% coverage and prioritized them
+  - Documented well-covered modules (90%+ coverage): CitrixADC, unPackerStream, digLbVserver, regex parsers
+  - Analysis of under-covered modules with improvement recommendations
+  - Priority testing roadmap for critical untested modules (nsDiag, fastCore)
+  - Testing strategy recommendations and success metrics
+
+- **Project Planning Documentation**: Major updates planning document
+  - Created PROJECT_ORCID.md for tracking next phase enhancements
+  - Index with status tracking for all planned improvements
+  - Detailed sections for JSON conversion engine redesign, testing expansion, feature research
+  - Documentation of completed work with timestamps and deliverables
+
+- **Documentation Website**: Complete documentation site using Docsify
+  - Set up Docsify v4.13.1 with GitHub Pages deployment
+  - Created comprehensive documentation structure with sidebar and navbar navigation
+  - Getting Started guides: Installation, Basic Usage, Interface
+  - Feature documentation: Parsing, Abstraction, Conversion, Diagnostics
+  - Architecture overview with links to A10 docs
+  - Contributing guides: Development, Testing, Vendor Support
+  - Reference documentation: API, Troubleshooting
+  - Deployment instructions in docs/DEPLOY.md
+  - Documentation URL: https://f5devcentral.github.io/vscode-f5-flipper/
+
+### Changed
+
+- **Test Suite Improvements**: Enhanced overall test quality and coverage
+  - Overall test coverage: 91.51% lines, 73.33% branches, 87.87% functions ✅
+  - All tests passing (186 tests, up from 119)
+  - Exceeds required thresholds (80% lines/functions, 70% branches)
+  - Improved test organization with better categorization
+
+- **README Modernization**: Complete rewrite with modern format
+  - Short, punchy, user-focused content
+  - Highlighted AS3 output with FAST templates as primary value proposition
+  - Added visual appeal with consistent formatting
+  - Moved technical architecture details to ROADMAP.md
+  - Added standard open source contribution guidelines
+  - Enhanced with badges for marketplace and downloads
+  - Referenced new documentation website
+
+### Fixed
+
+- None
+
+---
+
 ## [1.14.0] - (01-15-2025)
 
 ### Added
