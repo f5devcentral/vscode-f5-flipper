@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>F5 Flipper - NetScaler to F5 Converter</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="description"
+    content="Analyze Citrix NetScaler/ADC configurations and convert them to F5 AS3 declarations with FAST templates.">
+  <meta name="viewport"
+    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+
+  <!-- Docsify Themeable - Simple Dark -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">
+
+  <!-- Custom styles -->
+  <style>
+    :root {
+      --base-font-size: 16px;
+      --theme-color: #e8113f;
+      --theme-color-dark: #c00d35;
+      --sidebar-width: 18rem;
+    }
+
+    /* Dark theme code blocks */
+    pre[data-lang] {
+      background: #1e1e1e !important;
+    }
+
+    pre[data-lang] code {
+      color: #d4d4d4 !important;
+      background: #1e1e1e !important;
+    }
+
+    .markdown-section pre > code {
+      background-color: #1e1e1e !important;
+      color: #d4d4d4 !important;
+    }
+
+    .sidebar {
+      margin-top: 48px;
+    }
+
+    .markdown-section {
+      max-width: 1000px;
+    }
+
+    /* Logo styling */
+    .app-name-link img {
+      height: 32px;
+      width: auto;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    /* Make all navbar links the same color */
+    .app-nav a {
+      color: var(--link-color) !important;
+    }
+
+    .app-nav a:hover {
+      color: var(--link-color-hover) !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">Loading...</div>
+
+  <script>
+    window.$docsify = {
+      name: 'F5 Flipper 🐬',
+      repo: 'https://github.com/f5devcentral/vscode-f5-flipper',
+      homepage: 'README.md',
+      loadNavbar: true,
+      loadSidebar: true,
+      subMaxLevel: 2,
+      maxLevel: 2,
+      auto2top: true,
+      relativePath: false,
+
+      // Search configuration
+      search: {
+        paths: 'auto',
+        placeholder: 'Search',
+        noData: 'No results found',
+        depth: 3,
+        hideOtherSidebarContent: false,
+      },
+
+      // Copy code plugin
+      copyCode: {
+        buttonText: 'Copy',
+        errorText: 'Error',
+        successText: 'Copied!'
+      },
+
+      // Alias for external files
+      alias: {
+        '/CHANGELOG': 'https://raw.githubusercontent.com/f5devcentral/vscode-f5-flipper/main/CHANGELOG.md',
+        '/ROADMAP': 'https://raw.githubusercontent.com/f5devcentral/vscode-f5-flipper/main/ROADMAP.md',
+        '/.*/_sidebar.md': '/_sidebar.md',
+      },
+
+      // Custom plugins
+      plugins: [
+        // Add footer with last modified
+        function (hook, vm) {
+          hook.beforeEach(function (html) {
+            return html + '\n\n---\n\n';
+          });
+
+          hook.afterEach(function (html) {
+            var footer = [
+              '<hr/>',
+              '<footer>',
+              '<span>Built with <a href="https://docsify.js.org" target="_blank">Docsify</a> | ',
+              '<a href="https://github.com/f5devcentral/vscode-f5-flipper" target="_blank">F5 DevCentral</a></span>',
+              '</footer>'
+            ].join('');
+            return html + footer;
+          });
+        }
+      ],
+
+      // Theme configuration
+      themeable: {
+        readyTransition: true,
+        responsiveTables: true
+      },
+
+      // Mermaid configuration
+      mermaid: {
+        theme: 'dark'
+      }
+    }
+  </script>
+
+  <!-- Docsify core -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4.13.1/lib/docsify.min.js"></script>
+
+  <!-- Docsify plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4.13.1/lib/plugins/search.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-copy-code@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4.13.1/lib/plugins/external-script.min.js"></script>
+
+  <!-- Prism syntax highlighting -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-markdown.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-nginx.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-javascript.min.js"></script>
+
+  <!-- Mermaid for diagrams -->
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    window.mermaid = mermaid;
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-mermaid@2/dist/docsify-mermaid.js"></script>
+  <script>mermaid.initialize({ startOnLoad: true, theme: 'dark' });</script>
+</body>
+
+</html>
