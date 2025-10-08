@@ -3,7 +3,7 @@
   "displayName": "F5 Flipper",
   "description": "Breaking down Citrix NetScaler ADC configs",
   "publisher": "F5DevCentral",
-  "version": "1.15.0",
+  "version": "1.16.0",
   "keywords": [
     "F5",
     "F5Networks",
@@ -80,7 +80,7 @@
     "viewsWelcome": [
       {
         "view": "nsConfigView",
-        "contents": "Welome to project-flipper!\nThis project aims to explore the process of breaking down, analyzing and abstracting applications from a Citrix NetScaler config/archive (.conf/.tgz)\n- Phase 1: Unpack config\n- Phase 2: Abstract Applications\n- Phase 3: Diagnostics\n- Phase 4: Conversion Outputs (tmos/as3)\nImport a Citrix ADC/NS config/archive to continue.\n[Import .conf/.tgz from local file](command:f5-flipper.cfgExplore)\n[Load Example/Test NS Config](command:f5-flipper.cfgExploreTest)\n[Repo](https://github.com/f5devcentral/vscode-f5-flipper)\n\nThank you for checking out this tool.  Please provide feedback through github issues\n[Open Issue/Bug](https://github.com/f5devcentral/vscode-f5-flipper/issues/new/choose)"
+        "contents": "Welcome to F5 Flipper 🐬\nNetScaler to F5 Configuration Converter\n[Documentation](https://f5devcentral.github.io/vscode-f5-flipper/)\n\nAnalyze Citrix NetScaler/ADC configurations and convert them to F5 AS3 declarations with FAST templates.\n\n✨ Key Features:\n• Parse NetScaler configs (.conf/.tgz archives)\n• Application abstraction (CS/LB/GSLB)\n• Smart diagnostics (40+ detection rules)\n• AS3 conversion via FAST templates\n• Interactive webviews with Monaco editor\n\nImport a Citrix ADC/NS config/archive to get started.\n\n[Import .conf/.tgz from local file](command:f5-flipper.cfgExplore)\n[Load Example/Test NS Config](command:f5-flipper.cfgExploreTest)\n[Repo](https://github.com/f5devcentral/vscode-f5-flipper)\n\nFeedback and contributions welcome!\n[Open Issue/Bug](https://github.com/f5devcentral/vscode-f5-flipper/issues/new/choose)"
       }
     ],
     "commands": [
