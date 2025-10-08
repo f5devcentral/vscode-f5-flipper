@@ -4,6 +4,8 @@
 
 Analyze Citrix NetScaler/ADC configurations and convert them to F5 AS3 declarations with FAST templates.
 
+**📖 [Documentation](https://f5devcentral.github.io/vscode-f5-flipper/)**
+
 ![Project Flipper](project-flipper-dophin.png)
 
 [![Visual Studio Marketplace](https://img.shields.io/visual-studio-marketplace/v/F5DevCentral.vscode-f5-flipper?style=flat-square&label=VS%20Code%20Marketplace&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=F5DevCentral.vscode-f5-flipper)

@@ -33,60 +33,31 @@ export function digCStoLBreferences(apps: AdcApp[]) {
                 app.apps = [];
             }
 
+            // PolicyRef is always an object array per models.ts, never strings
             for ( const p of app.bindings["-policyName"]) {
 
-                if (typeof p === 'string') {
-
-                    // todo: look up a single lb server with 'p' as the name
-                    const a = apps.filter((a: AdcApp) => a.name === p)[0]
+                // Check if policy has -targetLBVserver reference
+                if (p["-targetLBVserver"]) {
+                    const x = p["-targetLBVserver"]
+                    const a = apps.filter((b: AdcApp) => b.name === x)[0]
 
                     if(a) {
 
                         // copy app json
                         const b = JSON.parse(JSON.stringify(a))
-    
+
                         // copy reference app config lines to main app
                         app.lines.push(...b.lines)
                         // delete app lines from referenced app
                         delete b.lines
-    
+
                         // push lb app to cs app
                         app.apps.push(sortAdcApp(b))
+
                     } else {
-                        logger.error(`-policyName ${p} referenced by CS ${app.name} not found`)
-                    }
-
-
-                } else {
-
-                    // this should be a list of objects
-                    // todo: loop through the policies and get lb references
-                    if (p["-targetLBVserver"]) {
-                        const x = p["-targetLBVserver"]
-                        const a = apps.filter((b: AdcApp) => b.name === x)[0]
-
-                        if(a) {
-
-                            // copy app json
-                            const b = JSON.parse(JSON.stringify(a))
-                            // const b = JSON.parse(JSON.stringify(a))
-    
-                            // copy reference app config lines to main app
-                            app.lines.push(...b.lines)
-                            // delete app lines from referenced app
-                            delete b.lines
-    
-                            // push lb app to cs app
-                            app.apps.push(sortAdcApp(b))
-
-
-                        } else {
-                            logger.error(`policy with -targetLBVserver ${p} referenced by CS ${app.name} not found`)
-                        }
+                        logger.error(`policy action with -targetLBVserver ${x} referenced by CS ${app.name} not found`)
                     }
                 }
-
-
             }
 
         }

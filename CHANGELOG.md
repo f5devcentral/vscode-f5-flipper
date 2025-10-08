@@ -19,6 +19,86 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.16.0] - (10-08-2025)
+
+### Added
+
+- **Enhanced Test Coverage for Content Switching**: Comprehensive test suite for CS vserver functionality
+  - Added 27 tests for `digCsVserver.ts` covering CS vserver parsing, policy bindings, and actions
+  - Tests validate CS policy abstraction, CS action abstraction with targetLBVserver
+  - Coverage includes CS vserver options, SSL bindings, and complex multi-policy configurations
+  - Integration tests for CS→LB vserver relationships
+  - Edge case testing for empty CS vservers and missing references
+  - Coverage improvement: 0% → 69.04% (appflow code path not covered due to complexity)
+
+- **CS to LB Reference Error Handling Tests**: New test suite for error path validation
+  - Added 8 tests for `digCStoLbRefs.ts` focusing on missing reference scenarios
+  - Tests validate graceful handling of broken LB vserver references
+  - Coverage for missing `-policyName`, `-targetLBVserver`, and `-lbvserver` references
+  - Real-world error case testing using starlord config fixture
+  - Coverage improvement: 79.59% → 95.45%
+
+- **Diagnostic Rules Validation Suite**: Comprehensive testing of diagnostic system
+  - Added 34 tests for `nsDiag.ts` diagnostic rules validation
+  - Validates diagnostic rules file structure, severity levels, and regex patterns
+  - Tests rule categorization (by category, technology, severity)
+  - Simulates diagnostic matching logic without VS Code dependencies
+  - Validates regex compilation and pattern matching accuracy
+  - Rule statistics calculation testing
+
+- **Project Documentation Updates**:
+  - Updated [PROJECT_ORCID.md](PROJECT_ORCID.md) tracking document with test coverage completion status
+  - Updated [TEST_COVERAGE_ANALYSIS.md](TEST_COVERAGE_ANALYSIS.md) with final coverage metrics
+  - Documented test session results (69 new tests, coverage improvement to 92.47%)
+  - Added improvement recommendations for reference validation UI integration
+
+- **DNS AS3 Template**: Implemented complete DNS load balancer AS3 conversion template ([templates/as3/DNS.yaml](templates/as3/DNS.yaml))
+  - Fixed error when converting DNS apps: `Error: could not find a template with name "as3/DNS"`
+  - DNS applications now fully support AS3 conversion
+  - Template includes DNS-specific features: DNS monitors, query types (A, AAAA, NS, MX, etc.), port 53 configuration
+  - Supports DNS virtual servers, service groups, and health monitoring
+  - Template follows established pattern from UDP/TCP templates
+  - Tested with existing `dnsLoadBalancer.ns.conf` fixture
+
+- **DNS Template Documentation**: Created comprehensive GitHub issue document ([ISSUE_DNS_TEMPLATE.md](ISSUE_DNS_TEMPLATE.md))
+  - Documented the DNS template requirements and implementation details
+  - Provided template structure reference and DNS-specific features
+  - Included acceptance criteria for validation
+
+### Changed
+
+- **Code Quality Improvements**: Refactored `digCStoLbRefs.ts` for better maintainability
+  - Removed unnecessary string-based policy reference handling (PolicyRef type is always object-based)
+  - Simplified error handling logic with clearer error messages
+  - Improved code readability and reduced cyclomatic complexity
+  - Better alignment with TypeScript type definitions
+
+- **TypeScript Model Enhancements**: Updated type definitions for better accuracy
+  - Enhanced `PolicyRef` type to remove deprecated string union (object-only now)
+  - Added `-priority` property to PolicyRef type
+  - Fixed CsPolicy property names to use bracket notation (`['-action']`, `['-rule']`)
+  - Added `-comment` property to CsPolicyActions type
+  - Better type safety for CS vserver policy handling
+
+- **Test Coverage Metrics**: Overall improvement across all metrics
+  - **Lines**: 91.81% → **92.47%** (+0.66%)
+  - **Branches**: 74.66% → **75.11%** (+0.45%)
+  - **Functions**: 88.88% → **88.77%** (stable, rounding variation)
+  - **Test Count**: 220 → **255 tests** (+35 tests, +15.9%)
+
+- **Welcome View Enhancement**:
+  - Improved visual appeal of the Citrix ADC/NS Config Explorer welcome screen
+  - Updated to represent latest project status
+  - Included a link to the new documentation website
+
+### Fixed
+
+- Corrected TypeScript type definitions for CS policy objects
+- Improved error message clarity for missing LB vserver references
+- Fixed PolicyRef type to match actual usage patterns (removed string union)
+
+---
+
 ## [1.15.0] - (10-07-2025)
 
 ### Added

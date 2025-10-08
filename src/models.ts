@@ -23,8 +23,8 @@ export type AdcApp = {
     };
     csPolicies?: {
         name?: string;
-        action?: string;
-        rule?: string;
+        ['-action']?: string;
+        ['-rule']?: string;
     }[];
     csPolicyActions?: CsPolicyActions[];
     appflows?: unknown[];
@@ -70,6 +70,7 @@ export type NsFastTempParams = {
 
 export type CsPolicyActions = {
     '-targetLBVserver'?: string;
+    '-comment'?: string;
 }
 
 export type Appflow = {
@@ -97,8 +98,9 @@ export type DomainBinding = {
 export type PolicyRef = {
     '-policyName': string;
     '-targetLBVserver'?: string;
+    '-priority'?: string;
     opts?: Opts;
-} | string;
+};
 
 export type Service = {
     name: string;
