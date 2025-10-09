@@ -257,7 +257,9 @@ export type AdcRegExTree = {
         'add appflow collector': RegExp;
         'set ssl vserver': RegExp;
         'set ssl service': RegExp;
+        'set lb vserver': RegExp;
         'set lb monitor': RegExp;
+        'set cs vserver': RegExp;
         'set ns param': RegExp;
         'set ns hostName': RegExp;
         'set gslb vserver': RegExp;

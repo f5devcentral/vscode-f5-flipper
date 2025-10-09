@@ -338,7 +338,66 @@ Major enhancements to F5 Flipper extension focusing on improved architecture, te
 ### 7.1 Extended Feature Detection
 **Status**: Not Started
 **Priority**: High
-**Description**: Extend diagnostics to identify and categorize application features
+**Description**: Implement comprehensive feature detection and F5 platform compatibility assessment
+
+**Design Document**: [FEATURE_DETECTION_DESIGN.md](FEATURE_DETECTION_DESIGN.md)
+
+**Overview**:
+Create a hybrid system that detects NetScaler application features during abstraction and validates compatibility through diagnostic rules. This enables intelligent platform recommendations (TMOS, NGINX+, F5 XC) and conversion guidance.
+
+**Key Components**:
+1. **Feature Detection During Abstraction**
+   - Detect features as applications are parsed (SSL, persistence, LB methods, etc.)
+   - Add `features`, `f5Compatibility`, and `complexityScore` to AdcApp objects
+   - Single-pass efficiency during digestion
+
+2. **Compatibility Assessment via Diagnostics**
+   - Diagnostic rules for platform-specific feature gaps
+   - Actionable warnings for conversion challenges
+   - Leverages existing nsDiag infrastructure
+
+**Implementation Tasks**:
+
+- [ ] Create FeatureDetector utility class ([FEATURE_DETECTION_DESIGN.md](FEATURE_DETECTION_DESIGN.md#phase-1-feature-detector-framework))
+- [ ] Extend models.ts with AppFeatures and F5Compatibility interfaces
+- [ ] Update digesters (digLbVserver, digCsVserver) to collect features
+- [ ] Add feature compatibility diagnostic rules to nsDiag.ts
+- [ ] Create feature summary webview for UI display
+- [ ] Add platform recommendation icons to tree view
+- [ ] Generate feature matrix reports
+- [ ] Write unit tests for feature detection (tests/400_featureDetector.unit.tests.ts)
+
+**Feature Categories**:
+
+- SSL/TLS (client, server, SNI, ciphers)
+- Persistence (types, timeout, backup)
+- Load Balancing (methods, monitors, weights)
+- Content Switching (policies, rules)
+- HTTP Features (compression, caching, HTTP/2)
+- Security (WAF, auth, rate limiting, bot management)
+- Network (IPv6, VLANs, profiles)
+- Advanced (appflow, spillover, traffic domains)
+
+**Platform Compatibility**:
+
+- **TMOS**: Score features against LTM/ASM/APM/GTM/AFM module capabilities
+- **NGINX+**: Identify unsupported features (GSLB, advanced auth, etc.)
+- **F5 XC**: Assess cloud-native fit and legacy feature gaps
+
+**Benefits**:
+
+- Automated platform recommendations with confidence scores
+- Feature gap analysis per target platform
+- Complexity assessment for migration planning
+- Template auto-suggestion based on detected features
+- Better conversion planning and risk evaluation
+
+**Success Metrics**:
+
+- Feature detection accuracy > 95%
+- Platform recommendations validated against 50+ real migrations
+- UI integration with < 100ms overhead per app
+- Diagnostic rules cover 80%+ common migration issues
 
 ---
 
@@ -542,6 +601,7 @@ During unit test development (section 3.1), tests revealed that when CS vservers
 - [flipper_webview](https://github.com/DumpySquare/flipper_webview) - Prototype repository
 - Package.json - Extension configuration
 - Test coverage reports in `.nyc_output/`
+- [FEATURE_DETECTION_DESIGN.md](FEATURE_DETECTION_DESIGN.md) - Feature detection system design
 
 ---
 

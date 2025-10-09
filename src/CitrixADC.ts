@@ -15,6 +15,7 @@ import { countMainObjects } from './objectCounter';
 import { parseAdcConfArrays } from './parseAdcArrys';
 import { RegExTree } from './regex';
 import { UnPacker } from './unPackerStream';
+import { parseAdcConfArraysRx } from './parseAdcArraysRx';
 
 
 
@@ -140,6 +141,7 @@ export default class ADC extends EventEmitter {
         await this.setAdcVersion(conf)
 
         await parseAdcConfArrays(config, this.configObjectArry, this.rx!)
+        // await parseAdcConfArraysRx(config, this.configObjectArry, this.rx!)  // TODO: Testing new parser
 
         // get hostname from configObjectArry, assign to parent class for easy access
         if (this.configObjectArry.set?.ns?.hostName) {
