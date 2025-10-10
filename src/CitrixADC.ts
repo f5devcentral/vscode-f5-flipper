@@ -10,12 +10,15 @@ import { digLbVserver } from './digLbVserver';
 import { digGslbVservers } from './digGslbVserver';
 import { digCStoLBreferences } from './digCStoLbRefs';
 import { logger } from './logger';
-import { AdcApp, AdcConfObj, AdcRegExTree, ConfigFile, Explosion, Stats } from './models'
+import { AdcApp, AdcConfObj, AdcConfObjRx, AdcRegExTree, ConfigFile, Explosion, Stats } from './models'
 import { countMainObjects } from './objectCounter';
 import { parseAdcConfArrays } from './parseAdcArrys';
 import { RegExTree } from './regex';
 import { UnPacker } from './unPackerStream';
 import { parseAdcConfArraysRx } from './parseAdcArraysRx';
+import { digCsVserversRx } from './digCsVserverRx';
+import { digLbVserverRx } from './digLbVserverRx';
+import { digGslbVserversRx } from './digGslbVserverRx';
 
 
 
@@ -36,6 +39,11 @@ export default class ADC extends EventEmitter {
      */
     // public configObject: AdcConfObj = {};
     public configObjectArry: AdcConfObj = {};
+    /**
+     * new ns config as full nested json objects - using regex parsing
+     * this is for the new json parsing engine
+     */
+    public configObjectArryRx: AdcConfObjRx = {};
     /**
      * adc version
      */
@@ -66,6 +74,7 @@ export default class ADC extends EventEmitter {
     private stats: Stats = {
         objectCount: 0,
     };
+    appsRx: AdcApp[];
 
     constructor() {
         super();
@@ -93,7 +102,7 @@ export default class ADC extends EventEmitter {
         })
 
         await unPacker.stream(file)
-            .then(async ({ files, size }) => {
+            .then(async ({ size }) => {
 
                 this.stats.sourceSize = size;
 
@@ -140,8 +149,10 @@ export default class ADC extends EventEmitter {
         // build rx tree based on ns version
         await this.setAdcVersion(conf)
 
-        await parseAdcConfArrays(config, this.configObjectArry, this.rx!)
-        // await parseAdcConfArraysRx(config, this.configObjectArry, this.rx!)  // TODO: Testing new parser
+        await parseAdcConfArrays(config, this.configObjectArry, this.rx);
+
+        // fully parse ns config to json with regex engine project-orchid
+        await parseAdcConfArraysRx(config, this.configObjectArryRx, this.rx);
 
         // get hostname from configObjectArry, assign to parent class for easy access
         if (this.configObjectArry.set?.ns?.hostName) {
@@ -225,12 +236,13 @@ export default class ADC extends EventEmitter {
 
         // setup our array to hold the apps
         const apps: AdcApp[] = [];
+        const appsRx: AdcApp[] = [];
 
         // start our timer for abstracting apps
         const startTime = process.hrtime.bigint();
 
 
-        // dig each 'add cs vserver'
+        // dig each 'add cs vserver' - OLD array-based parser
         await digCsVservers(this.configObjectArry, this.rx)
             .then(csApps => {
                 // add the cs apps to the main app array
@@ -240,7 +252,7 @@ export default class ADC extends EventEmitter {
                 logger.error(err)
             });
 
-        // dig each 'add lb vserver', but check for existing?
+        // dig each 'add lb vserver', but check for existing? - OLD array-based parser
         await digLbVserver(this.configObjectArry, this.rx)
             .then(lbApps => {
                 // add the lb apps to the main app array
@@ -259,6 +271,31 @@ export default class ADC extends EventEmitter {
                 logger.error(err)
             });
 
+        // NEW RX-based parser - parallel execution for comparison
+        await digCsVserversRx(this.configObjectArryRx, this.rx)
+            .then(csApps => {
+                appsRx.push(...csApps as AdcApp[])
+            })
+            .catch(err => {
+                logger.error(err)
+            });
+
+        await digLbVserverRx(this.configObjectArryRx, this.rx)
+            .then(lbApps => {
+                appsRx.push(...lbApps as AdcApp[])
+            })
+            .catch(err => {
+                logger.error(err)
+            });
+
+        await digGslbVserversRx(this.configObjectArryRx, this.rx)
+            .then(gslbApps => {
+                appsRx.push(...gslbApps)
+            })
+            .catch(err => {
+                logger.error(err)
+            });
+
         // now that all apps have been abstracted, go through and find cs pointing to lb's
         digCStoLBreferences(apps)
 
@@ -269,6 +306,20 @@ export default class ADC extends EventEmitter {
             sortAdcApp(app)
         }
 
+        // Apply same post-processing to RX-based apps
+        digCStoLBreferences(appsRx)
+        for await (const app of appsRx) {
+            app.lines = app.lines.filter((value, index, array) => array.indexOf(value) === index)
+            // Remove empty or invalid certs arrays (match original behavior)
+            if (app.bindings?.certs) {
+                // Remove if empty or contains only empty objects
+                if (app.bindings.certs.length === 0 ||
+                    (app.bindings.certs.length === 1 && Object.keys(app.bindings.certs[0]).length === 0)) {
+                    delete app.bindings.certs;
+                }
+            }
+            sortAdcApp(app)
+        }
 
         // capture app abstraction time
         this.stats.appTime = Number(process.hrtime.bigint() - startTime) / 1000000;
@@ -280,6 +331,9 @@ export default class ADC extends EventEmitter {
             // do we want to just log or toss on error if we have no apps?
             throw new Error(msg)
         }
+
+        // stash the rx based apps in an array in the parent class for reference
+        this.appsRx = appsRx;
 
         // return the app array
         return apps;

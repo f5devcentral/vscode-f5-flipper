@@ -381,3 +381,128 @@ export type AdcConfObj = {
         ns?: unknown;
     };
 }
+
+
+/**
+ * Parsed NS config object structure using RX engine
+ * Objects are keyed by name instead of stored in arrays
+ * Each object contains fully parsed properties from named capture groups
+ */
+export type AdcConfObjRx = {
+    vserver?: string;
+    add?: {
+        ns?: {
+            ip?: Record<string, NsObject>;
+            ip6?: Record<string, NsObject>;
+        };
+        server?: Record<string, NsObject>;
+        service?: Record<string, NsObject>;
+        serviceGroup?: Record<string, NsObject>;
+        ssl?: {
+            certKey?: Record<string, NsObject>;
+        };
+        lb?: {
+            vserver?: Record<string, NsObject>;
+            monitor?: Record<string, NsObject>;
+        };
+        cs?: {
+            vserver?: Record<string, NsObject>;
+            action?: Record<string, NsObject>;
+            policy?: Record<string, NsObject>;
+        };
+        gslb?: {
+            vserver?: Record<string, NsObject>;
+            service?: Record<string, NsObject>;
+        }
+        rewrite?: {
+            policy?: Record<string, NsObject>;
+            action?: Record<string, NsObject>;
+        };
+        responder?: {
+            policy?: Record<string, NsObject>;
+            action?: Record<string, NsObject>;
+        };
+        authentication?: {
+            policy?: Record<string, NsObject>;
+            action?: Record<string, NsObject>;
+        };
+        cache?: Record<string, NsObject>;
+        dns?: {
+            nameServer?: Record<string, NsObject>;
+        };
+        route?: Record<string, NsObject>;
+        appfw?: Record<string, NsObject>;
+        appflow?: {
+            policy?: Record<string, NsObject>;
+            action?: Record<string, NsObject>;
+            collector?: Record<string, NsObject>;
+        }
+    };
+    set?: {
+        ns?: {
+            config?: Record<string, NsObject>;
+            hostName?: Record<string, NsObject>;
+
+        };
+        gslb?: {
+            vserver?: Record<string, NsObject>;
+        }
+        system?: Record<string, NsObject>;
+        rsskeytype?: Record<string, NsObject>;
+        lacp?: Record<string, NsObject>;
+        interface?: Record<string, NsObject>;
+        nd6RAvariables?: Record<string, NsObject>;
+        snmp?: Record<string, NsObject>;
+        cmp?: Record<string, NsObject>;
+        service?: Record<string, NsObject>;
+        aaa?: Record<string, NsObject>;
+        lb?: Record<string, NsObject>;
+        cache?: Record<string, NsObject>;
+        appflow?: Record<string, NsObject>;
+        bot?: Record<string, NsObject>;
+        appfw?: Record<string, NsObject>;
+        subscriber?: Record<string, NsObject>;
+        ssl?: {
+            service?: Record<string, NsObject>;
+        };
+        cloud?: Record<string, NsObject>;
+        cloudtunnel?: Record<string, NsObject>;
+        ip6TunnelParam?: Record<string, NsObject>;
+        ptp?: Record<string, NsObject>;
+        videooptimization?: Record<string, NsObject>;
+    };
+    bind?: {
+        cache?: Record<string, NsObject>;
+        lb?: {
+            vserver?: Record<string, NsObject>;
+        };
+        cs?: {
+            vserver?: Record<string, NsObject>;
+        };
+        gslb?: {
+            vserver?: Record<string, NsObject>;
+        }
+        service?: Record<string, NsObject>;
+        serviceGroup?: Record<string, NsObject>;
+        audit?: Record<string, NsObject>;
+        tunnel?: Record<string, NsObject>;
+        ssl?: {
+            service?: Record<string, NsObject>;
+            vserver?: Record<string, NsObject>;
+        };
+    };
+    enable?: {
+        ns?: unknown;
+    };
+}
+
+/**
+ * Generic NS object with parsed properties
+ * All objects have at minimum a name and _line property
+ * Additional properties populated from regex named capture groups
+ */
+export interface NsObject {
+    name: string;
+    _line: string;
+    [key: string]: any;  // Additional properties from capture groups (protocol, ipAddress, port, etc.)
+}

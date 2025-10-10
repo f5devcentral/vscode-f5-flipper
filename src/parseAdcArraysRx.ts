@@ -1,4 +1,4 @@
-import { AdcRegExTree, AdcConfObj } from "./models";
+import { AdcRegExTree, AdcConfObjRx } from "./models";
 import { nestedObjValue } from "./objects";
 import { deepmergeInto } from 'deepmerge-ts'
 import { parseNsOptions } from "./parseAdcUtils";
@@ -10,15 +10,18 @@ import { parseNsOptions } from "./parseAdcUtils";
  * Parse NS config lines with full RX parsing
  * Stores fully parsed objects instead of unparsed strings
  * @param config Array of config lines
- * @param cfgObj Target AdcConfObj to populate
+ * @param cfgObj Target AdcConfObjRx to populate
  * @param rx Regex tree for pattern matching
  */
-export async function parseAdcConfArraysRx(config: string[], cfgObj: AdcConfObj, rx: AdcRegExTree) {
+export async function parseAdcConfArraysRx(config: string[], cfgObj: AdcConfObjRx, rx: AdcRegExTree) {
 
     // Optional: sortNsLines(config, rx) - currently disabled to process in original order
 
     // Cache parent keys for faster lookups
     const parents = Object.keys(rx.parents);
+
+    // Counter for bind statements to create unique keys
+    let bindCounter = 0;
 
     // Process each line sequentially
     for (const line of config) {
@@ -34,6 +37,7 @@ export async function parseAdcConfArraysRx(config: string[], cfgObj: AdcConfObj,
         // Extract verb and object type (e.g., "add lb vserver" -> ["add", "lb", "vserver"])
         const location = matchedParent.trim().split(' ');
         const objectType = location.pop() as string;  // "vserver"
+        const verb = location[0];  // "add", "bind", "set", etc.
 
         // Extract body after verb/type
         const body = line.slice(matchedParent.length + 1);
@@ -41,11 +45,18 @@ export async function parseAdcConfArraysRx(config: string[], cfgObj: AdcConfObj,
         // Parse the line fully with RX
         const parsedObj = parseNsLineWithRx(matchedParent, body, line, rx);
 
-        // Create nested object with parsed data keyed by name
-        const tmpObj = nestedObjValue(location, { [objectType]: { [parsedObj.name]: parsedObj } });
-
-        // Merge with main object
-        deepmergeInto(cfgObj, tmpObj);
+        // For "bind" statements, create unique keys for each binding line
+        // This prevents multiple bindings from being merged into one object
+        if (verb === 'bind') {
+            // Use name + counter as unique key for this bind statement
+            const uniqueKey = `${parsedObj.name}_${bindCounter++}`;
+            const tmpObj = nestedObjValue(location, { [objectType]: { [parsedObj.name]: { [uniqueKey]: parsedObj } } });
+            deepmergeInto(cfgObj, tmpObj);
+        } else {
+            // For add/set/enable/disable, use name as key (allow merging)
+            const tmpObj = nestedObjValue(location, { [objectType]: { [parsedObj.name]: parsedObj } });
+            deepmergeInto(cfgObj, tmpObj);
+        }
     }
 
 }

@@ -11,7 +11,7 @@ Major enhancements to F5 Flipper extension focusing on improved architecture, te
 |---|---------|--------|----------|
 | 1.1 | [Main README Update](#11-main-readme-update) | ✅ Complete | High |
 | 1.2 | [Documentation Website](#12-documentation-website) | ✅ Complete (Initial) | High |
-| 2.1 | [JSON Conversion Engine Redesign](#21-json-conversion-engine-redesign) | Not Started | Critical |
+| 2.1 | [JSON Conversion Engine Redesign](#21-json-conversion-engine-redesign) | 🟡 Phase 1 Complete (40%) | Critical |
 | 3.1 | [Unit Test Coverage](#31-unit-test-coverage) | ✅ Complete | High |
 | 3.2 | [Production Config Testing](#32-production-config-testing) | Not Started | Medium |
 | 4.1 | [Review Related Tools](#41-review-related-tools) | Not Started | Medium |
@@ -20,7 +20,7 @@ Major enhancements to F5 Flipper extension focusing on improved architecture, te
 | 7.1 | [Extended Feature Detection](#71-extended-feature-detection) | Not Started | High |
 | 7.2 | [Reference Validation UI Integration](#72-reference-validation-ui-integration) | Not Started | High |
 
-**Overall Progress**: 3/10 sections complete (30%)
+**Overall Progress**: 3.4/10 sections complete (34%) - JSON Engine in progress
 
 ---
 
@@ -118,9 +118,12 @@ Major enhancements to F5 Flipper extension focusing on improved architecture, te
 ## 2. Core Architecture Enhancements
 
 ### 2.1 JSON Conversion Engine Redesign
-**Status**: Not Started
+**Status**: 🟡 In Progress - Phase 1 Complete (40%)
 **Priority**: Critical
 **Description**: Redesign conversion engine to convert every NS config line to JSON first, then abstract applications
+
+**Design Document**: [JSON_ENGINE_DESIGN.md](JSON_ENGINE_DESIGN.md)
+**Session Summary**: [SESSION_SUMMARY.md](SESSION_SUMMARY.md)
 
 **Current Approach**:
 - Parse config lines using regex patterns
@@ -133,21 +136,37 @@ Major enhancements to F5 Flipper extension focusing on improved architecture, te
 - Abstract applications from JSON model
 - Enables better querying, validation, and transformation
 
-**Deep Dive Required**:
-- [ ] Analyze current RegExTree patterns (`src/regex.ts`)
-- [ ] Design new JSON schema for NS config objects
-- [ ] Map all NS object types to JSON structure
-- [ ] Plan migration path from current to new approach
-- [ ] Consider performance implications
-- [ ] Design API for querying JSON config
+**Phase 1: Core Parser (✅ COMPLETE - 2025-10-08)**:
+- [x] Analyze current RegExTree patterns (`src/regex.ts`)
+- [x] Design new JSON schema for NS config objects
+- [x] Created [src/parseAdcArraysRx.ts](src/parseAdcArraysRx.ts) - RX-based parser with named capture groups
+- [x] Added RX patterns: `set lb vserver`, `set cs vserver` to [src/regex.ts](src/regex.ts)
+- [x] Options parsing with `parseNsOptions()` (dashes preserved)
+- [x] Objects keyed by name: `cfgObj.add.lb.vserver.web_vs` (not arrays)
+- [x] Preserves original line with `_line` property
+- [x] Created comprehensive tests: [tests/300_parseAdcArraysRx.unit.tests.ts](tests/300_parseAdcArraysRx.unit.tests.ts)
+- [x] 17/17 tests passing with all 14 artifact configs
 
-**Implementation Steps**:
-- [ ] Create JSON schema definitions for NS objects
-- [ ] Extend/refactor regex parser for complete JSON conversion
+**Phase 2: Integration Testing & Validation (🔄 NEXT - 2025-10-09)**:
+- [ ] Create integration test with full test archive (f5_flipper_test.tgz)
+- [ ] Parse all 15 configs in archive programmatically
+- [ ] Validate JSON structure completeness
+- [ ] Fix edge cases and errors as discovered
+- [ ] Document parsing coverage per config type
+
+**Phase 3: Application Abstraction (PENDING)**:
+- [ ] Create `src/digLbVserverRx.ts` - JSON-based LB vserver discovery
+- [ ] Create `src/digCsVserverRx.ts` - JSON-based CS vserver discovery
+- [ ] Create `src/digGslbVserverRx.ts` - JSON-based GSLB vserver discovery
+- [ ] Create parity tests comparing to legacy digesters
+- [ ] Validate identical output for all 14 configs
+
+**Phase 4: Production Integration (PENDING)**:
 - [ ] Update ADC class to use new JSON model
 - [ ] Refactor digesters to work with JSON model
 - [ ] Update tree view provider for JSON model
 - [ ] Migration testing with existing configs
+- [ ] Performance benchmarking
 
 **Benefits**:
 - More complete representation of NS config

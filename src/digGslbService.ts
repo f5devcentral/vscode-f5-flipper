@@ -46,11 +46,15 @@ export function digGslbService(serviceName: string, configObjectArry: AdcConfObj
                 // <server> should match the serverName specified in the 'add gslb service'
                 configObjectArry.add?.server?.filter(el => el.startsWith(serverName))
                     .forEach(x => {
-                        const parent = 'add service'
+                        // BUG FIX #2: Changed 'add service' to 'add server' (was incorrect)
+                        const parent = 'add server'
                         const originalString = parent + ' ' + x;
                         lines.push(originalString)
-                        const serverDest = x.split(' ').pop();
-                        gslbService['serverDest'] = serverDest
+                        // BUG FIX #3: Use regex to properly parse server dest (was using split which breaks on quotes)
+                        const rxMatch = x.match(rx.parents[parent]);
+                        if (rxMatch && rxMatch.groups) {
+                            gslbService['serverDest'] = rxMatch.groups.dest;
+                        }
                     })
             }
 

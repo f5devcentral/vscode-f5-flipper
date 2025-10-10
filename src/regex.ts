@@ -149,41 +149,41 @@ export class RegExTree {
 
 
 
-export type TmosRegExTree = {
-    tmosVersion: RegExp,
-    parentObjects: RegExp,
-    parentNameValue: RegExp,
-    vs: {
-        pool: {
-            obj: RegExp,
-            members: RegExp,
-            nodesFromMembers: RegExp,
-            monitors: RegExp
-        },
-        profiles: {
-            obj: RegExp,
-            names: RegExp
-        },
-        rules: {
-            obj: RegExp,
-            names: RegExp
-        },
-        snat: {
-            obj: RegExp,
-            name: RegExp
-        },
-        ltPolicies: {
-            obj: RegExp,
-            names: RegExp
-        },
-        persist: {
-            obj: RegExp,
-            name: RegExp
-        },
-        fbPersist: RegExp,
-        destination: RegExp
-    }
-}
+// export type TmosRegExTree = {
+//     tmosVersion: RegExp,
+//     parentObjects: RegExp,
+//     parentNameValue: RegExp,
+//     vs: {
+//         pool: {
+//             obj: RegExp,
+//             members: RegExp,
+//             nodesFromMembers: RegExp,
+//             monitors: RegExp
+//         },
+//         profiles: {
+//             obj: RegExp,
+//             names: RegExp
+//         },
+//         rules: {
+//             obj: RegExp,
+//             names: RegExp
+//         },
+//         snat: {
+//             obj: RegExp,
+//             name: RegExp
+//         },
+//         ltPolicies: {
+//             obj: RegExp,
+//             names: RegExp
+//         },
+//         persist: {
+//             obj: RegExp,
+//             name: RegExp
+//         },
+//         fbPersist: RegExp,
+//         destination: RegExp
+//     }
+// }
 
 /**
  * returns full number without decimals so it can be compared

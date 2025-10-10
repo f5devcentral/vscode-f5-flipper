@@ -591,11 +591,12 @@ export function digSslBinding(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) {
         }
     }
 
-    // if (sslBindObj.length > 0) {
+    // BUG FIX: Only add cert object if it has properties (was creating empty cert objects)
+    if (Object.keys(sslBindObj).length > 0) {
         // create certs array if not there
         if (!app.bindings.certs) app.bindings.certs = [];
         app.bindings.certs.push(sslBindObj);
-    // }
+    }
 }
 
 
