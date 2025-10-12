@@ -28,8 +28,9 @@ describe('Namaste App tests', function () {
   let err;
 
   before(async function () {
-    // log test file name - makes it easer for troubleshooting
-    console.log('       file:', __filename)
+    // log test file name - makes it easier for troubleshooting
+    console.log('----------------------------------------------------------');
+    console.log('---------- file:', __filename);
     testFile = await archiveMake('namaste.conf') as string;
     // clear the events arrays
     parsedFileEvents.length = 0
@@ -86,22 +87,22 @@ describe('Namaste App tests', function () {
 
     // serviceGroup Monitors
     assert.deepStrictEqual(appServiceGroupMonitors, [
-        {
-          name: "namaste_custome_tcp_mon",
-          "-LRTM": "DISABLED",
-          "-interval": "30",
-          "-resptimeout": "15",
-          "-secure": "YES",
-          "protocol": "TCP"
-        },
-        {
-          name: "namaste_awaken_http8443_mon",
-          "-send": "GET /look/within",
-          "-recv": "\\\"find\\\":love",
-          "-LRTM": "DISABLED",
-          "-secure": "YES",
-          "protocol": "HTTP-ECV"
-        },
+      {
+        name: "namaste_custome_tcp_mon",
+        "-LRTM": "DISABLED",
+        "-interval": "30",
+        "-resptimeout": "15",
+        "-secure": "YES",
+        "protocol": "TCP"
+      },
+      {
+        name: "namaste_awaken_http8443_mon",
+        "-send": "GET /look/within",
+        "-recv": "\\\"find\\\":love",
+        "-LRTM": "DISABLED",
+        "-secure": "YES",
+        "protocol": "HTTP-ECV"
+      },
     ])
   })
 

@@ -23,18 +23,18 @@ const testFile = path.join(__dirname, 'artifacts', 'apps', 't1.ns.conf')
 const parsedFileEvents: any[] = []
 const parsedObjEvents: any[] = []
 
-// log test file name - makes it easier for troubleshooting
-console.log('----------------------------------------------------------');
-console.log('---------- file:', __filename);
 
 describe('NS Conf parser functional tests', function () {
-
+    
     let adc: ADC;
     let exp: Explosion;
     let log;
     let err;
-
+    
     before(function () {
+        // log test file name - makes it easier for troubleshooting
+        console.log('----------------------------------------------------------');
+        console.log('---------- file:', __filename);
 
         // clear the events arrays
         parsedFileEvents.length = 0

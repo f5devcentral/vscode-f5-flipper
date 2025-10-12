@@ -28,8 +28,10 @@ describe('ssl certificate tests', function () {
     let err;
 
     before(async function () {
-        // log test file name - makes it easer for troubleshooting
+        // log test file name - makes it easier for troubleshooting
+        console.log('----------------------------------------------------------');
         console.log('---------- file:', __filename);
+        
         testFile = await archiveMake() as string;
         // clear the events arrays
         parsedFileEvents.length = 0
@@ -78,41 +80,41 @@ describe('ssl certificate tests', function () {
             "-encrypted": "-encryptmethod ENCMTHD_3",
             "-certkeyName": "star.groot.cer",
             "-eccCurveName": [
-              "P_256",
-              "P_384",
-              "P_224",
-              "P_521",
+                "P_256",
+                "P_384",
+                "P_224",
+                "P_521",
             ],
-          })
-        
+        })
+
     })
 
 
     it(`lb ssl cert binding`, async () => {
-        
+
         // lb -> bind ssl vserver starlord_offload_lb_vs -certkeyName starlord.galaxy.io_cert
-        
+
         const app = expld.config.apps?.find(x => x.name === 'starlord_offload_lb_vs');
-        
+
         // get the cert details
         const appCert = app?.bindings?.certs![0]
-        
+
         assert.deepStrictEqual(appCert, {
             "-cert": "foo.crt",
             "-key": "foo.key",
             "-cipherName": "ECDHE",
             "-certkeyName": "starlord.galaxy.io_cert",
             "-eccCurveName": [
-              "P_256",
-              "P_384",
-              "P_224",
-              "P_521",
+                "P_256",
+                "P_384",
+                "P_224",
+                "P_521",
             ],
-          })
+        })
     })
 
     // it(`vpn? ssl cert binding`, async () => {
-        
+
     //     // and ssl cert binding?  like a service?
     // })
 

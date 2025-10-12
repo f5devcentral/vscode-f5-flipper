@@ -20,18 +20,18 @@ let testFile: string;
 const parsedFileEvents: any[] = []
 const parsedObjEvents: any[] = []
 
-// log test file name - makes it easier for troubleshooting
-console.log('----------------------------------------------------------');
-console.log('---------- file:', __filename);
 
 describe('service abstraction tests', function () {
-
+    
     let adc: ADC;
     let expld: Explosion;
     let log;
     let err;
-
+    
     before(async function () {
+        // log test file name - makes it easier for troubleshooting
+        console.log('----------------------------------------------------------');
+        console.log('---------- file:', __filename);
 
         testFile = await archiveMake('apple.ns.conf') as string;
 

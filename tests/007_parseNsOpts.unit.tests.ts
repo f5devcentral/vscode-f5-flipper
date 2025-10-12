@@ -18,13 +18,13 @@ const parsedFileEvents: any[] = []
 const parsedObjEvents: any[] = []
 const rx = new RegExTree().get('13.1');
 
-// log test file name - makes it easier for troubleshooting
-console.log('----------------------------------------------------------');
-console.log('---------- file:', __filename);
 
 describe('parse NS options function tests', function () {
-
+    
     before(async function () {
+        // log test file name - makes it easier for troubleshooting
+        console.log('----------------------------------------------------------');
+        console.log('---------- file:', __filename);
 
         // clear the events arrays
         parsedFileEvents.length = 0

@@ -21,6 +21,8 @@ import { countMainObjectsRx } from '../src/objectCounter';
 describe('Object Counter RX Tests', function () {
 
     before(async function () {
+        // log test file name - makes it easier for troubleshooting
+        console.log('----------------------------------------------------------');
         console.log('---------- file:', __filename);
     });
 

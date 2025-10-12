@@ -20,6 +20,8 @@ import { archiveMake } from './archiveBuilder';
 describe('CS to LB References Tests', function () {
 
     before(async function () {
+        // log test file name - makes it easier for troubleshooting
+        console.log('----------------------------------------------------------');
         console.log('---------- file:', __filename);
     });
 
