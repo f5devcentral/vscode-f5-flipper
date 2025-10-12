@@ -50,6 +50,7 @@ describe('Policy Abstraction Tests (RX Engine)', function () {
 
     before(async function () {
         // log test file name - makes it easier for troubleshooting
+        console.log('----------------------------------------------------------');
         console.log('---------- file:', __filename);
 
         // clear the events arrays

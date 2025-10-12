@@ -28,7 +28,9 @@ describe('TCP Listen Policy application tests', function () {
 
     before(async function () {
         // log test file name - makes it easier for troubleshooting
+        console.log('----------------------------------------------------------');
         console.log('---------- file:', __filename);
+        
         testFile = await archiveMake('tcpListenPolicy.ns.conf') as string;
         // clear the events arrays
         parsedFileEvents.length = 0

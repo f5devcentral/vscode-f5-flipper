@@ -18,7 +18,8 @@ describe('NsDiag Diagnostic Rules', () => {
     let diagnosticRules: DiagRule[];
 
     before(() => {
-        // log test file name - makes it easer for troubleshooting
+        // log test file name - makes it easier for troubleshooting
+        console.log('----------------------------------------------------------');
         console.log('---------- file:', __filename);
 
         // Load the actual diagnostics.json file from the project

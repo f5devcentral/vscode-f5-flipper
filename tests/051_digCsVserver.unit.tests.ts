@@ -10,7 +10,8 @@ describe('digCsVserver Content Switching Tests', () => {
     let explosion: Explosion;
 
     before(async function () {
-        // log test file name - makes it easer for troubleshooting
+        // log test file name - makes it easier for troubleshooting
+        console.log('----------------------------------------------------------');
         console.log('---------- file:', __filename);
         
         // Load the starlord config which has CS vserver examples

@@ -25,19 +25,17 @@ let testFile: string;
 const parsedFileEvents: any[] = []
 const parsedObjEvents: any[] = []
 
-// log test file name - makes it easier for troubleshooting
-console.log('----------------------------------------------------------');
-console.log('---------- file:', __filename);
-
 describe('tgz unpacker tests', function () {
-
-
+    
     let adc: ADC;
     let exp: Explosion;
     let log;
     let err;
-
+    
     before(async function () {
+        // log test file name - makes it easier for troubleshooting
+        console.log('----------------------------------------------------------');
+        console.log('---------- file:', __filename);
 
         testFile = await archiveMake() as string;
         // clear the events arrays
