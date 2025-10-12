@@ -17,14 +17,12 @@ const parsedFileEvents: any[] = []
 const parsedObjEvents: any[] = []
 const rx = new RegExTree().get('13.1');
 
+// log test file name - makes it easier for troubleshooting
+console.log('----------------------------------------------------------');
+console.log('---------- file:', __filename);
 describe('tgz unpacker tests', function () {
 
-
-
-
     before(async function () {
-        // log test file name - makes it easer for troubleshooting
-        console.log('       file:', __filename)
 
         // clear the events arrays
         parsedFileEvents.length = 0
@@ -775,7 +773,7 @@ describe('tgz unpacker tests', function () {
 
             Object.entries(patterns).forEach(([pattern, configLine]) => {
                 const slim = configLine.replace(pattern + ' ', '');
-                const match = slim.match(rx.parents[pattern]);
+                const match = slim.match(rx.parents[pattern as keyof typeof rx.parents]);
                 assert.notStrictEqual(match, null, `Pattern '${pattern}' should match quoted names`);
                 // Regex captures the entire name including quotes, e.g. "my web server"
                 // Just verify the match succeeded and name group exists
@@ -792,7 +790,7 @@ describe('tgz unpacker tests', function () {
 
             Object.entries(patterns).forEach(([pattern, configLine]) => {
                 const slim = configLine.replace(pattern + ' ', '');
-                const match = slim.match(rx.parents[pattern]);
+                const match = slim.match(rx.parents[pattern as keyof typeof rx.parents]);
                 assert.notStrictEqual(match, null, `Pattern '${pattern}' should match wildcard port`);
             });
         });

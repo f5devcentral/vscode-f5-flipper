@@ -19,7 +19,7 @@ describe('NsDiag Diagnostic Rules', () => {
 
     before(() => {
         // log test file name - makes it easer for troubleshooting
-        console.log('       file:', __filename)
+        console.log('---------- file:', __filename);
 
         // Load the actual diagnostics.json file from the project
         diagnosticsFilePath = path.join(__dirname, '..', 'diagnostics.json');

@@ -5,14 +5,10 @@
 import { EventEmitter } from 'events';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { digCsVservers } from './digCsVserver';
-import { digLbVserver } from './digLbVserver';
-import { digGslbVservers } from './digGslbVserver';
 import { digCStoLBreferences } from './digCStoLbRefs';
 import { logger } from './logger';
-import { AdcApp, AdcConfObj, AdcConfObjRx, AdcRegExTree, ConfigFile, Explosion, Stats } from './models'
-import { countMainObjects } from './objectCounter';
-import { parseAdcConfArrays } from './parseAdcArrys';
+import { AdcApp, AdcConfObjRx, AdcRegExTree, ConfigFile, Explosion, Stats } from './models'
+import { countMainObjectsRx } from './objectCounter';
 import { RegExTree } from './regex';
 import { UnPacker } from './unPackerStream';
 import { parseAdcConfArraysRx } from './parseAdcArraysRx';
@@ -25,7 +21,14 @@ import { digGslbVserversRx } from './digGslbVserverRx';
 
 /**
  * Class to consume Citrix ADC archive/configs -> parse apps
- * 
+ *
+ * NEW OPTIMIZED IMPLEMENTATION - Uses RX-based object parsing
+ * - Pre-compiled regex patterns for faster matching
+ * - Improved options parsing without string concatenation
+ * - Parallel digester execution
+ * - Set-based duplicate removal
+ *
+ * For legacy implementation see CitrixADCold.ts
  */
 export default class ADC extends EventEmitter {
     /**
@@ -34,14 +37,7 @@ export default class ADC extends EventEmitter {
      */
     public configFiles: ConfigFile[] = [];
     /**
-     * tmos config as nested json objects 
-     * - consolidated parant object keys like add cs vserver/add lb vserver/add gslb vserver
-     */
-    // public configObject: AdcConfObj = {};
-    public configObjectArry: AdcConfObj = {};
-    /**
-     * new ns config as full nested json objects - using regex parsing
-     * this is for the new json parsing engine
+     * ns config as full nested json objects - using optimized RX parsing
      */
     public configObjectArryRx: AdcConfObjRx = {};
     /**
@@ -74,7 +70,6 @@ export default class ADC extends EventEmitter {
     private stats: Stats = {
         objectCount: 0,
     };
-    appsRx: AdcApp[];
 
     constructor() {
         super();
@@ -149,21 +144,21 @@ export default class ADC extends EventEmitter {
         // build rx tree based on ns version
         await this.setAdcVersion(conf)
 
-        await parseAdcConfArrays(config, this.configObjectArry, this.rx);
-
-        // fully parse ns config to json with regex engine project-orchid
+        // fully parse ns config to json with optimized RX parsing engine
         await parseAdcConfArraysRx(config, this.configObjectArryRx, this.rx);
 
-        // get hostname from configObjectArry, assign to parent class for easy access
-        if (this.configObjectArry.set?.ns?.hostName) {
-            // there should always be only one in this array
-            this.hostname = this.configObjectArry.set.ns.hostName[0];
+        // get hostname from configObjectArryRx, assign to parent class for easy access
+        if (this.configObjectArryRx.set?.ns?.hostName) {
+            // Get the first hostname from the object
+            const hostnameObj = this.configObjectArryRx.set.ns.hostName;
+            const firstHostname = Object.values(hostnameObj)[0];
+            this.hostname = firstHostname?.name || this.inputFile;
         } else {
             this.hostname = this.inputFile;
         }
 
         // gather stats on the number of different objects found (vservers/monitors/policies)
-        await countMainObjects(this.configObjectArry)
+        await countMainObjectsRx(this.configObjectArryRx)
             .then(stats => {
                 this.stats.objects = stats;
             });
@@ -234,91 +229,46 @@ export default class ADC extends EventEmitter {
      */
     async apps() {
 
-        // setup our array to hold the apps
-        const apps: AdcApp[] = [];
-        const appsRx: AdcApp[] = [];
-
         // start our timer for abstracting apps
         const startTime = process.hrtime.bigint();
 
-
-        // dig each 'add cs vserver' - OLD array-based parser
-        await digCsVservers(this.configObjectArry, this.rx)
-            .then(csApps => {
-                // add the cs apps to the main app array
-                apps.push(...csApps as AdcApp[])
+        // Run all digesters in parallel for maximum performance
+        const [csApps, lbApps, gslbApps] = await Promise.all([
+            digCsVserversRx(this.configObjectArryRx, this.rx).catch(err => {
+                logger.error(err);
+                return [];
+            }),
+            digLbVserverRx(this.configObjectArryRx, this.rx).catch(err => {
+                logger.error(err);
+                return [];
+            }),
+            digGslbVserversRx(this.configObjectArryRx, this.rx).catch(err => {
+                logger.error(err);
+                return [];
             })
-            .catch(err => {
-                logger.error(err)
-            });
+        ]);
 
-        // dig each 'add lb vserver', but check for existing? - OLD array-based parser
-        await digLbVserver(this.configObjectArry, this.rx)
-            .then(lbApps => {
-                // add the lb apps to the main app array
-                apps.push(...lbApps as AdcApp[])
-            })
-            .catch(err => {
-                logger.error(err)
-            });
+        // Combine all apps into single array
+        const apps: AdcApp[] = [...csApps, ...lbApps, ...gslbApps];
 
+        // Build CS to LB references (adds referenced LB apps to CS apps)
+        digCStoLBreferences(apps);
 
-        await digGslbVservers(this.configObjectArry, this.rx)
-            .then(gslbApps => {
-                apps.push(...gslbApps)
-            })
-            .catch(err => {
-                logger.error(err)
-            });
+        // Post-process all apps: remove duplicate lines and sort properties
+        for (const app of apps) {
+            // Use Set for O(n) duplicate removal instead of O(n²) indexOf
+            app.lines = [...new Set(app.lines)];
 
-        // NEW RX-based parser - parallel execution for comparison
-        await digCsVserversRx(this.configObjectArryRx, this.rx)
-            .then(csApps => {
-                appsRx.push(...csApps as AdcApp[])
-            })
-            .catch(err => {
-                logger.error(err)
-            });
-
-        await digLbVserverRx(this.configObjectArryRx, this.rx)
-            .then(lbApps => {
-                appsRx.push(...lbApps as AdcApp[])
-            })
-            .catch(err => {
-                logger.error(err)
-            });
-
-        await digGslbVserversRx(this.configObjectArryRx, this.rx)
-            .then(gslbApps => {
-                appsRx.push(...gslbApps)
-            })
-            .catch(err => {
-                logger.error(err)
-            });
-
-        // now that all apps have been abstracted, go through and find cs pointing to lb's
-        digCStoLBreferences(apps)
-
-        // loop through each app and remove any duplicate NS config lines
-        for await (const app of apps) {
-            app.lines = app.lines.filter((value, index, array) => array.indexOf(value) === index)
-            // resort the app object properties for better human reading
-            sortAdcApp(app)
-        }
-
-        // Apply same post-processing to RX-based apps
-        digCStoLBreferences(appsRx)
-        for await (const app of appsRx) {
-            app.lines = app.lines.filter((value, index, array) => array.indexOf(value) === index)
-            // Remove empty or invalid certs arrays (match original behavior)
+            // Remove empty or invalid certs arrays
             if (app.bindings?.certs) {
-                // Remove if empty or contains only empty objects
                 if (app.bindings.certs.length === 0 ||
                     (app.bindings.certs.length === 1 && Object.keys(app.bindings.certs[0]).length === 0)) {
                     delete app.bindings.certs;
                 }
             }
-            sortAdcApp(app)
+
+            // Resort the app object properties for better human reading
+            sortAdcApp(app);
         }
 
         // capture app abstraction time
@@ -331,9 +281,6 @@ export default class ADC extends EventEmitter {
             // do we want to just log or toss on error if we have no apps?
             throw new Error(msg)
         }
-
-        // stash the rx based apps in an array in the parent class for reference
-        this.appsRx = appsRx;
 
         // return the app array
         return apps;
@@ -379,19 +326,16 @@ export function sortAdcApp(app: AdcApp) {
         name: app.name,
         type: app.type,
         protocol: app.protocol,
-        ipAddress: app.ipAddress,
-        port: app.port,
-        opts: app.opts || undefined,
-        bindings: app.bindings,
-        csPolicies: app.csPolicies,
-        csPolicyActions: app.csPolicyActions || undefined,
-        appflows: app.appflows || undefined,
-        lines: app.lines,
-        apps: app.apps
+        ...(app.ipAddress && { ipAddress: app.ipAddress }),
+        ...(app.port && { port: app.port }),
+        ...(app.opts && { opts: app.opts }),
+        ...(app.bindings && { bindings: app.bindings }),
+        ...(app.csPolicies && { csPolicies: app.csPolicies }),
+        ...(app.csPolicyActions && { csPolicyActions: app.csPolicyActions }),
+        ...(app.appflows && { appflows: app.appflows }),
+        ...(app.lines && { lines: app.lines }),
+        ...(app.apps && { apps: app.apps })
     }
 
-    // if(app.csPolicyActions) {
-
-    // }
     return app = sorted;
 }

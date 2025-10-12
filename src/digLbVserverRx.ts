@@ -1,10 +1,13 @@
 import { deepmergeInto } from "deepmerge-ts";
 import { logger } from "./logger";
-import { AdcApp, AdcConfObjRx, AdcRegExTree, NsObject, PolicyRef } from "./models";
+import { AdcApp, AdcConfObjRx, AdcRegExTree, PolicyRef } from "./models";
+import { isIP } from "net";
+import { extractOptions } from "./parseAdcUtils";
 
 /**
  * Digest LB vservers using RX-parsed objects (not arrays)
  * This is the new implementation using configObjectArryRx
+ *      add lb vserver <vserverName>
  */
 export async function digLbVserverRx(coaRx: AdcConfObjRx, rx: AdcRegExTree) {
     const apps: AdcApp[] = [];
@@ -14,6 +17,9 @@ export async function digLbVserverRx(coaRx: AdcConfObjRx, rx: AdcRegExTree) {
 
     // Iterate over LB vserver objects (keyed by name)
     for (const [vsName, vs] of Object.entries(coaRx.add.lb.vserver)) {
+
+        // TODO: Names with quotes are preserved from parseAdcArraysRx to match old behavior
+        // This can be simplified once old parser is removed
 
         const app: AdcApp = {
             name: vs.name,
@@ -64,21 +70,11 @@ export async function digLbVserverRx(coaRx: AdcConfObjRx, rx: AdcRegExTree) {
     return apps;
 }
 
-/**
- * Extract options from parsed object (exclude special properties)
- */
-function extractOptions(obj: NsObject): Record<string, any> {
-    const opts: Record<string, any> = {};
-    for (const [key, value] of Object.entries(obj)) {
-        if (key !== 'name' && key !== '_line' && key !== 'protocol' && key !== 'ipAddress' && key !== 'port' && key !== 'server') {
-            opts[key] = value;
-        }
-    }
-    return opts;
-}
+// extractOptions function moved to parseAdcUtils.ts for reuse across digesters
 
 /**
  * Dig service details using RX objects
+ *     add service <serviceName>    
  */
 async function digServiceRx(serviceName: string, app: AdcApp, coaRx: AdcConfObjRx, rx: AdcRegExTree) {
     const service = coaRx.add?.service?.[serviceName];
@@ -120,6 +116,7 @@ async function digServiceRx(serviceName: string, app: AdcApp, coaRx: AdcConfObjR
 
 /**
  * Dig serviceGroup details using RX objects
+ *      add serviceGroup <serviceName>
  */
 async function digServiceGroupRx(serviceName: string, app: AdcApp, coaRx: AdcConfObjRx, rx: AdcRegExTree) {
     const serviceGroup = coaRx.add?.serviceGroup?.[serviceName];
@@ -168,18 +165,26 @@ async function digServiceGroupRx(serviceName: string, app: AdcApp, coaRx: AdcCon
 
             } else if (bind['-monitorName']) {
                 const monitorName = bind['-monitorName'];
-                const monitor = coaRx.add?.lb?.monitor?.[monitorName];
 
+                if (!sgDetails.monitors) sgDetails.monitors = [];
+
+                // Create monitor object with name
+                const monitorObj: any = {
+                    name: monitorName
+                };
+
+                // Try to get monitor config (won't exist for built-in monitors like HTTP, tcp, ping)
+                const monitor = coaRx.add?.lb?.monitor?.[monitorName];
                 if (monitor) {
                     app.lines.push(monitor._line);
-                    if (!sgDetails.monitors) sgDetails.monitors = [];
-                    // Include all monitor properties including protocol (match original)
-                    sgDetails.monitors.push({
-                        name: monitorName,
-                        protocol: monitor.protocol,  // Include protocol explicitly
-                        ...extractOptions(monitor)
-                    });
+                    // Add monitor protocol and options if available
+                    if (monitor.protocol) {
+                        monitorObj.protocol = monitor.protocol;
+                    }
+                    Object.assign(monitorObj, extractOptions(monitor));
                 }
+
+                sgDetails.monitors.push(monitorObj);
             }
         }
     }
@@ -193,6 +198,7 @@ async function digServiceGroupRx(serviceName: string, app: AdcApp, coaRx: AdcCon
 
 /**
  * Dig bind service details using RX objects
+ *      bind service <serviceName>
  */
 async function digBindServiceRx(serviceName: string, app: AdcApp, coaRx: AdcConfObjRx, rx: AdcRegExTree) {
     const bindServices = coaRx.bind?.service?.[serviceName];
@@ -206,8 +212,8 @@ async function digBindServiceRx(serviceName: string, app: AdcApp, coaRx: AdcConf
             const serverName = bind.serv;
             await digServerRx(serverName, app, coaRx, rx);
 
-        } else if (bind.monitor) {
-            const monitorName = bind.monitor;
+        } else if (bind['-monitorName']) {
+            const monitorName = bind['-monitorName'];
             const monitor = coaRx.add?.lb?.monitor?.[monitorName];
 
             if (monitor) {
@@ -218,7 +224,8 @@ async function digBindServiceRx(serviceName: string, app: AdcApp, coaRx: AdcConf
 }
 
 /**
- * Dig bind ssl service details using RX objects
+ * Dig bind ssl service details using RX object
+ *   bind ssl service <serviceName>
  */
 async function digBindSslServiceRx(serviceName: string, app: AdcApp, coaRx: AdcConfObjRx, rx: AdcRegExTree) {
     const sslBindings = coaRx.bind?.ssl?.service?.[serviceName];
@@ -263,11 +270,15 @@ async function digBindSslServiceRx(serviceName: string, app: AdcApp, coaRx: AdcC
     if (certKeyName) {
         const certKey = coaRx.add?.ssl?.certKey?.[certKeyName];
         if (certKey) {
-            // Add certKey properties (use lowercase -certkeyName to match original)
-            sslBindObj['-cert'] = certKey['-cert'];
-            sslBindObj['-key'] = certKey['-key'];
-            sslBindObj['-certkeyName'] = certKey.name;  // lowercase to match original
+            // Add all certKey options (including -cert, -key, -inform, -passcrypt, -encrypted, etc.)
+            // Use extractOptions to get all properties except name, _line, protocol, etc.
+            const certKeyOpts = extractOptions(certKey);
+            Object.assign(sslBindObj, certKeyOpts);
 
+            // Set -certkeyName to the certKey name (not included in extractOptions)
+            sslBindObj['-certkeyName'] = certKey.name;
+
+            if (!app.bindings) app.bindings = {};
             if (!app.bindings.certs) {
                 app.bindings.certs = [];
             }
@@ -278,6 +289,7 @@ async function digBindSslServiceRx(serviceName: string, app: AdcApp, coaRx: AdcC
 
 /**
  * Dig SSL bindings for vserver using RX objects
+ *   bind ssl vserver <vserverName>
  */
 export async function digSslBindingRx(app: AdcApp, coaRx: AdcConfObjRx, rx: AdcRegExTree) {
     const sslBindings = coaRx.bind?.ssl?.vserver?.[app.name];
@@ -295,10 +307,22 @@ export async function digSslBindingRx(app: AdcApp, coaRx: AdcConfObjRx, rx: AdcR
         if (bind['-certkeyName']) {
             certKeyName = bind['-certkeyName'];
 
-            // Add certKey line immediately after the binding that references it
+            // TODO: Match old behavior - certKey is keyed by its name, which should match certKeyName
+            // Old code: if (el.startsWith(certKeyName)) - we look up by exact certKeyName match
+
+            // there are no certKey objects keyed by vserver name, so this lookup will always fail
             const certKey = coaRx.add?.ssl?.certKey?.[certKeyName];
+
+            // Add certKey line immediately after the binding that references it (match original order)
             if (certKey) {
                 app.lines.push(certKey._line);
+
+                // merge unique certKey properties immediately (like -cert, -key, -inform, etc.)
+                for (const [key, value] of Object.entries(certKey)) {
+                    if (key !== 'name' && key !== '_line') {
+                        sslBindObj[key] = value;
+                    }
+                }
             }
         }
 
@@ -308,31 +332,58 @@ export async function digSslBindingRx(app: AdcApp, coaRx: AdcConfObjRx, rx: AdcR
                 sslBindObj['-eccCurveName'] = [];
             }
             sslBindObj['-eccCurveName'].push(bind['-eccCurveName']);
+        } else {
+
+            // Merge other SSL binding properties (like -cipherName)
+            for (const [key, value] of Object.entries(bind)) {
+                if (key !== '_line' && key !== 'name' && key !== '-eccCurveName') {
+                    sslBindObj[key] = value;
+                }
+            }
+
         }
 
-        // Merge other SSL binding properties (like -cipherName)
-        for (const [key, value] of Object.entries(bind)) {
-            if (key !== '_line' && key !== 'name' && key !== '-certkeyName' && key !== '-eccCurveName') {
-                sslBindObj[key] = value;
-            }
-        }
+        const b = "for debug";
     }
 
-    // Add the certKey details to the cert object
+    // Add the certKey details to the cert object (if found)
     if (certKeyName) {
+        // TODO: Match old behavior - only look up by certKeyName (not vserver name)
         const certKey = coaRx.add?.ssl?.certKey?.[certKeyName];
-        if (certKey) {
-            // Add certKey properties (use lowercase -certkeyName to match original)
-            sslBindObj['-cert'] = certKey['-cert'];
-            sslBindObj['-key'] = certKey['-key'];
-            sslBindObj['-certkeyName'] = certKey.name;  // lowercase to match original
 
-            if (!app.bindings.certs) {
-                app.bindings.certs = [];
-            }
-            app.bindings.certs.push(sslBindObj);
+        if (certKey) {
+            // Add all certKey options (including -cert, -key, -inform, -passcrypt, -encrypted, etc.)
+            // Use extractOptions to get all properties except name, _line, protocol, etc.
+            const certKeyOpts = extractOptions(certKey);
+            Object.assign(sslBindObj, certKeyOpts);
+
+            // Set -certkeyName to the certKey name (not included in extractOptions)
+            sslBindObj['-certkeyName'] = certKey.name;
+        } else {
+            // TODO: Even if certKey not found, preserve -certkeyName from bind statement
+            sslBindObj['-certkeyName'] = certKeyName;
         }
     }
+
+    // Create cert object if we have any SSL binding properties (match old behavior)
+    // Old code: if (Object.keys(sslBindObj).length > 0) { app.bindings.certs.push(sslBindObj); }
+    if (Object.keys(sslBindObj).length > 0) {
+        if (!app.bindings) app.bindings = {};
+        if (!app.bindings.certs) {
+            app.bindings.certs = [];
+        }
+        app.bindings.certs.push(sslBindObj);
+    }
+
+    // dedup eccCurveName array (original behavior)
+    if (app.bindings?.certs) {
+        for (const cert of app.bindings.certs) {
+            if (cert['-eccCurveName'] && Array.isArray(cert['-eccCurveName'])) {
+                cert['-eccCurveName'] = Array.from(new Set(cert['-eccCurveName']));
+            }
+        }
+    }
+    // dedup 
 }
 
 /**
@@ -382,9 +433,9 @@ async function digServerRx(
 
     const dest = server.dest || server.ipAddress || server.address;
     if (dest) {
-        // Check if dest is an IP address (match original behavior)
-        const isIpAddress = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(dest);
-        if (isIpAddress) {
+        // Check if dest is an IP address (IPv4 or IPv6) using Node.js isIP()
+        // Returns 4 for IPv4, 6 for IPv6, 0 for not an IP
+        if (isIP(dest)) {
             result.address = dest;
         } else {
             result.hostname = dest;

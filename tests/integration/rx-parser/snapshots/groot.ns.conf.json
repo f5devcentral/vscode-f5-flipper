@@ -1,0 +1,882 @@
+{
+  "configFile": "groot.ns.conf",
+  "generatedAt": "2025-10-12T00:36:16.288Z",
+  "apps": [
+    {
+      "name": "groot-cs-redirect",
+      "protocol": "HTTP",
+      "ipAddress": "192.168.10.65",
+      "type": "cs",
+      "port": "80",
+      "lines": [
+        "add cs action groot-am-cs-action -targetLBVserver groot-am-lb-vsvr",
+        "add cs action groot-groot-cs-action -targetLBVserver groot-groot-lb-vsvr",
+        "add cs action groot-i-cs-action -targetLBVserver groot-i-lb-vsvr",
+        "add cs action groot-yes-cs-action -targetLBVserver groot-yes-lb-vsvr",
+        "add cs policy groot-am-cs-policy -rule \"HTTP.REQ.HOSTNAME.CONTAINS(\\\"grootam\\\")\" -action groot-am-cs-action",
+        "add cs policy groot-groot-cs-policy -rule \"HTTP.REQ.HOSTNAME.CONTAINS(\\\"groot\\\")\" -action groot-groot-cs-action",
+        "add cs policy groot-i-cs-policy -rule \"HTTP.REQ.HOSTNAME.CONTAINS(\\\"grooti\\\")\" -action groot-i-cs-action",
+        "add cs policy groot-yes-cs-policy -rule \"HTTP.REQ.HOSTNAME.CONTAINS(\\\"grootyes\\\")\" -action groot-yes-cs-action",
+        "add cs vserver groot-cs-redirect HTTP 192.168.10.65 80 -cltTimeout 180 -persistenceType NONE -devno 54722560",
+        "add lb vserver groot-am-lb-vsvr SSL 0.0.0.0 0 -persistenceType SOURCEIP -timeout 30 -cltTimeout 180 -devno 50855936",
+        "add lb vserver groot-groot-lb-vsvr SSL 0.0.0.0 0 -persistenceType SOURCEIP -timeout 30 -cltTimeout 180 -devno 50888704",
+        "add lb vserver groot-i-lb-vsvr SSL 0.0.0.0 0 -persistenceType SOURCEIP -timeout 30 -cltTimeout 180 -devno 50823168",
+        "add lb vserver groot-yes-lb-vsvr SSL 0.0.0.0 0 -persistenceType SOURCEIP -timeout 30 -cltTimeout 180 -devno 50921472",
+        "add server sprout134A-grooti 192.168.160.138 -devno 108843",
+        "add server sprout134A_grootam 192.168.160.118 -devno 108845",
+        "add server sprout134B-grooti 192.168.160.140 -devno 108844",
+        "add server sprout134B_grootam 192.168.160.119 -devno 108846",
+        "add serviceGroup groot-am-svc-grp SSL -maxClient 1000 -maxReq 0 -cip ENABLED X-Client-IP -usip NO -useproxyport YES -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP NO -devno 47415296",
+        "add serviceGroup groot-i-svc-grp SSL -maxClient 1000 -maxReq 0 -cip ENABLED X-Client-IP -usip NO -useproxyport YES -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP NO -devno 47382528",
+        "add serviceGroup groot-yes-svc-grp SSL -maxClient 1000 -maxReq 0 -cip ENABLED X-Client-IP -usip NO -useproxyport YES -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP NO -devno 47448064",
+        "add ssl certKey star.groot.cer -cert www.star.groot_2022.pfx -key www.star.groot_2022.pfx -inform PFX -passcrypt XXXX -encrypted -encryptmethod ENCMTHD_3",
+        "bind cs vserver groot-cs-redirect -policyName groot-am-cs-policy -priority 110 -devno 112005",
+        "bind cs vserver groot-cs-redirect -policyName groot-groot-cs-policy -priority 130 -devno 112005",
+        "bind cs vserver groot-cs-redirect -policyName groot-i-cs-policy -priority 100 -devno 112005",
+        "bind cs vserver groot-cs-redirect -policyName groot-yes-cs-policy -priority 120 -devno 112005",
+        "bind lb vserver groot-am-lb-vsvr groot-am-svc-grp",
+        "bind lb vserver groot-groot-lb-vsvr groot-svc-grp",
+        "bind lb vserver groot-i-lb-vsvr groot-i-svc-grp",
+        "bind lb vserver groot-yes-lb-vsvr groot-yes-svc-grp",
+        "bind serviceGroup groot-am-svc-grp sprout134A_grootam 443 -devno 71139328",
+        "bind serviceGroup groot-am-svc-grp sprout134B_grootam 443 -devno 71172096",
+        "bind serviceGroup groot-i-svc-grp -monitorName ping -devno 71106560",
+        "bind serviceGroup groot-i-svc-grp sprout134A-grooti 443 -devno 71041024",
+        "bind serviceGroup groot-i-svc-grp sprout134B-grooti 443 -devno 71073792"
+      ],
+      "opts": {
+        "-cltTimeout": "180",
+        "-persistenceType": "NONE"
+      },
+      "bindings": {
+        "-lbvserver": [],
+        "-policyName": [
+          {
+            "-policyName": "groot-i-cs-policy",
+            "-priority": "100"
+          },
+          {
+            "-policyName": "groot-am-cs-policy",
+            "-priority": "110"
+          },
+          {
+            "-policyName": "groot-yes-cs-policy",
+            "-priority": "120"
+          },
+          {
+            "-policyName": "groot-groot-cs-policy",
+            "-priority": "130"
+          }
+        ]
+      },
+      "csPolicies": [
+        {
+          "name": "groot-i-cs-policy",
+          "-rule": "HTTP.REQ.HOSTNAME.CONTAINS(\\\"grooti\\\")",
+          "-action": "groot-i-cs-action"
+        },
+        {
+          "name": "groot-am-cs-policy",
+          "-rule": "HTTP.REQ.HOSTNAME.CONTAINS(\\\"grootam\\\")",
+          "-action": "groot-am-cs-action"
+        },
+        {
+          "name": "groot-yes-cs-policy",
+          "-rule": "HTTP.REQ.HOSTNAME.CONTAINS(\\\"grootyes\\\")",
+          "-action": "groot-yes-cs-action"
+        },
+        {
+          "name": "groot-groot-cs-policy",
+          "-rule": "HTTP.REQ.HOSTNAME.CONTAINS(\\\"groot\\\")",
+          "-action": "groot-groot-cs-action"
+        }
+      ],
+      "csPolicyActions": [
+        {
+          "-targetLBVserver": "groot-i-lb-vsvr"
+        },
+        {
+          "-targetLBVserver": "groot-am-lb-vsvr"
+        },
+        {
+          "-targetLBVserver": "groot-yes-lb-vsvr"
+        },
+        {
+          "-targetLBVserver": "groot-groot-lb-vsvr"
+        }
+      ],
+      "apps": [
+        {
+          "name": "groot-i-lb-vsvr",
+          "type": "lb",
+          "protocol": "SSL",
+          "ipAddress": "0.0.0.0",
+          "port": "0",
+          "opts": {
+            "-persistenceType": "SOURCEIP",
+            "-timeout": "30",
+            "-cltTimeout": "180"
+          },
+          "bindings": {
+            "serviceGroup": [
+              {
+                "name": "groot-i-svc-grp",
+                "protocol": "SSL",
+                "-maxClient": "1000",
+                "-maxReq": "0",
+                "-cip": "ENABLED X-Client-IP",
+                "-usip": "NO",
+                "-useproxyport": "YES",
+                "-cltTimeout": "180",
+                "-svrTimeout": "360",
+                "-CKA": "NO",
+                "-TCPB": "NO",
+                "-CMP": "NO",
+                "servers": [
+                  {
+                    "name": "sprout134A-grooti",
+                    "port": "443",
+                    "address": "192.168.160.138"
+                  },
+                  {
+                    "name": "sprout134B-grooti",
+                    "port": "443",
+                    "address": "192.168.160.140"
+                  }
+                ],
+                "monitors": [
+                  {
+                    "name": "ping"
+                  }
+                ]
+              }
+            ],
+            "certs": [
+              {
+                "-cert": "www.star.groot_2022.pfx",
+                "-key": "www.star.groot_2022.pfx",
+                "-inform": "PFX",
+                "-passcrypt": "XXXX",
+                "-encrypted": "-encryptmethod ENCMTHD_3",
+                "-certkeyName": "star.groot.cer",
+                "-eccCurveName": [
+                  "P_256",
+                  "P_384",
+                  "P_224",
+                  "P_521"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "groot-am-lb-vsvr",
+          "type": "lb",
+          "protocol": "SSL",
+          "ipAddress": "0.0.0.0",
+          "port": "0",
+          "opts": {
+            "-persistenceType": "SOURCEIP",
+            "-timeout": "30",
+            "-cltTimeout": "180"
+          },
+          "bindings": {
+            "serviceGroup": [
+              {
+                "name": "groot-am-svc-grp",
+                "protocol": "SSL",
+                "-maxClient": "1000",
+                "-maxReq": "0",
+                "-cip": "ENABLED X-Client-IP",
+                "-usip": "NO",
+                "-useproxyport": "YES",
+                "-cltTimeout": "180",
+                "-svrTimeout": "360",
+                "-CKA": "NO",
+                "-TCPB": "NO",
+                "-CMP": "NO",
+                "servers": [
+                  {
+                    "name": "sprout134A_grootam",
+                    "port": "443",
+                    "address": "192.168.160.118"
+                  },
+                  {
+                    "name": "sprout134B_grootam",
+                    "port": "443",
+                    "address": "192.168.160.119"
+                  }
+                ]
+              }
+            ],
+            "certs": [
+              {
+                "-cert": "www.star.groot_2022.pfx",
+                "-key": "www.star.groot_2022.pfx",
+                "-inform": "PFX",
+                "-passcrypt": "XXXX",
+                "-encrypted": "-encryptmethod ENCMTHD_3",
+                "-certkeyName": "star.groot.cer",
+                "-eccCurveName": [
+                  "P_256",
+                  "P_384",
+                  "P_224",
+                  "P_521"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "groot-yes-lb-vsvr",
+          "type": "lb",
+          "protocol": "SSL",
+          "ipAddress": "0.0.0.0",
+          "port": "0",
+          "opts": {
+            "-persistenceType": "SOURCEIP",
+            "-timeout": "30",
+            "-cltTimeout": "180"
+          },
+          "bindings": {
+            "serviceGroup": [
+              {
+                "name": "groot-yes-svc-grp",
+                "protocol": "SSL",
+                "-maxClient": "1000",
+                "-maxReq": "0",
+                "-cip": "ENABLED X-Client-IP",
+                "-usip": "NO",
+                "-useproxyport": "YES",
+                "-cltTimeout": "180",
+                "-svrTimeout": "360",
+                "-CKA": "NO",
+                "-TCPB": "NO",
+                "-CMP": "NO"
+              }
+            ],
+            "certs": [
+              {
+                "-cert": "www.star.groot_2022.pfx",
+                "-key": "www.star.groot_2022.pfx",
+                "-inform": "PFX",
+                "-passcrypt": "XXXX",
+                "-encrypted": "-encryptmethod ENCMTHD_3",
+                "-certkeyName": "star.groot.cer",
+                "-eccCurveName": [
+                  "P_256",
+                  "P_384",
+                  "P_224",
+                  "P_521"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "groot-groot-lb-vsvr",
+          "type": "lb",
+          "protocol": "SSL",
+          "ipAddress": "0.0.0.0",
+          "port": "0",
+          "opts": {
+            "-persistenceType": "SOURCEIP",
+            "-timeout": "30",
+            "-cltTimeout": "180"
+          },
+          "bindings": {
+            "certs": [
+              {
+                "-cert": "www.star.groot_2022.pfx",
+                "-key": "www.star.groot_2022.pfx",
+                "-inform": "PFX",
+                "-passcrypt": "XXXX",
+                "-encrypted": "-encryptmethod ENCMTHD_3",
+                "-certkeyName": "star.groot.cer",
+                "-eccCurveName": [
+                  "P_256",
+                  "P_384",
+                  "P_224",
+                  "P_521"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "groot-cs-vsvr",
+      "protocol": "SSL",
+      "ipAddress": "192.168.10.65",
+      "type": "cs",
+      "port": "443",
+      "lines": [
+        "add cs action groot-am-cs-action -targetLBVserver groot-am-lb-vsvr",
+        "add cs action groot-groot-cs-action -targetLBVserver groot-groot-lb-vsvr",
+        "add cs action groot-i-cs-action -targetLBVserver groot-i-lb-vsvr",
+        "add cs action groot-yes-cs-action -targetLBVserver groot-yes-lb-vsvr",
+        "add cs policy groot-am-cs-policy -rule \"HTTP.REQ.HOSTNAME.CONTAINS(\\\"grootam\\\")\" -action groot-am-cs-action",
+        "add cs policy groot-groot-cs-policy -rule \"HTTP.REQ.HOSTNAME.CONTAINS(\\\"groot\\\")\" -action groot-groot-cs-action",
+        "add cs policy groot-i-cs-policy -rule \"HTTP.REQ.HOSTNAME.CONTAINS(\\\"grooti\\\")\" -action groot-i-cs-action",
+        "add cs policy groot-yes-cs-policy -rule \"HTTP.REQ.HOSTNAME.CONTAINS(\\\"grootyes\\\")\" -action groot-yes-cs-action",
+        "add cs vserver groot-cs-vsvr SSL 192.168.10.65 443 -cltTimeout 180 -persistenceType NONE -devno 54689792",
+        "add lb vserver groot-am-lb-vsvr SSL 0.0.0.0 0 -persistenceType SOURCEIP -timeout 30 -cltTimeout 180 -devno 50855936",
+        "add lb vserver groot-groot-lb-vsvr SSL 0.0.0.0 0 -persistenceType SOURCEIP -timeout 30 -cltTimeout 180 -devno 50888704",
+        "add lb vserver groot-i-lb-vsvr SSL 0.0.0.0 0 -persistenceType SOURCEIP -timeout 30 -cltTimeout 180 -devno 50823168",
+        "add lb vserver groot-yes-lb-vsvr SSL 0.0.0.0 0 -persistenceType SOURCEIP -timeout 30 -cltTimeout 180 -devno 50921472",
+        "add server sprout134A-grooti 192.168.160.138 -devno 108843",
+        "add server sprout134A_grootam 192.168.160.118 -devno 108845",
+        "add server sprout134B-grooti 192.168.160.140 -devno 108844",
+        "add server sprout134B_grootam 192.168.160.119 -devno 108846",
+        "add serviceGroup groot-am-svc-grp SSL -maxClient 1000 -maxReq 0 -cip ENABLED X-Client-IP -usip NO -useproxyport YES -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP NO -devno 47415296",
+        "add serviceGroup groot-i-svc-grp SSL -maxClient 1000 -maxReq 0 -cip ENABLED X-Client-IP -usip NO -useproxyport YES -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP NO -devno 47382528",
+        "add serviceGroup groot-yes-svc-grp SSL -maxClient 1000 -maxReq 0 -cip ENABLED X-Client-IP -usip NO -useproxyport YES -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP NO -devno 47448064",
+        "add ssl certKey star.groot.cer -cert www.star.groot_2022.pfx -key www.star.groot_2022.pfx -inform PFX -passcrypt XXXX -encrypted -encryptmethod ENCMTHD_3",
+        "bind cs vserver groot-cs-vsvr -policyName groot-am-cs-policy -priority 110 -devno 112000",
+        "bind cs vserver groot-cs-vsvr -policyName groot-groot-cs-policy -priority 130 -devno 112000",
+        "bind cs vserver groot-cs-vsvr -policyName groot-i-cs-policy -priority 100 -devno 112000",
+        "bind cs vserver groot-cs-vsvr -policyName groot-yes-cs-policy -priority 120 -devno 112000",
+        "bind lb vserver groot-am-lb-vsvr groot-am-svc-grp",
+        "bind lb vserver groot-groot-lb-vsvr groot-svc-grp",
+        "bind lb vserver groot-i-lb-vsvr groot-i-svc-grp",
+        "bind lb vserver groot-yes-lb-vsvr groot-yes-svc-grp",
+        "bind serviceGroup groot-am-svc-grp sprout134A_grootam 443 -devno 71139328",
+        "bind serviceGroup groot-am-svc-grp sprout134B_grootam 443 -devno 71172096",
+        "bind serviceGroup groot-i-svc-grp -monitorName ping -devno 71106560",
+        "bind serviceGroup groot-i-svc-grp sprout134A-grooti 443 -devno 71041024",
+        "bind serviceGroup groot-i-svc-grp sprout134B-grooti 443 -devno 71073792",
+        "bind ssl vserver groot-cs-vsvr -certkeyName star.groot.cer",
+        "bind ssl vserver groot-cs-vsvr -eccCurveName P_224",
+        "bind ssl vserver groot-cs-vsvr -eccCurveName P_256",
+        "bind ssl vserver groot-cs-vsvr -eccCurveName P_384",
+        "bind ssl vserver groot-cs-vsvr -eccCurveName P_521"
+      ],
+      "opts": {
+        "-cltTimeout": "180",
+        "-persistenceType": "NONE"
+      },
+      "bindings": {
+        "-lbvserver": [],
+        "-policyName": [
+          {
+            "-policyName": "groot-i-cs-policy",
+            "-priority": "100"
+          },
+          {
+            "-policyName": "groot-am-cs-policy",
+            "-priority": "110"
+          },
+          {
+            "-policyName": "groot-yes-cs-policy",
+            "-priority": "120"
+          },
+          {
+            "-policyName": "groot-groot-cs-policy",
+            "-priority": "130"
+          }
+        ],
+        "certs": [
+          {
+            "-cert": "www.star.groot_2022.pfx",
+            "-key": "www.star.groot_2022.pfx",
+            "-inform": "PFX",
+            "-passcrypt": "XXXX",
+            "-encrypted": "-encryptmethod ENCMTHD_3",
+            "-certkeyName": "star.groot.cer",
+            "-eccCurveName": [
+              "P_256",
+              "P_384",
+              "P_224",
+              "P_521"
+            ]
+          }
+        ]
+      },
+      "csPolicies": [
+        {
+          "name": "groot-i-cs-policy",
+          "-rule": "HTTP.REQ.HOSTNAME.CONTAINS(\\\"grooti\\\")",
+          "-action": "groot-i-cs-action"
+        },
+        {
+          "name": "groot-am-cs-policy",
+          "-rule": "HTTP.REQ.HOSTNAME.CONTAINS(\\\"grootam\\\")",
+          "-action": "groot-am-cs-action"
+        },
+        {
+          "name": "groot-yes-cs-policy",
+          "-rule": "HTTP.REQ.HOSTNAME.CONTAINS(\\\"grootyes\\\")",
+          "-action": "groot-yes-cs-action"
+        },
+        {
+          "name": "groot-groot-cs-policy",
+          "-rule": "HTTP.REQ.HOSTNAME.CONTAINS(\\\"groot\\\")",
+          "-action": "groot-groot-cs-action"
+        }
+      ],
+      "csPolicyActions": [
+        {
+          "-targetLBVserver": "groot-i-lb-vsvr"
+        },
+        {
+          "-targetLBVserver": "groot-am-lb-vsvr"
+        },
+        {
+          "-targetLBVserver": "groot-yes-lb-vsvr"
+        },
+        {
+          "-targetLBVserver": "groot-groot-lb-vsvr"
+        }
+      ],
+      "apps": [
+        {
+          "name": "groot-i-lb-vsvr",
+          "type": "lb",
+          "protocol": "SSL",
+          "ipAddress": "0.0.0.0",
+          "port": "0",
+          "opts": {
+            "-persistenceType": "SOURCEIP",
+            "-timeout": "30",
+            "-cltTimeout": "180"
+          },
+          "bindings": {
+            "serviceGroup": [
+              {
+                "name": "groot-i-svc-grp",
+                "protocol": "SSL",
+                "-maxClient": "1000",
+                "-maxReq": "0",
+                "-cip": "ENABLED X-Client-IP",
+                "-usip": "NO",
+                "-useproxyport": "YES",
+                "-cltTimeout": "180",
+                "-svrTimeout": "360",
+                "-CKA": "NO",
+                "-TCPB": "NO",
+                "-CMP": "NO",
+                "servers": [
+                  {
+                    "name": "sprout134A-grooti",
+                    "port": "443",
+                    "address": "192.168.160.138"
+                  },
+                  {
+                    "name": "sprout134B-grooti",
+                    "port": "443",
+                    "address": "192.168.160.140"
+                  }
+                ],
+                "monitors": [
+                  {
+                    "name": "ping"
+                  }
+                ]
+              }
+            ],
+            "certs": [
+              {
+                "-cert": "www.star.groot_2022.pfx",
+                "-key": "www.star.groot_2022.pfx",
+                "-inform": "PFX",
+                "-passcrypt": "XXXX",
+                "-encrypted": "-encryptmethod ENCMTHD_3",
+                "-certkeyName": "star.groot.cer",
+                "-eccCurveName": [
+                  "P_256",
+                  "P_384",
+                  "P_224",
+                  "P_521"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "groot-am-lb-vsvr",
+          "type": "lb",
+          "protocol": "SSL",
+          "ipAddress": "0.0.0.0",
+          "port": "0",
+          "opts": {
+            "-persistenceType": "SOURCEIP",
+            "-timeout": "30",
+            "-cltTimeout": "180"
+          },
+          "bindings": {
+            "serviceGroup": [
+              {
+                "name": "groot-am-svc-grp",
+                "protocol": "SSL",
+                "-maxClient": "1000",
+                "-maxReq": "0",
+                "-cip": "ENABLED X-Client-IP",
+                "-usip": "NO",
+                "-useproxyport": "YES",
+                "-cltTimeout": "180",
+                "-svrTimeout": "360",
+                "-CKA": "NO",
+                "-TCPB": "NO",
+                "-CMP": "NO",
+                "servers": [
+                  {
+                    "name": "sprout134A_grootam",
+                    "port": "443",
+                    "address": "192.168.160.118"
+                  },
+                  {
+                    "name": "sprout134B_grootam",
+                    "port": "443",
+                    "address": "192.168.160.119"
+                  }
+                ]
+              }
+            ],
+            "certs": [
+              {
+                "-cert": "www.star.groot_2022.pfx",
+                "-key": "www.star.groot_2022.pfx",
+                "-inform": "PFX",
+                "-passcrypt": "XXXX",
+                "-encrypted": "-encryptmethod ENCMTHD_3",
+                "-certkeyName": "star.groot.cer",
+                "-eccCurveName": [
+                  "P_256",
+                  "P_384",
+                  "P_224",
+                  "P_521"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "groot-yes-lb-vsvr",
+          "type": "lb",
+          "protocol": "SSL",
+          "ipAddress": "0.0.0.0",
+          "port": "0",
+          "opts": {
+            "-persistenceType": "SOURCEIP",
+            "-timeout": "30",
+            "-cltTimeout": "180"
+          },
+          "bindings": {
+            "serviceGroup": [
+              {
+                "name": "groot-yes-svc-grp",
+                "protocol": "SSL",
+                "-maxClient": "1000",
+                "-maxReq": "0",
+                "-cip": "ENABLED X-Client-IP",
+                "-usip": "NO",
+                "-useproxyport": "YES",
+                "-cltTimeout": "180",
+                "-svrTimeout": "360",
+                "-CKA": "NO",
+                "-TCPB": "NO",
+                "-CMP": "NO"
+              }
+            ],
+            "certs": [
+              {
+                "-cert": "www.star.groot_2022.pfx",
+                "-key": "www.star.groot_2022.pfx",
+                "-inform": "PFX",
+                "-passcrypt": "XXXX",
+                "-encrypted": "-encryptmethod ENCMTHD_3",
+                "-certkeyName": "star.groot.cer",
+                "-eccCurveName": [
+                  "P_256",
+                  "P_384",
+                  "P_224",
+                  "P_521"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "groot-groot-lb-vsvr",
+          "type": "lb",
+          "protocol": "SSL",
+          "ipAddress": "0.0.0.0",
+          "port": "0",
+          "opts": {
+            "-persistenceType": "SOURCEIP",
+            "-timeout": "30",
+            "-cltTimeout": "180"
+          },
+          "bindings": {
+            "certs": [
+              {
+                "-cert": "www.star.groot_2022.pfx",
+                "-key": "www.star.groot_2022.pfx",
+                "-inform": "PFX",
+                "-passcrypt": "XXXX",
+                "-encrypted": "-encryptmethod ENCMTHD_3",
+                "-certkeyName": "star.groot.cer",
+                "-eccCurveName": [
+                  "P_256",
+                  "P_384",
+                  "P_224",
+                  "P_521"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "groot-i-lb-vsvr",
+      "protocol": "SSL",
+      "ipAddress": "0.0.0.0",
+      "type": "lb",
+      "port": "0",
+      "lines": [
+        "add lb vserver groot-i-lb-vsvr SSL 0.0.0.0 0 -persistenceType SOURCEIP -timeout 30 -cltTimeout 180 -devno 50823168",
+        "add server sprout134A-grooti 192.168.160.138 -devno 108843",
+        "add server sprout134B-grooti 192.168.160.140 -devno 108844",
+        "add serviceGroup groot-i-svc-grp SSL -maxClient 1000 -maxReq 0 -cip ENABLED X-Client-IP -usip NO -useproxyport YES -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP NO -devno 47382528",
+        "add ssl certKey star.groot.cer -cert www.star.groot_2022.pfx -key www.star.groot_2022.pfx -inform PFX -passcrypt XXXX -encrypted -encryptmethod ENCMTHD_3",
+        "bind lb vserver groot-i-lb-vsvr groot-i-svc-grp",
+        "bind serviceGroup groot-i-svc-grp -monitorName ping -devno 71106560",
+        "bind serviceGroup groot-i-svc-grp sprout134A-grooti 443 -devno 71041024",
+        "bind serviceGroup groot-i-svc-grp sprout134B-grooti 443 -devno 71073792",
+        "bind ssl vserver groot-i-lb-vsvr -certkeyName star.groot.cer",
+        "bind ssl vserver groot-i-lb-vsvr -eccCurveName P_224",
+        "bind ssl vserver groot-i-lb-vsvr -eccCurveName P_256",
+        "bind ssl vserver groot-i-lb-vsvr -eccCurveName P_384",
+        "bind ssl vserver groot-i-lb-vsvr -eccCurveName P_521"
+      ],
+      "opts": {
+        "-persistenceType": "SOURCEIP",
+        "-timeout": "30",
+        "-cltTimeout": "180"
+      },
+      "bindings": {
+        "serviceGroup": [
+          {
+            "name": "groot-i-svc-grp",
+            "protocol": "SSL",
+            "-maxClient": "1000",
+            "-maxReq": "0",
+            "-cip": "ENABLED X-Client-IP",
+            "-usip": "NO",
+            "-useproxyport": "YES",
+            "-cltTimeout": "180",
+            "-svrTimeout": "360",
+            "-CKA": "NO",
+            "-TCPB": "NO",
+            "-CMP": "NO",
+            "servers": [
+              {
+                "name": "sprout134A-grooti",
+                "port": "443",
+                "address": "192.168.160.138"
+              },
+              {
+                "name": "sprout134B-grooti",
+                "port": "443",
+                "address": "192.168.160.140"
+              }
+            ],
+            "monitors": [
+              {
+                "name": "ping"
+              }
+            ]
+          }
+        ],
+        "certs": [
+          {
+            "-cert": "www.star.groot_2022.pfx",
+            "-key": "www.star.groot_2022.pfx",
+            "-inform": "PFX",
+            "-passcrypt": "XXXX",
+            "-encrypted": "-encryptmethod ENCMTHD_3",
+            "-certkeyName": "star.groot.cer",
+            "-eccCurveName": [
+              "P_256",
+              "P_384",
+              "P_224",
+              "P_521"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "groot-am-lb-vsvr",
+      "protocol": "SSL",
+      "ipAddress": "0.0.0.0",
+      "type": "lb",
+      "port": "0",
+      "lines": [
+        "add lb vserver groot-am-lb-vsvr SSL 0.0.0.0 0 -persistenceType SOURCEIP -timeout 30 -cltTimeout 180 -devno 50855936",
+        "add server sprout134A_grootam 192.168.160.118 -devno 108845",
+        "add server sprout134B_grootam 192.168.160.119 -devno 108846",
+        "add serviceGroup groot-am-svc-grp SSL -maxClient 1000 -maxReq 0 -cip ENABLED X-Client-IP -usip NO -useproxyport YES -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP NO -devno 47415296",
+        "add ssl certKey star.groot.cer -cert www.star.groot_2022.pfx -key www.star.groot_2022.pfx -inform PFX -passcrypt XXXX -encrypted -encryptmethod ENCMTHD_3",
+        "bind lb vserver groot-am-lb-vsvr groot-am-svc-grp",
+        "bind serviceGroup groot-am-svc-grp sprout134A_grootam 443 -devno 71139328",
+        "bind serviceGroup groot-am-svc-grp sprout134B_grootam 443 -devno 71172096",
+        "bind ssl vserver groot-am-lb-vsvr -certkeyName star.groot.cer",
+        "bind ssl vserver groot-am-lb-vsvr -eccCurveName P_224",
+        "bind ssl vserver groot-am-lb-vsvr -eccCurveName P_256",
+        "bind ssl vserver groot-am-lb-vsvr -eccCurveName P_384",
+        "bind ssl vserver groot-am-lb-vsvr -eccCurveName P_521"
+      ],
+      "opts": {
+        "-persistenceType": "SOURCEIP",
+        "-timeout": "30",
+        "-cltTimeout": "180"
+      },
+      "bindings": {
+        "serviceGroup": [
+          {
+            "name": "groot-am-svc-grp",
+            "protocol": "SSL",
+            "-maxClient": "1000",
+            "-maxReq": "0",
+            "-cip": "ENABLED X-Client-IP",
+            "-usip": "NO",
+            "-useproxyport": "YES",
+            "-cltTimeout": "180",
+            "-svrTimeout": "360",
+            "-CKA": "NO",
+            "-TCPB": "NO",
+            "-CMP": "NO",
+            "servers": [
+              {
+                "name": "sprout134A_grootam",
+                "port": "443",
+                "address": "192.168.160.118"
+              },
+              {
+                "name": "sprout134B_grootam",
+                "port": "443",
+                "address": "192.168.160.119"
+              }
+            ]
+          }
+        ],
+        "certs": [
+          {
+            "-cert": "www.star.groot_2022.pfx",
+            "-key": "www.star.groot_2022.pfx",
+            "-inform": "PFX",
+            "-passcrypt": "XXXX",
+            "-encrypted": "-encryptmethod ENCMTHD_3",
+            "-certkeyName": "star.groot.cer",
+            "-eccCurveName": [
+              "P_256",
+              "P_384",
+              "P_224",
+              "P_521"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "groot-groot-lb-vsvr",
+      "protocol": "SSL",
+      "ipAddress": "0.0.0.0",
+      "type": "lb",
+      "port": "0",
+      "lines": [
+        "add lb vserver groot-groot-lb-vsvr SSL 0.0.0.0 0 -persistenceType SOURCEIP -timeout 30 -cltTimeout 180 -devno 50888704",
+        "add ssl certKey star.groot.cer -cert www.star.groot_2022.pfx -key www.star.groot_2022.pfx -inform PFX -passcrypt XXXX -encrypted -encryptmethod ENCMTHD_3",
+        "bind lb vserver groot-groot-lb-vsvr groot-svc-grp",
+        "bind ssl vserver groot-groot-lb-vsvr -certkeyName star.groot.cer",
+        "bind ssl vserver groot-groot-lb-vsvr -eccCurveName P_224",
+        "bind ssl vserver groot-groot-lb-vsvr -eccCurveName P_256",
+        "bind ssl vserver groot-groot-lb-vsvr -eccCurveName P_384",
+        "bind ssl vserver groot-groot-lb-vsvr -eccCurveName P_521"
+      ],
+      "opts": {
+        "-persistenceType": "SOURCEIP",
+        "-timeout": "30",
+        "-cltTimeout": "180"
+      },
+      "bindings": {
+        "certs": [
+          {
+            "-cert": "www.star.groot_2022.pfx",
+            "-key": "www.star.groot_2022.pfx",
+            "-inform": "PFX",
+            "-passcrypt": "XXXX",
+            "-encrypted": "-encryptmethod ENCMTHD_3",
+            "-certkeyName": "star.groot.cer",
+            "-eccCurveName": [
+              "P_256",
+              "P_384",
+              "P_224",
+              "P_521"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "groot-yes-lb-vsvr",
+      "protocol": "SSL",
+      "ipAddress": "0.0.0.0",
+      "type": "lb",
+      "port": "0",
+      "lines": [
+        "add lb vserver groot-yes-lb-vsvr SSL 0.0.0.0 0 -persistenceType SOURCEIP -timeout 30 -cltTimeout 180 -devno 50921472",
+        "add serviceGroup groot-yes-svc-grp SSL -maxClient 1000 -maxReq 0 -cip ENABLED X-Client-IP -usip NO -useproxyport YES -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP NO -devno 47448064",
+        "add ssl certKey star.groot.cer -cert www.star.groot_2022.pfx -key www.star.groot_2022.pfx -inform PFX -passcrypt XXXX -encrypted -encryptmethod ENCMTHD_3",
+        "bind lb vserver groot-yes-lb-vsvr groot-yes-svc-grp",
+        "bind ssl vserver groot-yes-lb-vsvr -certkeyName star.groot.cer",
+        "bind ssl vserver groot-yes-lb-vsvr -eccCurveName P_224",
+        "bind ssl vserver groot-yes-lb-vsvr -eccCurveName P_256",
+        "bind ssl vserver groot-yes-lb-vsvr -eccCurveName P_384",
+        "bind ssl vserver groot-yes-lb-vsvr -eccCurveName P_521"
+      ],
+      "opts": {
+        "-persistenceType": "SOURCEIP",
+        "-timeout": "30",
+        "-cltTimeout": "180"
+      },
+      "bindings": {
+        "serviceGroup": [
+          {
+            "name": "groot-yes-svc-grp",
+            "protocol": "SSL",
+            "-maxClient": "1000",
+            "-maxReq": "0",
+            "-cip": "ENABLED X-Client-IP",
+            "-usip": "NO",
+            "-useproxyport": "YES",
+            "-cltTimeout": "180",
+            "-svrTimeout": "360",
+            "-CKA": "NO",
+            "-TCPB": "NO",
+            "-CMP": "NO"
+          }
+        ],
+        "certs": [
+          {
+            "-cert": "www.star.groot_2022.pfx",
+            "-key": "www.star.groot_2022.pfx",
+            "-inform": "PFX",
+            "-passcrypt": "XXXX",
+            "-encrypted": "-encryptmethod ENCMTHD_3",
+            "-certkeyName": "star.groot.cer",
+            "-eccCurveName": [
+              "P_256",
+              "P_384",
+              "P_224",
+              "P_521"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

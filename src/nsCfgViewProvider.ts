@@ -426,7 +426,7 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                     TreeItemCollapsibleState.None, {
                     command: 'f5-flipper.cfgExplore-show',
                     title: '',
-                    arguments: [this.adc?.configObjectArry]
+                    arguments: [this.adc?.configObjectArryRx]
                 }
                 ));
 

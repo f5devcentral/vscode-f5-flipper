@@ -1,6 +1,7 @@
 import { logger } from "./logger";
-import { AdcApp, AdcConfObjRx, AdcRegExTree, NsObject, Appflow, PolicyRef } from "./models";
+import { AdcApp, AdcConfObjRx, AdcRegExTree, Appflow, PolicyRef } from "./models";
 import { digSslBindingRx } from "./digLbVserverRx";
+import { extractOptions } from "./parseAdcUtils";
 
 /**
  * Digest CS vservers using RX-parsed objects (not arrays)
@@ -14,6 +15,9 @@ export async function digCsVserversRx(coaRx: AdcConfObjRx, rx: AdcRegExTree) {
 
     // Iterate over CS vserver objects (keyed by name)
     for (const [vsName, vs] of Object.entries(coaRx.add.cs.vserver)) {
+
+        // TODO: Names with quotes are preserved from parseAdcArraysRx to match old behavior
+        // This can be simplified once old parser is removed
 
         const app: AdcApp = {
             name: vs.name,
@@ -49,8 +53,8 @@ export async function digCsVserversRx(coaRx: AdcConfObjRx, rx: AdcRegExTree) {
         // Dig CS policies
         await digAddCsPolicysRx(app, coaRx, rx);
 
-        // Note: CS vservers don't have their own SSL bindings - SSL is handled by the LB vservers they reference
-        // digCStoLBreferences will add the referenced LB vserver details (including SSL) to app.apps later
+        // Process SSL bindings for CS vserver (CS vservers can have SSL bindings)
+        await digSslBindingRx(app, coaRx, rx);
 
         apps.push(app);
     }
@@ -58,18 +62,7 @@ export async function digCsVserversRx(coaRx: AdcConfObjRx, rx: AdcRegExTree) {
     return apps;
 }
 
-/**
- * Extract options from parsed object (exclude special properties)
- */
-function extractOptions(obj: NsObject): Record<string, any> {
-    const opts: Record<string, any> = {};
-    for (const [key, value] of Object.entries(obj)) {
-        if (key !== 'name' && key !== '_line' && key !== 'protocol' && key !== 'ipAddress' && key !== 'port') {
-            opts[key] = value;
-        }
-    }
-    return opts;
-}
+// extractOptions function moved to parseAdcUtils.ts for reuse across digesters
 
 /**
  * Dig CS policies using RX objects

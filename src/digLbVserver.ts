@@ -173,20 +173,13 @@ export async function digBindService(serviceName: string, app: AdcApp, obj: AdcC
 
 
         } else if (rxMatch.groups.monitor) {
-
+            // Legacy: Keep old monitor capture group handling for backward compatibility
             const monitorName = rxMatch.groups.monitor.split(' ').pop();
 
-            // add the object param/array if not already there
-            // if (!serviceGroup.monitors) serviceGroup.monitors = [];
-
-            //todo: get a list of the default monitor names and add them to the config somehow
-
-            // create the serviceGroup monitor object with the name
             const monitorObj = {
                 name: monitorName
             };
 
-            // get monitor config line
             obj.add?.lb?.monitor?.filter(m => m.split(' ')[0] === monitorName)
                 .forEach(x => {
                     const parent = 'add lb monitor';
@@ -198,19 +191,44 @@ export async function digBindService(serviceName: string, app: AdcApp, obj: AdcC
                         return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
                     }
                     const opts = parseNsOptions(rxMatch.groups.opts, rx);
-
-                    // add any monitor object options
                     deepmergeInto(monitorObj, opts)
                 })
 
-            // push the full monitor object to the serviceGroup
-            // serviceGroup.monitors.push(monitorObj);
-
         } else if (rxMatch.groups.opts) {
-            deepmergeInto(
-                // serviceGroup,
-                parseNsOptions(rxMatch.groups.opts, rx)
-            )
+            // Parse options to check for -monitorName
+            const opts = parseNsOptions(rxMatch.groups.opts, rx);
+
+            if (opts['-monitorName']) {
+                const monitorName = opts['-monitorName'];
+
+                // create the serviceGroup monitor object with the name
+                const monitorObj = {
+                    name: monitorName
+                };
+
+                // get monitor config line
+                obj.add?.lb?.monitor?.filter(m => m.split(' ')[0] === monitorName)
+                    .forEach(x => {
+                        const parent = 'add lb monitor';
+                        const originalString = parent + ' ' + x;
+                        app.lines.push(originalString)
+                        const rxMatch = x.match(rx.parents[parent])
+                        if (!rxMatch) {
+                            /* istanbul ignore next */
+                            return logger.error(`regex "${rx.parents[parent]}" - failed for line "${originalString}"`);
+                        }
+                        const opts = parseNsOptions(rxMatch.groups.opts, rx);
+
+                        // add any monitor object options
+                        deepmergeInto(monitorObj, opts)
+                    })
+            } else {
+                // Handle other options that aren't -monitorName
+                deepmergeInto(
+                    // serviceGroup,
+                    parseNsOptions(rxMatch.groups.opts, rx)
+                )
+            }
         }
     }
 }
@@ -597,6 +615,17 @@ export function digSslBinding(app: AdcApp, obj: AdcConfObj, rx: AdcRegExTree) {
         if (!app.bindings.certs) app.bindings.certs = [];
         app.bindings.certs.push(sslBindObj);
     }
+
+    // dedup entries in the app.bindings.certs array
+    if (app.bindings.certs) {
+        app.bindings.certs = app.bindings.certs.filter((cert, index, self) =>
+            index === self.findIndex((t) => (
+                JSON.stringify(t) === JSON.stringify(cert)
+            ))
+        );
+    }
+
+    return;
 }
 
 

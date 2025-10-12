@@ -1,0 +1,57 @@
+{
+  "configFile": "skree.ns.conf",
+  "generatedAt": "2025-10-12T00:36:16.293Z",
+  "apps": [
+    {
+      "name": "skree1_vip_RDP",
+      "protocol": "RDP",
+      "ipAddress": "10.10.10.10",
+      "type": "lb",
+      "port": "4489",
+      "lines": [
+        "add lb vserver skree1_vip_RDP RDP 10.10.10.10 4489 -persistenceType NONE -state DISABLED -cltTimeout 9000",
+        "add server skree1server01 10.10.10.7",
+        "add server skree1server02 10.10.10.8",
+        "add serviceGroup skree1_servicegroup_RDP RDP -maxClient 0 -maxReq 0 -cip DISABLED -usip YES -useproxyport YES -cltTimeout 9000 -svrTimeout 9000 -CKA NO -TCPB NO -CMP NO",
+        "bind lb vserver skree1_vip_RDP skree1_servicegroup_RDP",
+        "bind serviceGroup skree1_servicegroup_RDP skree1server01 *",
+        "bind serviceGroup skree1_servicegroup_RDP skree1server02 *"
+      ],
+      "opts": {
+        "-persistenceType": "NONE",
+        "-state": "DISABLED",
+        "-cltTimeout": "9000"
+      },
+      "bindings": {
+        "serviceGroup": [
+          {
+            "name": "skree1_servicegroup_RDP",
+            "protocol": "RDP",
+            "-maxClient": "0",
+            "-maxReq": "0",
+            "-cip": "DISABLED",
+            "-usip": "YES",
+            "-useproxyport": "YES",
+            "-cltTimeout": "9000",
+            "-svrTimeout": "9000",
+            "-CKA": "NO",
+            "-TCPB": "NO",
+            "-CMP": "NO",
+            "servers": [
+              {
+                "name": "skree1server02",
+                "port": "*",
+                "address": "10.10.10.8"
+              },
+              {
+                "name": "skree1server01",
+                "port": "*",
+                "address": "10.10.10.7"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

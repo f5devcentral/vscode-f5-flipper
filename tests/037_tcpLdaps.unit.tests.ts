@@ -28,7 +28,7 @@ describe('TCP LDAPS application tests', function () {
 
     before(async function () {
         // log test file name - makes it easier for troubleshooting
-        console.log('       file:', __filename)
+        console.log('---------- file:', __filename);
         testFile = await archiveMake('tcpLdaps.ns.conf') as string;
         // clear the events arrays
         parsedFileEvents.length = 0

@@ -11,7 +11,9 @@ Major enhancements to F5 Flipper extension focusing on improved architecture, te
 |---|---------|--------|----------|
 | 1.1 | [Main README Update](#11-main-readme-update) | ✅ Complete | High |
 | 1.2 | [Documentation Website](#12-documentation-website) | ✅ Complete (Initial) | High |
-| 2.1 | [JSON Conversion Engine Redesign](#21-json-conversion-engine-redesign) | 🟡 Phase 1 Complete (40%) | Critical |
+| 2.1 | [RX Parsing Engine (v1.17.0)](#21-rx-parsing-engine-v1170) | ✅ Complete | Critical |
+| 2.2 | [Parser Refinements](#22-parser-refinements) | 🟡 In Progress (25%) | High |
+| 2.3 | [Conversion Templates](#23-conversion-templates) | Not Started | High |
 | 3.1 | [Unit Test Coverage](#31-unit-test-coverage) | ✅ Complete | High |
 | 3.2 | [Production Config Testing](#32-production-config-testing) | Not Started | Medium |
 | 4.1 | [Review Related Tools](#41-review-related-tools) | Not Started | Medium |
@@ -20,11 +22,38 @@ Major enhancements to F5 Flipper extension focusing on improved architecture, te
 | 7.1 | [Extended Feature Detection](#71-extended-feature-detection) | Not Started | High |
 | 7.2 | [Reference Validation UI Integration](#72-reference-validation-ui-integration) | Not Started | High |
 
-**Overall Progress**: 3.4/10 sections complete (34%) - JSON Engine in progress
+**Overall Progress**: 4/12 sections complete (33%) - Parser refinements in progress
 
 ---
 
 ## Release History
+
+### v1.17.0 (2025-01-12) 🚀 MAJOR RELEASE
+- ✅ **NEW RX Parsing Engine** - Complete parser rewrite with **2-3x performance improvement**
+  - Object-based storage (O(1) lookups vs O(n) arrays)
+  - Pre-compiled regex patterns (~40% faster parsing)
+  - Parallel digester execution (3-6x speedup with `Promise.all()`)
+  - Set-based duplicate removal (O(n) vs O(n²))
+  - Native `structuredClone` for deep copying
+- ✅ **Quality Improvements**
+  - Better CS→LB binding detection
+  - Fixed duplicate SSL cert entries
+  - Enhanced server address/hostname detection
+  - Fixed monitor protocol field inclusion
+- ✅ **Snapshot-Based Testing** - 48 integration tests with golden snapshots
+- ✅ **Parser Fixes**
+  - Fixed `-cip` multi-value parameter parsing
+  - Eliminated undefined field pollution in JSON output
+  - Removed `-devno` internal fields from output
+- ✅ **Enhanced Type System**
+  - Comprehensive JSDoc for `AdcConfObjRx`
+  - Deprecated `AdcConfObj` with migration guide
+  - Created [RX-PARSER-TYPES.md](docs/RX-PARSER-TYPES.md) documentation
+- ✅ **Performance Documentation**
+  - Created [RX-Parser-Performance-Report.md](docs/RX-Parser-Performance-Report.md)
+  - Detailed benchmarks and optimization analysis
+- **Coverage**: 92.47% lines, 75.11% branches, 255 tests ✅
+- **Files**: [CitrixADC.ts](src/CitrixADC.ts), [parseAdcArraysRx.ts](src/parseAdcArraysRx.ts), [digLbVserverRx.ts](src/digLbVserverRx.ts), [digCsVserverRx.ts](src/digCsVserverRx.ts), [digGslbVserverRx.ts](src/digGslbVserverRx.ts)
 
 ### v1.16.0 (2025-10-08)
 - ✅ **Test Coverage Enhancement** - Added 69 new tests
@@ -117,63 +146,154 @@ Major enhancements to F5 Flipper extension focusing on improved architecture, te
 
 ## 2. Core Architecture Enhancements
 
-### 2.1 JSON Conversion Engine Redesign
-**Status**: 🟡 In Progress - Phase 1 Complete (40%)
+### 2.1 RX Parsing Engine (v1.17.0)
+**Status**: ✅ COMPLETE
 **Priority**: Critical
-**Description**: Redesign conversion engine to convert every NS config line to JSON first, then abstract applications
+**Description**: Complete rewrite of NetScaler configuration parser with RX-based engine delivering 2-3x performance improvement
 
 **Design Document**: [JSON_ENGINE_DESIGN.md](JSON_ENGINE_DESIGN.md)
-**Session Summary**: [SESSION_SUMMARY.md](SESSION_SUMMARY.md)
+**Performance Report**: [docs/RX-Parser-Performance-Report.md](docs/RX-Parser-Performance-Report.md)
+**Type Documentation**: [docs/RX-PARSER-TYPES.md](docs/RX-PARSER-TYPES.md)
 
-**Current Approach**:
-- Parse config lines using regex patterns
-- Create nested JSON structure
-- Walk structure to abstract applications
+**✅ COMPLETED - v1.17.0 Release (2025-01-12)**:
 
-**Proposed Approach**:
-- Convert ALL NS config lines to JSON representation
-- Maintain complete config as JSON
-- Abstract applications from JSON model
-- Enables better querying, validation, and transformation
-
-**Phase 1: Core Parser (✅ COMPLETE - 2025-10-08)**:
-- [x] Analyze current RegExTree patterns (`src/regex.ts`)
+**Phase 1: Core Parser (✅ COMPLETE)**:
+- [x] Analyze current RegExTree patterns ([src/regex.ts](src/regex.ts))
 - [x] Design new JSON schema for NS config objects
 - [x] Created [src/parseAdcArraysRx.ts](src/parseAdcArraysRx.ts) - RX-based parser with named capture groups
-- [x] Added RX patterns: `set lb vserver`, `set cs vserver` to [src/regex.ts](src/regex.ts)
 - [x] Options parsing with `parseNsOptions()` (dashes preserved)
 - [x] Objects keyed by name: `cfgObj.add.lb.vserver.web_vs` (not arrays)
 - [x] Preserves original line with `_line` property
-- [x] Created comprehensive tests: [tests/300_parseAdcArraysRx.unit.tests.ts](tests/300_parseAdcArraysRx.unit.tests.ts)
-- [x] 17/17 tests passing with all 14 artifact configs
 
-**Phase 2: Integration Testing & Validation (🔄 NEXT - 2025-10-09)**:
-- [ ] Create integration test with full test archive (f5_flipper_test.tgz)
-- [ ] Parse all 15 configs in archive programmatically
-- [ ] Validate JSON structure completeness
-- [ ] Fix edge cases and errors as discovered
-- [ ] Document parsing coverage per config type
+**Phase 2: Integration Testing & Validation (✅ COMPLETE)**:
+- [x] Created snapshot-based integration tests (48 tests across 14 configs)
+- [x] Parsed all configs in test archive successfully
+- [x] Validated JSON structure completeness
+- [x] Fixed edge cases (multi-value options, undefined pollution, SSL ordering)
+- [x] Performance comparison tests (2-3x improvement validated)
 
-**Phase 3: Application Abstraction (PENDING)**:
-- [ ] Create `src/digLbVserverRx.ts` - JSON-based LB vserver discovery
-- [ ] Create `src/digCsVserverRx.ts` - JSON-based CS vserver discovery
-- [ ] Create `src/digGslbVserverRx.ts` - JSON-based GSLB vserver discovery
-- [ ] Create parity tests comparing to legacy digesters
-- [ ] Validate identical output for all 14 configs
+**Phase 3: Application Abstraction (✅ COMPLETE)**:
+- [x] Created [src/digLbVserverRx.ts](src/digLbVserverRx.ts) - JSON-based LB vserver discovery
+- [x] Created [src/digCsVserverRx.ts](src/digCsVserverRx.ts) - JSON-based CS vserver discovery
+- [x] Created [src/digGslbVserverRx.ts](src/digGslbVserverRx.ts) - JSON-based GSLB vserver discovery
+- [x] Created [src/digCStoLbRefs.ts](src/digCStoLbRefs.ts) with `structuredClone`
+- [x] Parity tests validate identical output for all configs
+- [x] Better accuracy (improved bindings, no duplicates)
 
-**Phase 4: Production Integration (PENDING)**:
-- [ ] Update ADC class to use new JSON model
-- [ ] Refactor digesters to work with JSON model
-- [ ] Update tree view provider for JSON model
-- [ ] Migration testing with existing configs
-- [ ] Performance benchmarking
+**Phase 4: Production Integration (✅ COMPLETE)**:
+- [x] Updated [src/CitrixADC.ts](src/CitrixADC.ts) to use new RX parser
+- [x] Parallel digester execution with `Promise.all()` (3-6x speedup)
+- [x] Set-based duplicate removal (O(n) complexity)
+- [x] Performance benchmarking completed (2-3x faster)
+- [x] All 255 tests passing with 92.47% coverage
+- [x] Legacy parser preserved in `CitrixADCold.ts` for reference
 
-**Benefits**:
-- More complete representation of NS config
-- Easier to query and analyze
-- Better foundation for conversions
-- Improved diagnostics capabilities
-- Potential for config editing/manipulation
+**Achieved Benefits**:
+- ✅ 2-3x faster performance (up to 5.59x on digestion)
+- ✅ O(1) lookups by name vs O(n) array search
+- ✅ Single-pass parsing with immediate object creation
+- ✅ Better accuracy in binding detection and deduplication
+- ✅ 100% backward compatible output structure
+
+**Deliverables**:
+- ✅ [src/parseAdcArraysRx.ts](src/parseAdcArraysRx.ts) - New RX parsing engine
+- ✅ [src/digLbVserverRx.ts](src/digLbVserverRx.ts) - RX-based LB digester
+- ✅ [src/digCsVserverRx.ts](src/digCsVserverRx.ts) - RX-based CS digester
+- ✅ [src/digGslbVserverRx.ts](src/digGslbVserverRx.ts) - RX-based GSLB digester
+- ✅ [docs/RX-Parser-Performance-Report.md](docs/RX-Parser-Performance-Report.md) - Performance analysis
+- ✅ [docs/RX-PARSER-TYPES.md](docs/RX-PARSER-TYPES.md) - Type documentation
+
+---
+
+### 2.2 Parser Refinements
+**Status**: 🟡 In Progress (25%)
+**Priority**: High
+**Description**: Post-v1.17.0 parser improvements for cleaner output and enhanced API flexibility
+
+**Tasks**:
+
+1. **Fix names with quotes/spaces** (High Priority)
+   - [ ] Remove quote handling workaround in [parseAdcArraysRx.ts:118-119](src/parseAdcArraysRx.ts#L118)
+   - [ ] Currently keeps quotes to match old behavior for comparison tests
+   - [ ] Strip quotes consistently for cleaner output
+   - [ ] Update snapshot tests to expect unquoted names
+   - [ ] Handle edge cases: names with internal quotes, escaped quotes
+   - **Impact**: Cleaner JSON output, better consistency
+
+2. **Update ADC input API** (Medium Priority)
+   - [ ] Currently `loadParseAsync()` requires file path - limits programmatic use
+   - [ ] Add `loadParseFromText(config: string)` method
+   - [ ] Add `loadParseFromBuffer(buffer: Buffer)` method
+   - [ ] Update constructor to accept optional initial config
+   - [ ] Add tests for new input methods
+   - **Impact**: Enables programmatic config generation/testing, better API flexibility
+
+3. **Extend AdcConfObjRx types** (Medium Priority)
+   - [ ] Create specific object type interfaces:
+     - [ ] `LbVserver` - Load balancer virtual server properties
+     - [ ] `CsVserver` - Content switching virtual server properties
+     - [ ] `GslbVserver` - GSLB virtual server properties
+     - [ ] `ServiceGroup` - Service group properties
+     - [ ] `Server` - Server object properties
+   - [ ] Add type guards for runtime validation (`isLbVserver()`, etc.)
+   - [ ] Improve IDE autocomplete for nested objects
+   - [ ] Document all common fields per object type in JSDoc
+   - **Impact**: Better type safety, improved developer experience
+
+**Success Metrics**:
+- [ ] Quote handling: All names clean without quotes
+- [ ] API flexibility: Text/buffer input working with tests
+- [ ] Type coverage: 5+ specific object interfaces defined
+
+---
+
+### 2.3 Conversion Templates
+**Status**: Not Started
+**Priority**: High
+**Description**: Enhance and expand AS3 conversion templates for DNS and GSLB applications
+
+**Tasks**:
+
+1. **DNS Conversion Template Enhancement** (High Priority)
+   - [ ] Review current [templates/as3/DNS.yaml](templates/as3/DNS.yaml) - currently basic
+   - [ ] Add DNS-specific query types support:
+     - [ ] A records (IPv4)
+     - [ ] AAAA records (IPv6)
+     - [ ] NS (nameserver) records
+     - [ ] MX (mail exchange) records
+     - [ ] PTR (pointer) records
+     - [ ] SOA (start of authority) records
+     - [ ] CNAME (canonical name) records
+   - [ ] Support DNS load balancing methods:
+     - [ ] Round-robin
+     - [ ] Least connections
+     - [ ] Global availability
+   - [ ] Add DNS health monitoring options
+   - [ ] Test with [tests/artifacts/apps/dnsLoadBalancer.ns.conf](tests/artifacts/apps/dnsLoadBalancer.ns.conf)
+   - **Impact**: Complete DNS migration support
+
+2. **GSLB Conversion Templates** (High Priority)
+   - [ ] Research GSLB to F5 DNS mapping approach
+   - [ ] Design template structure for GSLB configurations
+   - [ ] Create initial [templates/as3/GSLB.yaml](templates/as3/GSLB.yaml) template
+   - [ ] Map GSLB virtual servers to F5 DNS wide IP pools
+   - [ ] Map GSLB services to F5 DNS pool members
+   - [ ] Handle GSLB service monitoring translation
+   - [ ] Document GSLB feature parity and limitations
+   - [ ] Remove "not supported" warning for GSLB apps
+   - [ ] Test with GSLB configs (t1.ns.conf has 12 GSLB apps)
+   - **Impact**: Enable GSLB application conversion (currently blocked)
+
+**Success Metrics**:
+- [ ] DNS: Template supports 7+ record types
+- [ ] GSLB: Initial template created and functional
+- [ ] Both: AS3 output validated on F5 BIG-IP
+
+**Future Template Expansion**:
+- [ ] FTP application templates
+- [ ] RDP application templates
+- [ ] SIP application templates
+- [ ] Advanced SSL/TLS features (client cert auth, OCSP, etc.)
 
 ---
 

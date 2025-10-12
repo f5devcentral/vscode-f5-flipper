@@ -1,0 +1,106 @@
+{
+  "configFile": "anyProtocol.ns.conf",
+  "generatedAt": "2025-10-12T00:36:16.242Z",
+  "apps": [
+    {
+      "name": "exchange_any_vs",
+      "protocol": "ANY",
+      "ipAddress": "192.168.1.41",
+      "type": "lb",
+      "port": "*",
+      "lines": [
+        "add lb vserver exchange_any_vs ANY 192.168.1.41 * -persistenceType NONE -lbMethod ROUNDROBIN -backupLBMethod SOURCEIPHASH -cltTimeout 900",
+        "add server exchange_sitea_01 10.1.1.223 -comment \"Primary Exchange Server Site A\"",
+        "add server exchange_sitea_02 10.1.1.98 -comment \"Secondary Exchange Server Site A\"",
+        "add server exchange_sitea_ha1 10.1.1.33 -comment \"HA Exchange Server Site A\"",
+        "add server exchange_sitea_ha2 10.1.1.154 -comment \"HA Exchange Server Site A\"",
+        "add server exchange_siteb_01 10.2.1.212 -comment \"Primary Exchange Server Site B\"",
+        "add server exchange_siteb_02 10.2.1.211 -comment \"Secondary Exchange Server Site B\"",
+        "add server exchange_siteb_ha1 10.2.1.218 -comment \"HA Exchange Server Site B\"",
+        "add server exchange_siteb_ha2 10.2.1.219 -comment \"HA Exchange Server Site B\"",
+        "add serviceGroup exchange_any_sg ANY -maxClient 0 -maxReq 0 -cip DISABLED -usip NO -useproxyport NO -cltTimeout 900 -svrTimeout 900 -CKA NO -TCPB NO -CMP NO",
+        "bind lb vserver exchange_any_vs exchange_any_sg",
+        "bind serviceGroup exchange_any_sg -monitorName ping",
+        "bind serviceGroup exchange_any_sg exchange_sitea_01 *",
+        "bind serviceGroup exchange_any_sg exchange_sitea_02 *",
+        "bind serviceGroup exchange_any_sg exchange_sitea_ha1 *",
+        "bind serviceGroup exchange_any_sg exchange_sitea_ha2 *",
+        "bind serviceGroup exchange_any_sg exchange_siteb_01 *",
+        "bind serviceGroup exchange_any_sg exchange_siteb_02 *",
+        "bind serviceGroup exchange_any_sg exchange_siteb_ha1 *",
+        "bind serviceGroup exchange_any_sg exchange_siteb_ha2 *"
+      ],
+      "opts": {
+        "-persistenceType": "NONE",
+        "-lbMethod": "ROUNDROBIN",
+        "-backupLBMethod": "SOURCEIPHASH",
+        "-cltTimeout": "900"
+      },
+      "bindings": {
+        "serviceGroup": [
+          {
+            "name": "exchange_any_sg",
+            "protocol": "ANY",
+            "-maxClient": "0",
+            "-maxReq": "0",
+            "-cip": "DISABLED",
+            "-usip": "NO",
+            "-useproxyport": "NO",
+            "-cltTimeout": "900",
+            "-svrTimeout": "900",
+            "-CKA": "NO",
+            "-TCPB": "NO",
+            "-CMP": "NO",
+            "servers": [
+              {
+                "name": "exchange_sitea_01",
+                "port": "*",
+                "address": "10.1.1.223"
+              },
+              {
+                "name": "exchange_sitea_02",
+                "port": "*",
+                "address": "10.1.1.98"
+              },
+              {
+                "name": "exchange_siteb_01",
+                "port": "*",
+                "address": "10.2.1.212"
+              },
+              {
+                "name": "exchange_siteb_02",
+                "port": "*",
+                "address": "10.2.1.211"
+              },
+              {
+                "name": "exchange_siteb_ha1",
+                "port": "*",
+                "address": "10.2.1.218"
+              },
+              {
+                "name": "exchange_siteb_ha2",
+                "port": "*",
+                "address": "10.2.1.219"
+              },
+              {
+                "name": "exchange_sitea_ha1",
+                "port": "*",
+                "address": "10.1.1.33"
+              },
+              {
+                "name": "exchange_sitea_ha2",
+                "port": "*",
+                "address": "10.1.1.154"
+              }
+            ],
+            "monitors": [
+              {
+                "name": "ping"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

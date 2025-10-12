@@ -1,0 +1,95 @@
+{
+  "configFile": "tcpLdaps.ns.conf",
+  "generatedAt": "2025-10-12T00:36:16.311Z",
+  "apps": [
+    {
+      "name": "ldaps_lb_vs",
+      "protocol": "TCP",
+      "ipAddress": "192.168.1.10",
+      "type": "lb",
+      "port": "636",
+      "lines": [
+        "add lb vserver ldaps_lb_vs TCP 192.168.1.10 636 -persistenceType NONE -cltTimeout 9000",
+        "add server ldaps_backup_dc1 10.2.1.50 -comment \"Backup Domain Controller\"",
+        "add server ldaps_primary_dc1 10.1.1.60 -comment \"Primary Domain Controller 1\"",
+        "add server ldaps_primary_dc2 10.1.1.61 -comment \"Primary Domain Controller 2\"",
+        "add server ldaps_primary_dc3 10.1.2.60 -comment \"Primary Domain Controller 3\"",
+        "add server ldaps_primary_dc4 10.1.2.70 -comment \"Primary Domain Controller 4\"",
+        "add serviceGroup ldaps_backup_sg TCP -maxClient 0 -maxReq 0 -cip DISABLED -usip NO -useproxyport YES -cltTimeout 9000 -svrTimeout 9000 -CKA NO -TCPB NO -CMP NO",
+        "add serviceGroup ldaps_primary_sg TCP -maxClient 0 -maxReq 0 -cip DISABLED -usip NO -useproxyport YES -cltTimeout 9000 -svrTimeout 9000 -CKA NO -TCPB NO -CMP NO",
+        "bind lb vserver ldaps_lb_vs ldaps_backup_sg",
+        "bind lb vserver ldaps_lb_vs ldaps_primary_sg",
+        "bind serviceGroup ldaps_backup_sg ldaps_backup_dc1 636",
+        "bind serviceGroup ldaps_primary_sg ldaps_primary_dc1 636",
+        "bind serviceGroup ldaps_primary_sg ldaps_primary_dc2 636",
+        "bind serviceGroup ldaps_primary_sg ldaps_primary_dc3 636",
+        "bind serviceGroup ldaps_primary_sg ldaps_primary_dc4 636"
+      ],
+      "opts": {
+        "-persistenceType": "NONE",
+        "-cltTimeout": "9000"
+      },
+      "bindings": {
+        "serviceGroup": [
+          {
+            "name": "ldaps_primary_sg",
+            "protocol": "TCP",
+            "-maxClient": "0",
+            "-maxReq": "0",
+            "-cip": "DISABLED",
+            "-usip": "NO",
+            "-useproxyport": "YES",
+            "-cltTimeout": "9000",
+            "-svrTimeout": "9000",
+            "-CKA": "NO",
+            "-TCPB": "NO",
+            "-CMP": "NO",
+            "servers": [
+              {
+                "name": "ldaps_primary_dc1",
+                "port": "636",
+                "address": "10.1.1.60"
+              },
+              {
+                "name": "ldaps_primary_dc2",
+                "port": "636",
+                "address": "10.1.1.61"
+              },
+              {
+                "name": "ldaps_primary_dc3",
+                "port": "636",
+                "address": "10.1.2.60"
+              },
+              {
+                "name": "ldaps_primary_dc4",
+                "port": "636",
+                "address": "10.1.2.70"
+              }
+            ]
+          },
+          {
+            "name": "ldaps_backup_sg",
+            "protocol": "TCP",
+            "-maxClient": "0",
+            "-maxReq": "0",
+            "-cip": "DISABLED",
+            "-usip": "NO",
+            "-useproxyport": "YES",
+            "-cltTimeout": "9000",
+            "-svrTimeout": "9000",
+            "-CKA": "NO",
+            "-TCPB": "NO",
+            "-CMP": "NO",
+            "servers": [
+              {
+                "name": "ldaps_backup_dc1",
+                "port": "636",
+                "address": "10.2.1.50"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

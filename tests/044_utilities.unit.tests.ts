@@ -31,6 +31,11 @@ function isAdcApp(obj: any): boolean {
 
 describe('Utilities Helper Functions', function () {
 
+    before(async function () {
+        // log test file name - makes it easer for troubleshooting
+        console.log('---------- file:', __filename);
+    });
+
     describe('getNonce()', function () {
 
         it('should generate a 32-character alphanumeric string', function () {

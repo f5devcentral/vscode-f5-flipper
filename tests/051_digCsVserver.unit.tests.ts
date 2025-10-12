@@ -11,7 +11,7 @@ describe('digCsVserver Content Switching Tests', () => {
 
     before(async function () {
         // log test file name - makes it easer for troubleshooting
-        console.log('       file:', __filename);
+        console.log('---------- file:', __filename);
         
         // Load the starlord config which has CS vserver examples
         starlordConfig = path.join(__dirname, 'artifacts', 'apps', 'starlord.ns.conf');

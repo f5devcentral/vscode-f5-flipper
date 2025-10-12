@@ -1,16 +1,19 @@
 
 var lodashGet = require('lodash.get');
 
-import { AdcConfObj, ObjStats } from "./models";
+import { AdcConfObj, AdcConfObjRx, ObjStats } from "./models";
 
-
+/**
+ * Count main objects from legacy array-based config structure
+ * @deprecated Use countMainObjectsRx for new RX-based structure
+ */
 export async function countMainObjects(cfgObj: AdcConfObj): Promise<ObjStats> {
 
     const stat: ObjStats = {}
 
     // note:  we assume that every 'add' is unique, since all the binds/sets attach to what was "add"ed
 
-    // items to get counts for 
+    // items to get counts for
     const items = [
     'add cs vserver',
     'add cs policy',
@@ -55,6 +58,54 @@ export async function countMainObjects(cfgObj: AdcConfObj): Promise<ObjStats> {
     // todo: work on cleaning up the capitalization and key building
     // probably make a dedicated function
     // https://stackoverflow.com/questions/1026069/how-do-i-make-the-first-letter-of-a-string-uppercase-in-javascript
+
+    return stat;
+}
+
+/**
+ * Count main objects from new RX-based config structure
+ * Works with nested object structure where each item is keyed by name
+ * @param cfgObjRx - RX-parsed config object
+ * @returns Object stats with counts for each object type
+ */
+export async function countMainObjectsRx(cfgObjRx: AdcConfObjRx): Promise<ObjStats> {
+    const stat: ObjStats = {}
+
+    // Note: In RX structure, every 'add' object is stored as { name: { ...props } }
+    // We count the number of keys at each path
+
+    // Items to get counts for (same as legacy)
+    const items = [
+        { path: ['add', 'cs', 'vserver'], label: 'csVserver' },
+        { path: ['add', 'cs', 'policy'], label: 'csPolicy' },
+        { path: ['add', 'cs', 'action'], label: 'csAction' },
+        { path: ['add', 'lb', 'vserver'], label: 'lbVserver' },
+        { path: ['add', 'lb', 'monitor'], label: 'lbMonitor' },
+        { path: ['add', 'gslb', 'vserver'], label: 'gslbVserver' },
+        { path: ['add', 'gslb', 'service'], label: 'gslbService' },
+        { path: ['add', 'server'], label: 'server' },
+        { path: ['add', 'service'], label: 'service' },
+        { path: ['add', 'serviceGroup'], label: 'serviceGroup' },
+        { path: ['add', 'ssl', 'certKey'], label: 'sslCertKey' }
+    ]
+
+    items.forEach(({ path, label }) => {
+        // Navigate the nested object structure
+        let current: any = cfgObjRx;
+        for (const segment of path) {
+            if (current && typeof current === 'object') {
+                current = current[segment];
+            } else {
+                current = undefined;
+                break;
+            }
+        }
+
+        // Count keys if we found the object
+        if (current && typeof current === 'object') {
+            stat[label] = Object.keys(current).length;
+        }
+    })
 
     return stat;
 }

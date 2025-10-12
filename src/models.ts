@@ -274,6 +274,14 @@ export type AdcRegExTree = {
 }
 
 
+/**
+ * @deprecated Use AdcConfObjRx instead
+ * This type is used by the old array-based parser (CitrixADCold.ts)
+ * The new RX parser uses AdcConfObjRx which stores objects by name in Records
+ *
+ * Old parser stores config lines as string arrays
+ * New parser stores parsed objects with named capture groups
+ */
 export type AdcConfObj = {
     vserver?: string;
     add?: {
@@ -385,8 +393,31 @@ export type AdcConfObj = {
 
 /**
  * Parsed NS config object structure using RX engine
- * Objects are keyed by name instead of stored in arrays
- * Each object contains fully parsed properties from named capture groups
+ *
+ * **Key Improvements over AdcConfObj:**
+ * - Objects stored by name in Records (e.g., `Record<string, NsObject>`)
+ * - Each object fully parsed with named capture groups (name, protocol, ipAddress, port, etc.)
+ * - No need to re-parse config lines - all data is structured
+ * - Faster lookups by name vs array iteration
+ *
+ * **Structure:**
+ * ```typescript
+ * {
+ *   add: {
+ *     lb: {
+ *       vserver: {
+ *         "my_vserver": { name: "my_vserver", protocol: "HTTP", ipAddress: "10.1.1.1", ... }
+ *       }
+ *     }
+ *   }
+ * }
+ * ```
+ *
+ * **Usage Example:**
+ * ```typescript
+ * const vserver = config.add?.lb?.vserver?.["my_vserver"];
+ * console.log(vserver?.protocol); // "HTTP"
+ * ```
  */
 export type AdcConfObjRx = {
     vserver?: string;
@@ -497,12 +528,70 @@ export type AdcConfObjRx = {
 }
 
 /**
- * Generic NS object with parsed properties
- * All objects have at minimum a name and _line property
- * Additional properties populated from regex named capture groups
+ * Base NS object with parsed properties from regex named capture groups
+ *
+ * **Required Fields:**
+ * - `name` - Object name (e.g., vserver name, service name)
+ * - `_line` - Original config line for reference
+ *
+ * **Common Optional Fields (added by regex capture groups):**
+ * - `protocol` - Protocol type (HTTP, SSL, TCP, DNS, etc.)
+ * - `ipAddress` - IP address for vservers/services
+ * - `port` - Port number
+ * - `server` - Server name for services
+ * - Options prefixed with `-` (e.g., `-persistenceType`, `-cltTimeout`)
+ *
+ * **Examples:**
+ * ```typescript
+ * // LB VServer
+ * {
+ *   name: "web_vs",
+ *   protocol: "HTTP",
+ *   ipAddress: "10.1.1.100",
+ *   port: "80",
+ *   "-persistenceType": "SOURCEIP",
+ *   "-cltTimeout": "180",
+ *   _line: "add lb vserver web_vs HTTP 10.1.1.100 80 -persistenceType SOURCEIP"
+ * }
+ *
+ * // Service
+ * {
+ *   name: "web_svc",
+ *   server: "server1",
+ *   protocol: "HTTP",
+ *   port: "8080",
+ *   "-maxClient": "1000",
+ *   _line: "add service web_svc server1 HTTP 8080 -maxClient 1000"
+ * }
+ * ```
  */
 export interface NsObject {
+    /** Object name (vserver, service, etc.) */
     name: string;
+
+    /** Original config line */
     _line: string;
-    [key: string]: any;  // Additional properties from capture groups (protocol, ipAddress, port, etc.)
+
+    // Common fields from capture groups
+    /** Protocol (HTTP, SSL, TCP, DNS, etc.) */
+    protocol?: string;
+
+    /** IP address for vservers/services */
+    ipAddress?: string;
+
+    /** Port number */
+    port?: string;
+
+    /** Server name (for services) */
+    server?: string;
+
+    /** Server hostname (alternative to address) */
+    hostname?: string;
+
+    /** Server address (alternative to hostname) */
+    address?: string;
+
+    // All other properties from regex capture groups or parsed options
+    // Options prefixed with - (e.g., -persistenceType, -cltTimeout)
+    [key: string]: any;
 }

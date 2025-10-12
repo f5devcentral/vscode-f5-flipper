@@ -1,0 +1,1496 @@
+{
+  "configFile": "bren.ns.conf",
+  "generatedAt": "2025-10-12T00:36:16.269Z",
+  "apps": [
+    {
+      "name": "vip-sharepoint-80",
+      "protocol": "HTTP",
+      "ipAddress": "20.15.3.47",
+      "type": "cs",
+      "port": "80",
+      "lines": [
+        "add cs policy vip-sharepoint-policy -rule \"REQ.IP.SOURCEIP == 172.70.33.133 || REQ.IP.SOURCEIP == 172.70.34.101\"",
+        "add cs vserver vip-sharepoint-80 HTTP 20.15.3.47 80 -cltTimeout 180 -persistenceType NONE -devno 143523840",
+        "add lb vserver vip-sharepoint-default-80 HTTP 0.0.0.0 0 -persistenceType SOURCEIP -timeout 60 -redirectURL \"https://busyness.sharepoint.com/teams/rockstars\" -cltTimeout 180 -comment QLAT -devno 138575872",
+        "add lb vserver vip-sharepoint-redirect-80 HTTP 0.0.0.0 0 -persistenceType SOURCEIP -timeout 60 -cltTimeout 180 -comment QLAT -devno 138543104",
+        "add server prodserv11 172.50.23.61 -devno 25233",
+        "add service astroprd05-8080 prodserv11 HTTP 8080 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 360 -svrTimeout 360 -CKA YES -TCPB YES -CMP NO -devno 111083520",
+        "bind cs vserver vip-sharepoint-80 -lbvserver vip-sharepoint-default-80 -devno 34625",
+        "bind cs vserver vip-sharepoint-80 -policyName vip-sharepoint-policy -targetLBVserver vip-sharepoint-redirect-80 -priority 100 -devno 34649",
+        "bind lb vserver vip-sharepoint-redirect-80 astroprd05-8080"
+      ],
+      "opts": {
+        "-cltTimeout": "180",
+        "-persistenceType": "NONE"
+      },
+      "bindings": {
+        "-lbvserver": [
+          "vip-sharepoint-default-80"
+        ],
+        "-policyName": [
+          {
+            "-policyName": "vip-sharepoint-policy",
+            "-targetLBVserver": "vip-sharepoint-redirect-80",
+            "-priority": "100"
+          }
+        ]
+      },
+      "csPolicies": [
+        {
+          "name": "vip-sharepoint-policy",
+          "-rule": "REQ.IP.SOURCEIP == 172.70.33.133 || REQ.IP.SOURCEIP == 172.70.34.101"
+        }
+      ],
+      "apps": [
+        {
+          "name": "vip-sharepoint-redirect-80",
+          "type": "lb",
+          "protocol": "HTTP",
+          "ipAddress": "0.0.0.0",
+          "port": "0",
+          "opts": {
+            "-persistenceType": "SOURCEIP",
+            "-timeout": "60",
+            "-cltTimeout": "180",
+            "-comment": "QLAT"
+          },
+          "bindings": {
+            "service": [
+              {
+                "name": "astroprd05-8080",
+                "protocol": "HTTP",
+                "port": "8080",
+                "server": "prodserv11",
+                "opts": {
+                  "-gslb": "NONE",
+                  "-maxClient": "0",
+                  "-maxReq": "0",
+                  "-cip": "ENABLED X-Forwarded-For",
+                  "-usip": "NO",
+                  "-useproxyport": "YES",
+                  "-sp": "OFF",
+                  "-cltTimeout": "360",
+                  "-svrTimeout": "360",
+                  "-CKA": "YES",
+                  "-TCPB": "YES",
+                  "-CMP": "NO"
+                },
+                "address": "172.50.23.61"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vip-sharepoint-default-80",
+          "type": "lb",
+          "protocol": "HTTP",
+          "ipAddress": "0.0.0.0",
+          "port": "0",
+          "opts": {
+            "-persistenceType": "SOURCEIP",
+            "-timeout": "60",
+            "-redirectURL": "https://busyness.sharepoint.com/teams/rockstars",
+            "-cltTimeout": "180",
+            "-comment": "QLAT"
+          }
+        }
+      ]
+    },
+    {
+      "name": "vip-sharepoint-443",
+      "protocol": "SSL",
+      "ipAddress": "20.15.3.47",
+      "type": "cs",
+      "port": "443",
+      "lines": [
+        "add cs policy vip-sharepoint-policy -rule \"REQ.IP.SOURCEIP == 172.70.33.133 || REQ.IP.SOURCEIP == 172.70.34.101\"",
+        "add cs vserver vip-sharepoint-443 SSL 20.15.3.47 443 -cltTimeout 180 -persistenceType NONE -devno 143556608",
+        "add lb vserver vip-sharepoint-default-443 HTTP 0.0.0.0 0 -persistenceType SOURCEIP -timeout 60 -redirectURL \"https://busyness.sharepoint.com/teams/rockstars\" -cltTimeout 180 -comment QLAT -devno 138641408",
+        "add lb vserver vip-sharepoint-redirect-443 HTTP 0.0.0.0 0 -persistenceType SOURCEIP -timeout 60 -cltTimeout 180 -comment QLAT -devno 138608640",
+        "add server astroprd02 172.50.23.40 -devno 24502",
+        "add server astroprd03 172.50.23.52 -devno 24546",
+        "add server prodserv10 172.50.23.60 -devno 24967",
+        "add server prodserv11 172.50.23.61 -devno 25233",
+        "add service astroprd02-8443 astroprd02 SSL 8443 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 360 -svrTimeout 360 -CKA YES -TCPB YES -CMP NO -devno 110198784",
+        "add service astroprd03-8443 astroprd03 SSL 8443 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 360 -svrTimeout 360 -CKA YES -TCPB YES -CMP NO -devno 110231552",
+        "add service astroprd04-8443 prodserv10 SSL 8443 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 180 -svrTimeout 180 -CKA YES -TCPB YES -CMP NO -devno 110985216",
+        "add service astroprd05-8443 prodserv11 SSL 8443 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 180 -svrTimeout 180 -CKA YES -TCPB YES -CMP NO -devno 111017984",
+        "add ssl certKey vip-sharepoint-051316.cer -cert sharepoint021623111921.cer -key vip-sharepoint.key",
+        "bind cs vserver vip-sharepoint-443 -lbvserver vip-sharepoint-default-443 -devno 34625",
+        "bind cs vserver vip-sharepoint-443 -policyName vip-sharepoint-policy -targetLBVserver vip-sharepoint-redirect-443 -priority 100 -devno 34653",
+        "bind lb vserver vip-sharepoint-default-443 astroprd02-8443",
+        "bind lb vserver vip-sharepoint-default-443 astroprd03-8443",
+        "bind lb vserver vip-sharepoint-default-443 astroprd04-8443",
+        "bind lb vserver vip-sharepoint-default-443 astroprd05-8443",
+        "bind lb vserver vip-sharepoint-redirect-443 astroprd05-8443",
+        "bind ssl vserver vip-sharepoint-443 -certkeyName vip-sharepoint-051316.cer",
+        "bind ssl vserver vip-sharepoint-443 -cipherName ITNET",
+        "bind ssl vserver vip-sharepoint-443 -eccCurveName P_224",
+        "bind ssl vserver vip-sharepoint-443 -eccCurveName P_256",
+        "bind ssl vserver vip-sharepoint-443 -eccCurveName P_384",
+        "bind ssl vserver vip-sharepoint-443 -eccCurveName P_521"
+      ],
+      "opts": {
+        "-cltTimeout": "180",
+        "-persistenceType": "NONE"
+      },
+      "bindings": {
+        "-lbvserver": [
+          "vip-sharepoint-default-443"
+        ],
+        "-policyName": [
+          {
+            "-policyName": "vip-sharepoint-policy",
+            "-targetLBVserver": "vip-sharepoint-redirect-443",
+            "-priority": "100"
+          }
+        ],
+        "certs": [
+          {
+            "-cipherName": "ITNET",
+            "-cert": "sharepoint021623111921.cer",
+            "-key": "vip-sharepoint.key",
+            "-certkeyName": "vip-sharepoint-051316.cer",
+            "-eccCurveName": [
+              "P_256",
+              "P_384",
+              "P_224",
+              "P_521"
+            ]
+          }
+        ]
+      },
+      "csPolicies": [
+        {
+          "name": "vip-sharepoint-policy",
+          "-rule": "REQ.IP.SOURCEIP == 172.70.33.133 || REQ.IP.SOURCEIP == 172.70.34.101"
+        }
+      ],
+      "apps": [
+        {
+          "name": "vip-sharepoint-redirect-443",
+          "type": "lb",
+          "protocol": "HTTP",
+          "ipAddress": "0.0.0.0",
+          "port": "0",
+          "opts": {
+            "-persistenceType": "SOURCEIP",
+            "-timeout": "60",
+            "-cltTimeout": "180",
+            "-comment": "QLAT"
+          },
+          "bindings": {
+            "service": [
+              {
+                "name": "astroprd05-8443",
+                "protocol": "SSL",
+                "port": "8443",
+                "server": "prodserv11",
+                "opts": {
+                  "-gslb": "NONE",
+                  "-maxClient": "0",
+                  "-maxReq": "0",
+                  "-cip": "ENABLED X-Forwarded-For",
+                  "-usip": "NO",
+                  "-useproxyport": "YES",
+                  "-sp": "OFF",
+                  "-cltTimeout": "180",
+                  "-svrTimeout": "180",
+                  "-CKA": "YES",
+                  "-TCPB": "YES",
+                  "-CMP": "NO"
+                },
+                "address": "172.50.23.61"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vip-sharepoint-default-443",
+          "type": "lb",
+          "protocol": "HTTP",
+          "ipAddress": "0.0.0.0",
+          "port": "0",
+          "opts": {
+            "-persistenceType": "SOURCEIP",
+            "-timeout": "60",
+            "-redirectURL": "https://busyness.sharepoint.com/teams/rockstars",
+            "-cltTimeout": "180",
+            "-comment": "QLAT"
+          },
+          "bindings": {
+            "service": [
+              {
+                "name": "astroprd02-8443",
+                "protocol": "SSL",
+                "port": "8443",
+                "server": "astroprd02",
+                "opts": {
+                  "-gslb": "NONE",
+                  "-maxClient": "0",
+                  "-maxReq": "0",
+                  "-cip": "ENABLED X-Forwarded-For",
+                  "-usip": "NO",
+                  "-useproxyport": "YES",
+                  "-sp": "OFF",
+                  "-cltTimeout": "360",
+                  "-svrTimeout": "360",
+                  "-CKA": "YES",
+                  "-TCPB": "YES",
+                  "-CMP": "NO"
+                },
+                "address": "172.50.23.40"
+              },
+              {
+                "name": "astroprd03-8443",
+                "protocol": "SSL",
+                "port": "8443",
+                "server": "astroprd03",
+                "opts": {
+                  "-gslb": "NONE",
+                  "-maxClient": "0",
+                  "-maxReq": "0",
+                  "-cip": "ENABLED X-Forwarded-For",
+                  "-usip": "NO",
+                  "-useproxyport": "YES",
+                  "-sp": "OFF",
+                  "-cltTimeout": "360",
+                  "-svrTimeout": "360",
+                  "-CKA": "YES",
+                  "-TCPB": "YES",
+                  "-CMP": "NO"
+                },
+                "address": "172.50.23.52"
+              },
+              {
+                "name": "astroprd04-8443",
+                "protocol": "SSL",
+                "port": "8443",
+                "server": "prodserv10",
+                "opts": {
+                  "-gslb": "NONE",
+                  "-maxClient": "0",
+                  "-maxReq": "0",
+                  "-cip": "ENABLED X-Forwarded-For",
+                  "-usip": "NO",
+                  "-useproxyport": "YES",
+                  "-sp": "OFF",
+                  "-cltTimeout": "180",
+                  "-svrTimeout": "180",
+                  "-CKA": "YES",
+                  "-TCPB": "YES",
+                  "-CMP": "NO"
+                },
+                "address": "172.50.23.60"
+              },
+              {
+                "name": "astroprd05-8443",
+                "protocol": "SSL",
+                "port": "8443",
+                "server": "prodserv11",
+                "opts": {
+                  "-gslb": "NONE",
+                  "-maxClient": "0",
+                  "-maxReq": "0",
+                  "-cip": "ENABLED X-Forwarded-For",
+                  "-usip": "NO",
+                  "-useproxyport": "YES",
+                  "-sp": "OFF",
+                  "-cltTimeout": "180",
+                  "-svrTimeout": "180",
+                  "-CKA": "YES",
+                  "-TCPB": "YES",
+                  "-CMP": "NO"
+                },
+                "address": "172.50.23.61"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "nv-app-443",
+      "protocol": "SSL",
+      "ipAddress": "20.15.3.125",
+      "type": "cs",
+      "port": "443",
+      "lines": [
+        "add cs policy nv-app-8080 -rule \"HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"QUAL\\\") || HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"backdoor\\\") || HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"ANYQHO\\\") || HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"F150\\\")\"",
+        "add cs policy nv-app-8110 -rule \"HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"BIRD\\\")|| HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"GFX\\\")\"",
+        "add cs policy nv-app-8120 -rule \"HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"CAT1\\\")|| HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"DOG\\\")|| HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"PORCH\\\") || HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"DONUT\\\")\"",
+        "add cs policy nv-app-8130 -rule \"HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"DING\\\")|| HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"DEMO\\\")|| HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"TURBO\\\") || HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"IO\\\")\"",
+        "add cs policy nv-app-8140 -rule \"HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"RFID\\\")|| HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"CYT\\\")|| HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"TIRE\\\")\"",
+        "add cs policy nv-app-8150 -rule \"HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"MNT\\\")|| HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"YE\\\")|| HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"BUMPER\\\") || HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"ABC\\\")\"",
+        "add cs vserver nv-app-443 SSL 20.15.3.125 443 -cltTimeout 180 -persistenceType NONE -devno 143491072",
+        "add lb vserver nv-app-cs-8080-443 SSL 0.0.0.0 0 -persistenceType NONE -cltTimeout 180 -devno 137199616",
+        "add lb vserver nv-app-cs-8110-443 SSL 0.0.0.0 0 -persistenceType NONE -cltTimeout 180 -devno 137232384",
+        "add lb vserver nv-app-cs-8120-443 SSL 0.0.0.0 0 -persistenceType NONE -cltTimeout 180 -devno 137265152",
+        "add lb vserver nv-app-cs-8130-443 SSL 0.0.0.0 0 -persistenceType NONE -cltTimeout 180 -devno 137297920",
+        "add lb vserver nv-app-cs-8140-443 SSL 0.0.0.0 0 -persistenceType NONE -cltTimeout 180 -devno 137330688",
+        "add lb vserver nv-app-cs-8150-443 SSL 0.0.0.0 0 -persistenceType NONE -cltTimeout 180 -devno 137363456",
+        "add rewrite policy nv_dhw_rewrite \"HTTP.REQ.URL.PATH.CONTAINS(\\\"/BEETLE/\\\")\" nv_dhw_rewrite_action",
+        "add ssl certKey nv_cert.cer -cert \"/nsconfig/ssl/nv_cert.cer\" -key \"/nsconfig/ssl/nv-app-Jun202013.key\" -expiryMonitor DISABLED",
+        "bind cs vserver nv-app-443 -policyName nv-app-8080 -targetLBVserver nv-app-cs-8080-443 -priority 50 -devno 34635",
+        "bind cs vserver nv-app-443 -policyName nv-app-8110 -targetLBVserver nv-app-cs-8110-443 -priority 60 -devno 34635",
+        "bind cs vserver nv-app-443 -policyName nv-app-8120 -targetLBVserver nv-app-cs-8120-443 -priority 70 -devno 34635",
+        "bind cs vserver nv-app-443 -policyName nv-app-8130 -targetLBVserver nv-app-cs-8130-443 -priority 80 -devno 34635",
+        "bind cs vserver nv-app-443 -policyName nv-app-8140 -targetLBVserver nv-app-cs-8140-443 -priority 90 -devno 34635",
+        "bind cs vserver nv-app-443 -policyName nv-app-8150 -targetLBVserver nv-app-cs-8150-443 -priority 100 -devno 34635",
+        "bind lb vserver nv-app-cs-8120-443 -policyName nv_dhw_rewrite -priority 100 -gotoPriorityExpression END -type REQUEST",
+        "bind ssl vserver nv-app-443 -certkeyName nv_cert.cer",
+        "bind ssl vserver nv-app-443 -cipherName ITNET",
+        "bind ssl vserver nv-app-443 -eccCurveName P_224",
+        "bind ssl vserver nv-app-443 -eccCurveName P_256",
+        "bind ssl vserver nv-app-443 -eccCurveName P_384",
+        "bind ssl vserver nv-app-443 -eccCurveName P_521"
+      ],
+      "opts": {
+        "-cltTimeout": "180",
+        "-persistenceType": "NONE"
+      },
+      "bindings": {
+        "-lbvserver": [],
+        "-policyName": [
+          {
+            "-policyName": "nv-app-8080",
+            "-targetLBVserver": "nv-app-cs-8080-443",
+            "-priority": "50"
+          },
+          {
+            "-policyName": "nv-app-8110",
+            "-targetLBVserver": "nv-app-cs-8110-443",
+            "-priority": "60"
+          },
+          {
+            "-policyName": "nv-app-8120",
+            "-targetLBVserver": "nv-app-cs-8120-443",
+            "-priority": "70"
+          },
+          {
+            "-policyName": "nv-app-8130",
+            "-targetLBVserver": "nv-app-cs-8130-443",
+            "-priority": "80"
+          },
+          {
+            "-policyName": "nv-app-8140",
+            "-targetLBVserver": "nv-app-cs-8140-443",
+            "-priority": "90"
+          },
+          {
+            "-policyName": "nv-app-8150",
+            "-targetLBVserver": "nv-app-cs-8150-443",
+            "-priority": "100"
+          }
+        ],
+        "certs": [
+          {
+            "-cipherName": "ITNET",
+            "-cert": "/nsconfig/ssl/nv_cert.cer",
+            "-key": "/nsconfig/ssl/nv-app-Jun202013.key",
+            "-expiryMonitor": "DISABLED",
+            "-certkeyName": "nv_cert.cer",
+            "-eccCurveName": [
+              "P_256",
+              "P_384",
+              "P_224",
+              "P_521"
+            ]
+          }
+        ]
+      },
+      "csPolicies": [
+        {
+          "name": "nv-app-8080",
+          "-rule": "HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"QUAL\\\") || HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"backdoor\\\") || HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"ANYQHO\\\") || HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"F150\\\")"
+        },
+        {
+          "name": "nv-app-8110",
+          "-rule": "HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"BIRD\\\")|| HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"GFX\\\")"
+        },
+        {
+          "name": "nv-app-8120",
+          "-rule": "HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"CAT1\\\")|| HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"DOG\\\")|| HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"PORCH\\\") || HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"DONUT\\\")"
+        },
+        {
+          "name": "nv-app-8130",
+          "-rule": "HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"DING\\\")|| HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"DEMO\\\")|| HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"TURBO\\\") || HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"IO\\\")"
+        },
+        {
+          "name": "nv-app-8140",
+          "-rule": "HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"RFID\\\")|| HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"CYT\\\")|| HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"TIRE\\\")"
+        },
+        {
+          "name": "nv-app-8150",
+          "-rule": "HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"MNT\\\")|| HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"YE\\\")|| HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"BUMPER\\\") || HTTP.REQ.URL.PATH_AND_QUERY.CONTAINS(\\\"ABC\\\")"
+        }
+      ],
+      "apps": [
+        {
+          "name": "nv-app-cs-8080-443",
+          "type": "lb",
+          "protocol": "SSL",
+          "ipAddress": "0.0.0.0",
+          "port": "0",
+          "opts": {
+            "-persistenceType": "NONE",
+            "-cltTimeout": "180"
+          },
+          "bindings": {
+            "certs": [
+              {
+                "-cipherName": "ITNET",
+                "-cert": "/nsconfig/ssl/nv_cert.cer",
+                "-key": "/nsconfig/ssl/nv-app-Jun202013.key",
+                "-expiryMonitor": "DISABLED",
+                "-certkeyName": "nv_cert.cer",
+                "-eccCurveName": [
+                  "P_224",
+                  "P_256",
+                  "P_384",
+                  "P_521"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "nv-app-cs-8110-443",
+          "type": "lb",
+          "protocol": "SSL",
+          "ipAddress": "0.0.0.0",
+          "port": "0",
+          "opts": {
+            "-persistenceType": "NONE",
+            "-cltTimeout": "180"
+          },
+          "bindings": {
+            "certs": [
+              {
+                "-cipherName": "ITNET",
+                "-cert": "/nsconfig/ssl/nv_cert.cer",
+                "-key": "/nsconfig/ssl/nv-app-Jun202013.key",
+                "-expiryMonitor": "DISABLED",
+                "-certkeyName": "nv_cert.cer",
+                "-eccCurveName": [
+                  "P_224",
+                  "P_256",
+                  "P_384",
+                  "P_521"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "nv-app-cs-8120-443",
+          "type": "lb",
+          "protocol": "SSL",
+          "ipAddress": "0.0.0.0",
+          "port": "0",
+          "opts": {
+            "-persistenceType": "NONE",
+            "-cltTimeout": "180"
+          },
+          "bindings": {
+            "-policyName": [
+              {
+                "-policyName": "nv_dhw_rewrite",
+                "-priority": "100",
+                "-gotoPriorityExpression": "END",
+                "-type": "REQUEST"
+              }
+            ],
+            "certs": [
+              {
+                "-cipherName": "ITNET",
+                "-cert": "/nsconfig/ssl/nv_cert.cer",
+                "-key": "/nsconfig/ssl/nv-app-Jun202013.key",
+                "-expiryMonitor": "DISABLED",
+                "-certkeyName": "nv_cert.cer",
+                "-eccCurveName": [
+                  "P_256",
+                  "P_384",
+                  "P_224",
+                  "P_521"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "nv-app-cs-8130-443",
+          "type": "lb",
+          "protocol": "SSL",
+          "ipAddress": "0.0.0.0",
+          "port": "0",
+          "opts": {
+            "-persistenceType": "NONE",
+            "-cltTimeout": "180"
+          },
+          "bindings": {
+            "certs": [
+              {
+                "-cipherName": "ITNET",
+                "-cert": "/nsconfig/ssl/nv_cert.cer",
+                "-key": "/nsconfig/ssl/nv-app-Jun202013.key",
+                "-expiryMonitor": "DISABLED",
+                "-certkeyName": "nv_cert.cer",
+                "-eccCurveName": [
+                  "P_256",
+                  "P_384",
+                  "P_224",
+                  "P_521"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "nv-app-cs-8140-443",
+          "type": "lb",
+          "protocol": "SSL",
+          "ipAddress": "0.0.0.0",
+          "port": "0",
+          "opts": {
+            "-persistenceType": "NONE",
+            "-cltTimeout": "180"
+          },
+          "bindings": {
+            "certs": [
+              {
+                "-cipherName": "ITNET",
+                "-cert": "/nsconfig/ssl/nv_cert.cer",
+                "-key": "/nsconfig/ssl/nv-app-Jun202013.key",
+                "-expiryMonitor": "DISABLED",
+                "-certkeyName": "nv_cert.cer",
+                "-eccCurveName": [
+                  "P_256",
+                  "P_384",
+                  "P_224",
+                  "P_521"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "nv-app-cs-8150-443",
+          "type": "lb",
+          "protocol": "SSL",
+          "ipAddress": "0.0.0.0",
+          "port": "0",
+          "opts": {
+            "-persistenceType": "NONE",
+            "-cltTimeout": "180"
+          },
+          "bindings": {
+            "certs": [
+              {
+                "-cipherName": "ITNET",
+                "-cert": "/nsconfig/ssl/nv_cert.cer",
+                "-key": "/nsconfig/ssl/nv-app-Jun202013.key",
+                "-expiryMonitor": "DISABLED",
+                "-certkeyName": "nv_cert.cer",
+                "-eccCurveName": [
+                  "P_256",
+                  "P_384",
+                  "P_224",
+                  "P_521"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "vip-sharepoint-redirect-80",
+      "protocol": "HTTP",
+      "ipAddress": "0.0.0.0",
+      "type": "lb",
+      "port": "0",
+      "lines": [
+        "add lb vserver vip-sharepoint-redirect-80 HTTP 0.0.0.0 0 -persistenceType SOURCEIP -timeout 60 -cltTimeout 180 -comment QLAT -devno 138543104",
+        "add server prodserv11 172.50.23.61 -devno 25233",
+        "add service astroprd05-8080 prodserv11 HTTP 8080 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 360 -svrTimeout 360 -CKA YES -TCPB YES -CMP NO -devno 111083520",
+        "bind lb vserver vip-sharepoint-redirect-80 astroprd05-8080"
+      ],
+      "opts": {
+        "-persistenceType": "SOURCEIP",
+        "-timeout": "60",
+        "-cltTimeout": "180",
+        "-comment": "QLAT"
+      },
+      "bindings": {
+        "service": [
+          {
+            "name": "astroprd05-8080",
+            "protocol": "HTTP",
+            "port": "8080",
+            "server": "prodserv11",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "NO",
+              "-useproxyport": "YES",
+              "-sp": "OFF",
+              "-cltTimeout": "360",
+              "-svrTimeout": "360",
+              "-CKA": "YES",
+              "-TCPB": "YES",
+              "-CMP": "NO"
+            },
+            "address": "172.50.23.61"
+          }
+        ]
+      }
+    },
+    {
+      "name": "vip-sharepoint-default-80",
+      "protocol": "HTTP",
+      "ipAddress": "0.0.0.0",
+      "type": "lb",
+      "port": "0",
+      "lines": [
+        "add lb vserver vip-sharepoint-default-80 HTTP 0.0.0.0 0 -persistenceType SOURCEIP -timeout 60 -redirectURL \"https://busyness.sharepoint.com/teams/rockstars\" -cltTimeout 180 -comment QLAT -devno 138575872"
+      ],
+      "opts": {
+        "-persistenceType": "SOURCEIP",
+        "-timeout": "60",
+        "-redirectURL": "https://busyness.sharepoint.com/teams/rockstars",
+        "-cltTimeout": "180",
+        "-comment": "QLAT"
+      }
+    },
+    {
+      "name": "vip-sharepoint-default-443",
+      "protocol": "HTTP",
+      "ipAddress": "0.0.0.0",
+      "type": "lb",
+      "port": "0",
+      "lines": [
+        "add lb vserver vip-sharepoint-default-443 HTTP 0.0.0.0 0 -persistenceType SOURCEIP -timeout 60 -redirectURL \"https://busyness.sharepoint.com/teams/rockstars\" -cltTimeout 180 -comment QLAT -devno 138641408",
+        "add server astroprd02 172.50.23.40 -devno 24502",
+        "add server astroprd03 172.50.23.52 -devno 24546",
+        "add server prodserv10 172.50.23.60 -devno 24967",
+        "add server prodserv11 172.50.23.61 -devno 25233",
+        "add service astroprd02-8443 astroprd02 SSL 8443 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 360 -svrTimeout 360 -CKA YES -TCPB YES -CMP NO -devno 110198784",
+        "add service astroprd03-8443 astroprd03 SSL 8443 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 360 -svrTimeout 360 -CKA YES -TCPB YES -CMP NO -devno 110231552",
+        "add service astroprd04-8443 prodserv10 SSL 8443 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 180 -svrTimeout 180 -CKA YES -TCPB YES -CMP NO -devno 110985216",
+        "add service astroprd05-8443 prodserv11 SSL 8443 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 180 -svrTimeout 180 -CKA YES -TCPB YES -CMP NO -devno 111017984",
+        "bind lb vserver vip-sharepoint-default-443 astroprd02-8443",
+        "bind lb vserver vip-sharepoint-default-443 astroprd03-8443",
+        "bind lb vserver vip-sharepoint-default-443 astroprd04-8443",
+        "bind lb vserver vip-sharepoint-default-443 astroprd05-8443"
+      ],
+      "opts": {
+        "-persistenceType": "SOURCEIP",
+        "-timeout": "60",
+        "-redirectURL": "https://busyness.sharepoint.com/teams/rockstars",
+        "-cltTimeout": "180",
+        "-comment": "QLAT"
+      },
+      "bindings": {
+        "service": [
+          {
+            "name": "astroprd02-8443",
+            "protocol": "SSL",
+            "port": "8443",
+            "server": "astroprd02",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "NO",
+              "-useproxyport": "YES",
+              "-sp": "OFF",
+              "-cltTimeout": "360",
+              "-svrTimeout": "360",
+              "-CKA": "YES",
+              "-TCPB": "YES",
+              "-CMP": "NO"
+            },
+            "address": "172.50.23.40"
+          },
+          {
+            "name": "astroprd03-8443",
+            "protocol": "SSL",
+            "port": "8443",
+            "server": "astroprd03",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "NO",
+              "-useproxyport": "YES",
+              "-sp": "OFF",
+              "-cltTimeout": "360",
+              "-svrTimeout": "360",
+              "-CKA": "YES",
+              "-TCPB": "YES",
+              "-CMP": "NO"
+            },
+            "address": "172.50.23.52"
+          },
+          {
+            "name": "astroprd04-8443",
+            "protocol": "SSL",
+            "port": "8443",
+            "server": "prodserv10",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "NO",
+              "-useproxyport": "YES",
+              "-sp": "OFF",
+              "-cltTimeout": "180",
+              "-svrTimeout": "180",
+              "-CKA": "YES",
+              "-TCPB": "YES",
+              "-CMP": "NO"
+            },
+            "address": "172.50.23.60"
+          },
+          {
+            "name": "astroprd05-8443",
+            "protocol": "SSL",
+            "port": "8443",
+            "server": "prodserv11",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "NO",
+              "-useproxyport": "YES",
+              "-sp": "OFF",
+              "-cltTimeout": "180",
+              "-svrTimeout": "180",
+              "-CKA": "YES",
+              "-TCPB": "YES",
+              "-CMP": "NO"
+            },
+            "address": "172.50.23.61"
+          }
+        ]
+      }
+    },
+    {
+      "name": "vip-sharepoint-redirect-443",
+      "protocol": "HTTP",
+      "ipAddress": "0.0.0.0",
+      "type": "lb",
+      "port": "0",
+      "lines": [
+        "add lb vserver vip-sharepoint-redirect-443 HTTP 0.0.0.0 0 -persistenceType SOURCEIP -timeout 60 -cltTimeout 180 -comment QLAT -devno 138608640",
+        "add server prodserv11 172.50.23.61 -devno 25233",
+        "add service astroprd05-8443 prodserv11 SSL 8443 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 180 -svrTimeout 180 -CKA YES -TCPB YES -CMP NO -devno 111017984",
+        "bind lb vserver vip-sharepoint-redirect-443 astroprd05-8443"
+      ],
+      "opts": {
+        "-persistenceType": "SOURCEIP",
+        "-timeout": "60",
+        "-cltTimeout": "180",
+        "-comment": "QLAT"
+      },
+      "bindings": {
+        "service": [
+          {
+            "name": "astroprd05-8443",
+            "protocol": "SSL",
+            "port": "8443",
+            "server": "prodserv11",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "NO",
+              "-useproxyport": "YES",
+              "-sp": "OFF",
+              "-cltTimeout": "180",
+              "-svrTimeout": "180",
+              "-CKA": "YES",
+              "-TCPB": "YES",
+              "-CMP": "NO"
+            },
+            "address": "172.50.23.61"
+          }
+        ]
+      }
+    },
+    {
+      "name": "nv-app-cs-8080-443",
+      "protocol": "SSL",
+      "ipAddress": "0.0.0.0",
+      "type": "lb",
+      "port": "0",
+      "lines": [
+        "add lb vserver nv-app-cs-8080-443 SSL 0.0.0.0 0 -persistenceType NONE -cltTimeout 180 -devno 137199616",
+        "add ssl certKey nv_cert.cer -cert \"/nsconfig/ssl/nv_cert.cer\" -key \"/nsconfig/ssl/nv-app-Jun202013.key\" -expiryMonitor DISABLED",
+        "bind ssl vserver nv-app-cs-8080-443 -certkeyName nv_cert.cer",
+        "bind ssl vserver nv-app-cs-8080-443 -cipherName ITNET",
+        "bind ssl vserver nv-app-cs-8080-443 -eccCurveName P_224",
+        "bind ssl vserver nv-app-cs-8080-443 -eccCurveName P_256",
+        "bind ssl vserver nv-app-cs-8080-443 -eccCurveName P_384",
+        "bind ssl vserver nv-app-cs-8080-443 -eccCurveName P_521"
+      ],
+      "opts": {
+        "-persistenceType": "NONE",
+        "-cltTimeout": "180"
+      },
+      "bindings": {
+        "certs": [
+          {
+            "-cipherName": "ITNET",
+            "-cert": "/nsconfig/ssl/nv_cert.cer",
+            "-key": "/nsconfig/ssl/nv-app-Jun202013.key",
+            "-expiryMonitor": "DISABLED",
+            "-certkeyName": "nv_cert.cer",
+            "-eccCurveName": [
+              "P_224",
+              "P_256",
+              "P_384",
+              "P_521"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "nv-app-cs-8110-443",
+      "protocol": "SSL",
+      "ipAddress": "0.0.0.0",
+      "type": "lb",
+      "port": "0",
+      "lines": [
+        "add lb vserver nv-app-cs-8110-443 SSL 0.0.0.0 0 -persistenceType NONE -cltTimeout 180 -devno 137232384",
+        "add ssl certKey nv_cert.cer -cert \"/nsconfig/ssl/nv_cert.cer\" -key \"/nsconfig/ssl/nv-app-Jun202013.key\" -expiryMonitor DISABLED",
+        "bind ssl vserver nv-app-cs-8110-443 -certkeyName nv_cert.cer",
+        "bind ssl vserver nv-app-cs-8110-443 -cipherName ITNET",
+        "bind ssl vserver nv-app-cs-8110-443 -eccCurveName P_224",
+        "bind ssl vserver nv-app-cs-8110-443 -eccCurveName P_256",
+        "bind ssl vserver nv-app-cs-8110-443 -eccCurveName P_384",
+        "bind ssl vserver nv-app-cs-8110-443 -eccCurveName P_521"
+      ],
+      "opts": {
+        "-persistenceType": "NONE",
+        "-cltTimeout": "180"
+      },
+      "bindings": {
+        "certs": [
+          {
+            "-cipherName": "ITNET",
+            "-cert": "/nsconfig/ssl/nv_cert.cer",
+            "-key": "/nsconfig/ssl/nv-app-Jun202013.key",
+            "-expiryMonitor": "DISABLED",
+            "-certkeyName": "nv_cert.cer",
+            "-eccCurveName": [
+              "P_224",
+              "P_256",
+              "P_384",
+              "P_521"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "nv-app-cs-8120-443",
+      "protocol": "SSL",
+      "ipAddress": "0.0.0.0",
+      "type": "lb",
+      "port": "0",
+      "lines": [
+        "add lb vserver nv-app-cs-8120-443 SSL 0.0.0.0 0 -persistenceType NONE -cltTimeout 180 -devno 137265152",
+        "add rewrite policy nv_dhw_rewrite \"HTTP.REQ.URL.PATH.CONTAINS(\\\"/BEETLE/\\\")\" nv_dhw_rewrite_action",
+        "add ssl certKey nv_cert.cer -cert \"/nsconfig/ssl/nv_cert.cer\" -key \"/nsconfig/ssl/nv-app-Jun202013.key\" -expiryMonitor DISABLED",
+        "bind lb vserver nv-app-cs-8120-443 -policyName nv_dhw_rewrite -priority 100 -gotoPriorityExpression END -type REQUEST",
+        "bind ssl vserver nv-app-cs-8120-443 -certkeyName nv_cert.cer",
+        "bind ssl vserver nv-app-cs-8120-443 -cipherName ITNET",
+        "bind ssl vserver nv-app-cs-8120-443 -eccCurveName P_224",
+        "bind ssl vserver nv-app-cs-8120-443 -eccCurveName P_256",
+        "bind ssl vserver nv-app-cs-8120-443 -eccCurveName P_384",
+        "bind ssl vserver nv-app-cs-8120-443 -eccCurveName P_521"
+      ],
+      "opts": {
+        "-persistenceType": "NONE",
+        "-cltTimeout": "180"
+      },
+      "bindings": {
+        "-policyName": [
+          {
+            "-policyName": "nv_dhw_rewrite",
+            "-priority": "100",
+            "-gotoPriorityExpression": "END",
+            "-type": "REQUEST"
+          }
+        ],
+        "certs": [
+          {
+            "-cipherName": "ITNET",
+            "-cert": "/nsconfig/ssl/nv_cert.cer",
+            "-key": "/nsconfig/ssl/nv-app-Jun202013.key",
+            "-expiryMonitor": "DISABLED",
+            "-certkeyName": "nv_cert.cer",
+            "-eccCurveName": [
+              "P_256",
+              "P_384",
+              "P_224",
+              "P_521"
+            ]
+          }
+        ]
+      },
+      "apps": []
+    },
+    {
+      "name": "nv-app-cs-8130-443",
+      "protocol": "SSL",
+      "ipAddress": "0.0.0.0",
+      "type": "lb",
+      "port": "0",
+      "lines": [
+        "add lb vserver nv-app-cs-8130-443 SSL 0.0.0.0 0 -persistenceType NONE -cltTimeout 180 -devno 137297920",
+        "add ssl certKey nv_cert.cer -cert \"/nsconfig/ssl/nv_cert.cer\" -key \"/nsconfig/ssl/nv-app-Jun202013.key\" -expiryMonitor DISABLED",
+        "bind ssl vserver nv-app-cs-8130-443 -certkeyName nv_cert.cer",
+        "bind ssl vserver nv-app-cs-8130-443 -cipherName ITNET",
+        "bind ssl vserver nv-app-cs-8130-443 -eccCurveName P_224",
+        "bind ssl vserver nv-app-cs-8130-443 -eccCurveName P_256",
+        "bind ssl vserver nv-app-cs-8130-443 -eccCurveName P_384",
+        "bind ssl vserver nv-app-cs-8130-443 -eccCurveName P_521"
+      ],
+      "opts": {
+        "-persistenceType": "NONE",
+        "-cltTimeout": "180"
+      },
+      "bindings": {
+        "certs": [
+          {
+            "-cipherName": "ITNET",
+            "-cert": "/nsconfig/ssl/nv_cert.cer",
+            "-key": "/nsconfig/ssl/nv-app-Jun202013.key",
+            "-expiryMonitor": "DISABLED",
+            "-certkeyName": "nv_cert.cer",
+            "-eccCurveName": [
+              "P_256",
+              "P_384",
+              "P_224",
+              "P_521"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "nv-app-cs-8140-443",
+      "protocol": "SSL",
+      "ipAddress": "0.0.0.0",
+      "type": "lb",
+      "port": "0",
+      "lines": [
+        "add lb vserver nv-app-cs-8140-443 SSL 0.0.0.0 0 -persistenceType NONE -cltTimeout 180 -devno 137330688",
+        "add ssl certKey nv_cert.cer -cert \"/nsconfig/ssl/nv_cert.cer\" -key \"/nsconfig/ssl/nv-app-Jun202013.key\" -expiryMonitor DISABLED",
+        "bind ssl vserver nv-app-cs-8140-443 -certkeyName nv_cert.cer",
+        "bind ssl vserver nv-app-cs-8140-443 -cipherName ITNET",
+        "bind ssl vserver nv-app-cs-8140-443 -eccCurveName P_224",
+        "bind ssl vserver nv-app-cs-8140-443 -eccCurveName P_256",
+        "bind ssl vserver nv-app-cs-8140-443 -eccCurveName P_384",
+        "bind ssl vserver nv-app-cs-8140-443 -eccCurveName P_521"
+      ],
+      "opts": {
+        "-persistenceType": "NONE",
+        "-cltTimeout": "180"
+      },
+      "bindings": {
+        "certs": [
+          {
+            "-cipherName": "ITNET",
+            "-cert": "/nsconfig/ssl/nv_cert.cer",
+            "-key": "/nsconfig/ssl/nv-app-Jun202013.key",
+            "-expiryMonitor": "DISABLED",
+            "-certkeyName": "nv_cert.cer",
+            "-eccCurveName": [
+              "P_256",
+              "P_384",
+              "P_224",
+              "P_521"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "nv-app-cs-8150-443",
+      "protocol": "SSL",
+      "ipAddress": "0.0.0.0",
+      "type": "lb",
+      "port": "0",
+      "lines": [
+        "add lb vserver nv-app-cs-8150-443 SSL 0.0.0.0 0 -persistenceType NONE -cltTimeout 180 -devno 137363456",
+        "add ssl certKey nv_cert.cer -cert \"/nsconfig/ssl/nv_cert.cer\" -key \"/nsconfig/ssl/nv-app-Jun202013.key\" -expiryMonitor DISABLED",
+        "bind ssl vserver nv-app-cs-8150-443 -certkeyName nv_cert.cer",
+        "bind ssl vserver nv-app-cs-8150-443 -cipherName ITNET",
+        "bind ssl vserver nv-app-cs-8150-443 -eccCurveName P_224",
+        "bind ssl vserver nv-app-cs-8150-443 -eccCurveName P_256",
+        "bind ssl vserver nv-app-cs-8150-443 -eccCurveName P_384",
+        "bind ssl vserver nv-app-cs-8150-443 -eccCurveName P_521"
+      ],
+      "opts": {
+        "-persistenceType": "NONE",
+        "-cltTimeout": "180"
+      },
+      "bindings": {
+        "certs": [
+          {
+            "-cipherName": "ITNET",
+            "-cert": "/nsconfig/ssl/nv_cert.cer",
+            "-key": "/nsconfig/ssl/nv-app-Jun202013.key",
+            "-expiryMonitor": "DISABLED",
+            "-certkeyName": "nv_cert.cer",
+            "-eccCurveName": [
+              "P_256",
+              "P_384",
+              "P_224",
+              "P_521"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "syslog-splunk-13514-514",
+      "protocol": "UDP",
+      "ipAddress": "20.15.3.116",
+      "type": "lb",
+      "port": "514",
+      "lines": [
+        "add lb vserver syslog-splunk-13514-514 UDP 20.15.3.116 514 -persistenceType NONE -timeout 60 -lbMethod ROUNDROBIN -sessionless ENABLED -cltTimeout 3600 -comment esyslog_vips -devno 139722752",
+        "add server splunk08 172.50.24.100 -devno 25359",
+        "add server splunk09 172.50.24.110 -devno 25360",
+        "add server splunk10 172.50.24.88 -devno 25363",
+        "add server splunk11 172.50.24.89 -devno 25364",
+        "add service splunk08-13514 splunk08 UDP 13514 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip YES -useproxyport NO -sp OFF -cltTimeout 3600 -svrTimeout 3600 -CKA NO -TCPB NO -CMP NO -accessDown YES -devno 611254272",
+        "add service splunk09-13514 splunk09 UDP 13514 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip YES -useproxyport NO -sp OFF -cltTimeout 3600 -svrTimeout 3600 -CKA NO -TCPB NO -CMP NO -accessDown YES -devno 611319808",
+        "add service splunk10-13514 splunk10 UDP 13514 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip YES -useproxyport NO -sp OFF -cltTimeout 3600 -svrTimeout 3600 -CKA NO -TCPB NO -CMP NO -accessDown YES -devno 611123200",
+        "add service splunk11-13514 splunk11 UDP 13514 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip YES -useproxyport NO -sp OFF -cltTimeout 3600 -svrTimeout 3600 -CKA NO -TCPB NO -CMP NO -accessDown YES -devno 611188736",
+        "bind lb vserver syslog-splunk-13514-514 splunk08-13514",
+        "bind lb vserver syslog-splunk-13514-514 splunk09-13514",
+        "bind lb vserver syslog-splunk-13514-514 splunk10-13514",
+        "bind lb vserver syslog-splunk-13514-514 splunk11-13514"
+      ],
+      "opts": {
+        "-persistenceType": "NONE",
+        "-timeout": "60",
+        "-lbMethod": "ROUNDROBIN",
+        "-sessionless": "ENABLED",
+        "-cltTimeout": "3600",
+        "-comment": "esyslog_vips"
+      },
+      "bindings": {
+        "service": [
+          {
+            "name": "splunk10-13514",
+            "protocol": "UDP",
+            "port": "13514",
+            "server": "splunk10",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "YES",
+              "-useproxyport": "NO",
+              "-sp": "OFF",
+              "-cltTimeout": "3600",
+              "-svrTimeout": "3600",
+              "-CKA": "NO",
+              "-TCPB": "NO",
+              "-CMP": "NO",
+              "-accessDown": "YES"
+            },
+            "address": "172.50.24.88"
+          },
+          {
+            "name": "splunk11-13514",
+            "protocol": "UDP",
+            "port": "13514",
+            "server": "splunk11",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "YES",
+              "-useproxyport": "NO",
+              "-sp": "OFF",
+              "-cltTimeout": "3600",
+              "-svrTimeout": "3600",
+              "-CKA": "NO",
+              "-TCPB": "NO",
+              "-CMP": "NO",
+              "-accessDown": "YES"
+            },
+            "address": "172.50.24.89"
+          },
+          {
+            "name": "splunk08-13514",
+            "protocol": "UDP",
+            "port": "13514",
+            "server": "splunk08",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "YES",
+              "-useproxyport": "NO",
+              "-sp": "OFF",
+              "-cltTimeout": "3600",
+              "-svrTimeout": "3600",
+              "-CKA": "NO",
+              "-TCPB": "NO",
+              "-CMP": "NO",
+              "-accessDown": "YES"
+            },
+            "address": "172.50.24.100"
+          },
+          {
+            "name": "splunk09-13514",
+            "protocol": "UDP",
+            "port": "13514",
+            "server": "splunk09",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "YES",
+              "-useproxyport": "NO",
+              "-sp": "OFF",
+              "-cltTimeout": "3600",
+              "-svrTimeout": "3600",
+              "-CKA": "NO",
+              "-TCPB": "NO",
+              "-CMP": "NO",
+              "-accessDown": "YES"
+            },
+            "address": "172.50.24.110"
+          }
+        ]
+      }
+    },
+    {
+      "name": "orionprd1123-443",
+      "protocol": "SSL",
+      "ipAddress": "20.15.3.19",
+      "type": "lb",
+      "port": "443",
+      "lines": [
+        "add lb vserver orionprd1123-443 SSL 20.15.3.19 443 -persistenceType SOURCEIP -timeout 60 -redirectURL \"https://maintenance.busyness.com/oops/backup.html\" -cltTimeout 180 -comment PSBI -devno 137527296",
+        "add server orionprd1 172.30.24.53 -devno 25191",
+        "add server orionprd2 172.30.24.54 -devno 25192",
+        "add service orionprd1-19000 orionprd1 HTTP 19000 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 180 -svrTimeout 180 -CKA YES -TCPB YES -CMP NO -accessDown YES -devno 108724224",
+        "add service orionprd2-19000 orionprd2 HTTP 19000 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 180 -svrTimeout 180 -CKA YES -TCPB YES -CMP NO -accessDown YES -devno 108756992",
+        "add ssl certKey orionprd1123.cer -cert orionprd95456.cer -key \"/nsconfig/ssl/orionprd1123.key\" -expiryMonitor DISABLED",
+        "bind lb vserver orionprd1123-443 orionprd1-19000",
+        "bind lb vserver orionprd1123-443 orionprd2-19000",
+        "bind ssl vserver orionprd1123-443 -certkeyName orionprd1123.cer",
+        "bind ssl vserver orionprd1123-443 -cipherName ITNET",
+        "bind ssl vserver orionprd1123-443 -eccCurveName P_224",
+        "bind ssl vserver orionprd1123-443 -eccCurveName P_256",
+        "bind ssl vserver orionprd1123-443 -eccCurveName P_384",
+        "bind ssl vserver orionprd1123-443 -eccCurveName P_521"
+      ],
+      "opts": {
+        "-persistenceType": "SOURCEIP",
+        "-timeout": "60",
+        "-redirectURL": "https://maintenance.busyness.com/oops/backup.html",
+        "-cltTimeout": "180",
+        "-comment": "PSBI"
+      },
+      "bindings": {
+        "service": [
+          {
+            "name": "orionprd1-19000",
+            "protocol": "HTTP",
+            "port": "19000",
+            "server": "orionprd1",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "NO",
+              "-useproxyport": "YES",
+              "-sp": "OFF",
+              "-cltTimeout": "180",
+              "-svrTimeout": "180",
+              "-CKA": "YES",
+              "-TCPB": "YES",
+              "-CMP": "NO",
+              "-accessDown": "YES"
+            },
+            "address": "172.30.24.53"
+          },
+          {
+            "name": "orionprd2-19000",
+            "protocol": "HTTP",
+            "port": "19000",
+            "server": "orionprd2",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "NO",
+              "-useproxyport": "YES",
+              "-sp": "OFF",
+              "-cltTimeout": "180",
+              "-svrTimeout": "180",
+              "-CKA": "YES",
+              "-TCPB": "YES",
+              "-CMP": "NO",
+              "-accessDown": "YES"
+            },
+            "address": "172.30.24.54"
+          }
+        ],
+        "certs": [
+          {
+            "-cipherName": "ITNET",
+            "-cert": "orionprd95456.cer",
+            "-key": "/nsconfig/ssl/orionprd1123.key",
+            "-expiryMonitor": "DISABLED",
+            "-certkeyName": "orionprd1123.cer",
+            "-eccCurveName": [
+              "P_256",
+              "P_384",
+              "P_224",
+              "P_521"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "ormdev-443",
+      "protocol": "SSL",
+      "ipAddress": "10.45.142.101",
+      "type": "lb",
+      "port": "443",
+      "lines": [
+        "add lb vserver ormdev-443 SSL 10.45.142.101 443 -persistenceType NONE -redirectURL \"https://maintenance.busyness.com/oops/backup.html\" -cltTimeout 180 -devno 132841472",
+        "add server oriondev7 172.30.36.88 -devno 24133",
+        "add service oriondev7-80 oriondev7 HTTP 80 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip YES -useproxyport YES -sp OFF -cltTimeout 180 -svrTimeout 180 -CKA NO -TCPB NO -CMP NO -accessDown YES -devno 100728832",
+        "add ssl certKey ormdev.cer -cert ormdev030923103444.cer -key \"/nsconfig/ssl/ormdev.key\"",
+        "bind lb vserver ormdev-443 oriondev7-80",
+        "bind ssl vserver ormdev-443 -certkeyName ormdev.cer",
+        "bind ssl vserver ormdev-443 -cipherName SSL3-DES-CBC3-SHA",
+        "bind ssl vserver ormdev-443 -cipherName SSL3-EDH-DSS-DES-CBC3-SHA",
+        "bind ssl vserver ormdev-443 -cipherName SSL3-EDH-RSA-DES-CBC3-SHA",
+        "bind ssl vserver ormdev-443 -cipherName SSL3-RC4-MD5",
+        "bind ssl vserver ormdev-443 -cipherName SSL3-RC4-SHA",
+        "bind ssl vserver ormdev-443 -cipherName TLS1-AES-128-CBC-SHA",
+        "bind ssl vserver ormdev-443 -cipherName TLS1-AES-256-CBC-SHA",
+        "bind ssl vserver ormdev-443 -cipherName TLS1-DHE-DSS-AES-128-CBC-SHA",
+        "bind ssl vserver ormdev-443 -cipherName TLS1-DHE-DSS-AES-256-CBC-SHA",
+        "bind ssl vserver ormdev-443 -cipherName TLS1-DHE-DSS-RC4-SHA",
+        "bind ssl vserver ormdev-443 -cipherName TLS1-DHE-RSA-AES-128-CBC-SHA",
+        "bind ssl vserver ormdev-443 -cipherName TLS1-DHE-RSA-AES-256-CBC-SHA",
+        "bind ssl vserver ormdev-443 -cipherName TLS1-ECDHE-RSA-AES128-SHA",
+        "bind ssl vserver ormdev-443 -cipherName TLS1-ECDHE-RSA-AES256-SHA",
+        "bind ssl vserver ormdev-443 -cipherName TLS1-ECDHE-RSA-DES-CBC3-SHA",
+        "bind ssl vserver ormdev-443 -cipherName TLS1-ECDHE-RSA-RC4-SHA",
+        "bind ssl vserver ormdev-443 -cipherName TLS1.2-AES-128-SHA256",
+        "bind ssl vserver ormdev-443 -cipherName TLS1.2-AES-256-SHA256",
+        "bind ssl vserver ormdev-443 -cipherName TLS1.2-AES128-GCM-SHA256",
+        "bind ssl vserver ormdev-443 -cipherName TLS1.2-AES256-GCM-SHA384",
+        "bind ssl vserver ormdev-443 -cipherName TLS1.2-DHE-RSA-AES-128-SHA256",
+        "bind ssl vserver ormdev-443 -cipherName TLS1.2-DHE-RSA-AES-256-SHA256",
+        "bind ssl vserver ormdev-443 -cipherName TLS1.2-DHE-RSA-AES128-GCM-SHA256",
+        "bind ssl vserver ormdev-443 -cipherName TLS1.2-DHE-RSA-AES256-GCM-SHA384",
+        "bind ssl vserver ormdev-443 -cipherName TLS1.2-ECDHE-RSA-AES-128-SHA256",
+        "bind ssl vserver ormdev-443 -cipherName TLS1.2-ECDHE-RSA-AES-256-SHA384",
+        "bind ssl vserver ormdev-443 -cipherName TLS1.2-ECDHE-RSA-AES128-GCM-SHA256",
+        "bind ssl vserver ormdev-443 -cipherName TLS1.2-ECDHE-RSA-AES256-GCM-SHA384",
+        "bind ssl vserver ormdev-443 -eccCurveName P_224",
+        "bind ssl vserver ormdev-443 -eccCurveName P_256",
+        "bind ssl vserver ormdev-443 -eccCurveName P_384",
+        "bind ssl vserver ormdev-443 -eccCurveName P_521"
+      ],
+      "opts": {
+        "-persistenceType": "NONE",
+        "-redirectURL": "https://maintenance.busyness.com/oops/backup.html",
+        "-cltTimeout": "180"
+      },
+      "bindings": {
+        "service": [
+          {
+            "name": "oriondev7-80",
+            "protocol": "HTTP",
+            "port": "80",
+            "server": "oriondev7",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "YES",
+              "-useproxyport": "YES",
+              "-sp": "OFF",
+              "-cltTimeout": "180",
+              "-svrTimeout": "180",
+              "-CKA": "NO",
+              "-TCPB": "NO",
+              "-CMP": "NO",
+              "-accessDown": "YES"
+            },
+            "address": "172.30.36.88"
+          }
+        ],
+        "certs": [
+          {
+            "-cipherName": "TLS1.2-DHE-RSA-AES-256-SHA256",
+            "-cert": "ormdev030923103444.cer",
+            "-key": "/nsconfig/ssl/ormdev.key",
+            "-certkeyName": "ormdev.cer",
+            "-eccCurveName": [
+              "P_256",
+              "P_384",
+              "P_224",
+              "P_521"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "tkb6prd-9402",
+      "protocol": "SSL",
+      "ipAddress": "10.45.250.39",
+      "type": "lb",
+      "port": "9402",
+      "lines": [
+        "add lb vserver tkb6prd-9402 SSL 10.45.250.39 9402 -persistenceType NONE -timeout 60 -state DISABLED -cltTimeout 360 -comment DI_tkb -devno 128942080",
+        "add server tkbgclb01 172.30.72.232 -devno 24533",
+        "add server tkbgclb02 172.30.72.237 -devno 24534",
+        "add service tkbgclb01-9402 tkbgclb01 SSL 9402 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip YES -useproxyport YES -sp OFF -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP NO -state DISABLED -downStateFlush DISABLED -devno 96174080",
+        "add service tkbgclb02-8402 tkbgclb02 SSL 8402 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip YES -useproxyport YES -sp OFF -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP NO -state DISABLED -downStateFlush DISABLED -devno 101122048",
+        "add service tkbgclb02-9402 tkbgclb02 SSL 9402 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip YES -useproxyport YES -sp OFF -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP NO -state DISABLED -downStateFlush DISABLED -devno 96206848",
+        "add ssl certKey tkb6prdDec172012.cer -cert \"/nsconfig/ssl/tkb6prd121515.cer\" -key \"/nsconfig/ssl/tkb6prdDec172012.key\" -expiryMonitor DISABLED",
+        "bind lb vserver tkb6prd-9402 tkbgclb01-9402",
+        "bind lb vserver tkb6prd-9402 tkbgclb02-8402",
+        "bind lb vserver tkb6prd-9402 tkbgclb02-9402",
+        "bind ssl vserver tkb6prd-9402 -certkeyName tkb6prdDec172012.cer",
+        "bind ssl vserver tkb6prd-9402 -cipherName ITNET",
+        "bind ssl vserver tkb6prd-9402 -eccCurveName P_224",
+        "bind ssl vserver tkb6prd-9402 -eccCurveName P_256",
+        "bind ssl vserver tkb6prd-9402 -eccCurveName P_384",
+        "bind ssl vserver tkb6prd-9402 -eccCurveName P_521"
+      ],
+      "opts": {
+        "-persistenceType": "NONE",
+        "-timeout": "60",
+        "-state": "DISABLED",
+        "-cltTimeout": "360",
+        "-comment": "DI_tkb"
+      },
+      "bindings": {
+        "service": [
+          {
+            "name": "tkbgclb01-9402",
+            "protocol": "SSL",
+            "port": "9402",
+            "server": "tkbgclb01",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "YES",
+              "-useproxyport": "YES",
+              "-sp": "OFF",
+              "-cltTimeout": "180",
+              "-svrTimeout": "360",
+              "-CKA": "NO",
+              "-TCPB": "NO",
+              "-CMP": "NO",
+              "-state": "DISABLED",
+              "-downStateFlush": "DISABLED"
+            },
+            "address": "172.30.72.232"
+          },
+          {
+            "name": "tkbgclb02-9402",
+            "protocol": "SSL",
+            "port": "9402",
+            "server": "tkbgclb02",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "YES",
+              "-useproxyport": "YES",
+              "-sp": "OFF",
+              "-cltTimeout": "180",
+              "-svrTimeout": "360",
+              "-CKA": "NO",
+              "-TCPB": "NO",
+              "-CMP": "NO",
+              "-state": "DISABLED",
+              "-downStateFlush": "DISABLED"
+            },
+            "address": "172.30.72.237"
+          },
+          {
+            "name": "tkbgclb02-8402",
+            "protocol": "SSL",
+            "port": "8402",
+            "server": "tkbgclb02",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "YES",
+              "-useproxyport": "YES",
+              "-sp": "OFF",
+              "-cltTimeout": "180",
+              "-svrTimeout": "360",
+              "-CKA": "NO",
+              "-TCPB": "NO",
+              "-CMP": "NO",
+              "-state": "DISABLED",
+              "-downStateFlush": "DISABLED"
+            },
+            "address": "172.30.72.237"
+          }
+        ],
+        "certs": [
+          {
+            "-cipherName": "ITNET",
+            "-cert": "/nsconfig/ssl/tkb6prd121515.cer",
+            "-key": "/nsconfig/ssl/tkb6prdDec172012.key",
+            "-expiryMonitor": "DISABLED",
+            "-certkeyName": "tkb6prdDec172012.cer",
+            "-eccCurveName": [
+              "P_256",
+              "P_384",
+              "P_224",
+              "P_521"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

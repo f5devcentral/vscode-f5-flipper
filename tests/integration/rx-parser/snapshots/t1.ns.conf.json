@@ -1,0 +1,981 @@
+{
+  "configFile": "t1.ns.conf",
+  "generatedAt": "2025-10-12T00:36:16.310Z",
+  "apps": [
+    {
+      "name": "app2_cs_vs",
+      "protocol": "HTTP",
+      "ipAddress": "192.168.86.143",
+      "type": "cs",
+      "port": "443",
+      "lines": [
+        "add cs action mycsaction -targetLBVserver https_offload_vs -comment \"Forwards requests to mylbvserver.\"",
+        "add cs policy policy-CS-4 -rule \"HTTP.REQ.HOSTNAME.EQ(\\\"app2.com\\\")\" -action mycsaction",
+        "add cs vserver app2_cs_vs HTTP 192.168.86.143 443 -cltTimeout 180 -persistenceType NONE",
+        "add lb monitor app1_http_mon HTTP -respCode 200 -httpRequest \"GET /index.html\" -LRTM DISABLED",
+        "add lb vserver https_offload_vs SSL 192.168.86.142 443 -persistenceType NONE -cltTimeout 180 -redirectFromPort 80 -httpsRedirectUrl \"https://192.168.86.142\"",
+        "add server 1.2.3.4 1.2.3.4",
+        "add server 1.2.3.5 1.2.3.5",
+        "add serviceGroup app1_http_sg HTTP -maxClient 0 -maxReq 0 -cip DISABLED -usip NO -useproxyport YES -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP NO",
+        "add ssl certKey app1_local -cert foo.crt -key foo.key",
+        "bind cs vserver app2_cs_vs -lbvserver https_offload_vs",
+        "bind cs vserver app2_cs_vs -policyName policy-CS-4 -priority 100",
+        "bind lb vserver https_offload_vs app1_http_sg",
+        "bind serviceGroup app1_http_sg -monitorName app1_http_mon",
+        "bind serviceGroup app1_http_sg 1.2.3.4 80",
+        "bind serviceGroup app1_http_sg 1.2.3.5 80"
+      ],
+      "opts": {
+        "-cltTimeout": "180",
+        "-persistenceType": "NONE"
+      },
+      "bindings": {
+        "-lbvserver": [
+          "https_offload_vs"
+        ],
+        "-policyName": [
+          {
+            "-policyName": "policy-CS-4",
+            "-priority": "100"
+          }
+        ]
+      },
+      "csPolicies": [
+        {
+          "name": "policy-CS-4",
+          "-rule": "HTTP.REQ.HOSTNAME.EQ(\\\"app2.com\\\")",
+          "-action": "mycsaction"
+        }
+      ],
+      "csPolicyActions": [
+        {
+          "-targetLBVserver": "https_offload_vs",
+          "-comment": "Forwards requests to mylbvserver."
+        }
+      ],
+      "apps": [
+        {
+          "name": "https_offload_vs",
+          "type": "lb",
+          "protocol": "SSL",
+          "ipAddress": "192.168.86.142",
+          "port": "443",
+          "opts": {
+            "-persistenceType": "NONE",
+            "-cltTimeout": "180",
+            "-redirectFromPort": "80",
+            "-httpsRedirectUrl": "https://192.168.86.142"
+          },
+          "bindings": {
+            "serviceGroup": [
+              {
+                "name": "app1_http_sg",
+                "protocol": "HTTP",
+                "-maxClient": "0",
+                "-maxReq": "0",
+                "-cip": "DISABLED",
+                "-usip": "NO",
+                "-useproxyport": "YES",
+                "-cltTimeout": "180",
+                "-svrTimeout": "360",
+                "-CKA": "NO",
+                "-TCPB": "NO",
+                "-CMP": "NO",
+                "servers": [
+                  {
+                    "name": "1.2.3.5",
+                    "port": "80",
+                    "address": "1.2.3.5"
+                  },
+                  {
+                    "name": "1.2.3.4",
+                    "port": "80",
+                    "address": "1.2.3.4"
+                  }
+                ],
+                "monitors": [
+                  {
+                    "name": "app1_http_mon",
+                    "protocol": "HTTP",
+                    "-respCode": "200",
+                    "-httpRequest": "GET /index.html",
+                    "-LRTM": "DISABLED"
+                  }
+                ]
+              }
+            ],
+            "certs": [
+              {
+                "-cipherName": "ECDHE",
+                "-cert": "foo.crt",
+                "-key": "foo.key",
+                "-certkeyName": "app1_local",
+                "-eccCurveName": [
+                  "P_256",
+                  "P_384",
+                  "P_224",
+                  "P_521"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "https_offload_vs",
+          "type": "lb",
+          "protocol": "SSL",
+          "ipAddress": "192.168.86.142",
+          "port": "443",
+          "opts": {
+            "-persistenceType": "NONE",
+            "-cltTimeout": "180",
+            "-redirectFromPort": "80",
+            "-httpsRedirectUrl": "https://192.168.86.142"
+          },
+          "bindings": {
+            "serviceGroup": [
+              {
+                "name": "app1_http_sg",
+                "protocol": "HTTP",
+                "-maxClient": "0",
+                "-maxReq": "0",
+                "-cip": "DISABLED",
+                "-usip": "NO",
+                "-useproxyport": "YES",
+                "-cltTimeout": "180",
+                "-svrTimeout": "360",
+                "-CKA": "NO",
+                "-TCPB": "NO",
+                "-CMP": "NO",
+                "servers": [
+                  {
+                    "name": "1.2.3.5",
+                    "port": "80",
+                    "address": "1.2.3.5"
+                  },
+                  {
+                    "name": "1.2.3.4",
+                    "port": "80",
+                    "address": "1.2.3.4"
+                  }
+                ],
+                "monitors": [
+                  {
+                    "name": "app1_http_mon",
+                    "protocol": "HTTP",
+                    "-respCode": "200",
+                    "-httpRequest": "GET /index.html",
+                    "-LRTM": "DISABLED"
+                  }
+                ]
+              }
+            ],
+            "certs": [
+              {
+                "-cipherName": "ECDHE",
+                "-cert": "foo.crt",
+                "-key": "foo.key",
+                "-certkeyName": "app1_local",
+                "-eccCurveName": [
+                  "P_256",
+                  "P_384",
+                  "P_224",
+                  "P_521"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "https_offload_vs",
+      "protocol": "SSL",
+      "ipAddress": "192.168.86.142",
+      "type": "lb",
+      "port": "443",
+      "lines": [
+        "add lb monitor app1_http_mon HTTP -respCode 200 -httpRequest \"GET /index.html\" -LRTM DISABLED",
+        "add lb vserver https_offload_vs SSL 192.168.86.142 443 -persistenceType NONE -cltTimeout 180 -redirectFromPort 80 -httpsRedirectUrl \"https://192.168.86.142\"",
+        "add server 1.2.3.4 1.2.3.4",
+        "add server 1.2.3.5 1.2.3.5",
+        "add serviceGroup app1_http_sg HTTP -maxClient 0 -maxReq 0 -cip DISABLED -usip NO -useproxyport YES -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP NO",
+        "add ssl certKey app1_local -cert foo.crt -key foo.key",
+        "bind lb vserver https_offload_vs app1_http_sg",
+        "bind serviceGroup app1_http_sg -monitorName app1_http_mon",
+        "bind serviceGroup app1_http_sg 1.2.3.4 80",
+        "bind serviceGroup app1_http_sg 1.2.3.5 80",
+        "bind ssl vserver https_offload_vs -certkeyName app1_local",
+        "bind ssl vserver https_offload_vs -cipherName ECDHE",
+        "bind ssl vserver https_offload_vs -eccCurveName P_224",
+        "bind ssl vserver https_offload_vs -eccCurveName P_256",
+        "bind ssl vserver https_offload_vs -eccCurveName P_384",
+        "bind ssl vserver https_offload_vs -eccCurveName P_521"
+      ],
+      "opts": {
+        "-persistenceType": "NONE",
+        "-cltTimeout": "180",
+        "-redirectFromPort": "80",
+        "-httpsRedirectUrl": "https://192.168.86.142"
+      },
+      "bindings": {
+        "serviceGroup": [
+          {
+            "name": "app1_http_sg",
+            "protocol": "HTTP",
+            "-maxClient": "0",
+            "-maxReq": "0",
+            "-cip": "DISABLED",
+            "-usip": "NO",
+            "-useproxyport": "YES",
+            "-cltTimeout": "180",
+            "-svrTimeout": "360",
+            "-CKA": "NO",
+            "-TCPB": "NO",
+            "-CMP": "NO",
+            "servers": [
+              {
+                "name": "1.2.3.5",
+                "port": "80",
+                "address": "1.2.3.5"
+              },
+              {
+                "name": "1.2.3.4",
+                "port": "80",
+                "address": "1.2.3.4"
+              }
+            ],
+            "monitors": [
+              {
+                "name": "app1_http_mon",
+                "protocol": "HTTP",
+                "-respCode": "200",
+                "-httpRequest": "GET /index.html",
+                "-LRTM": "DISABLED"
+              }
+            ]
+          }
+        ],
+        "certs": [
+          {
+            "-cipherName": "ECDHE",
+            "-cert": "foo.crt",
+            "-key": "foo.key",
+            "-certkeyName": "app1_local",
+            "-eccCurveName": [
+              "P_256",
+              "P_384",
+              "P_224",
+              "P_521"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "app2_http_vs",
+      "protocol": "HTTP",
+      "ipAddress": "192.168.86.144",
+      "type": "lb",
+      "port": "80",
+      "lines": [
+        "add lb monitor app1_http_mon HTTP -respCode 200 -httpRequest \"GET /index.html\" -LRTM DISABLED",
+        "add lb vserver app2_http_vs HTTP 192.168.86.144 80 -persistenceType NONE -cltTimeout 180",
+        "add rewrite policy app2_rewrite_policy HTTP.REQ.IS_VALID app2_rewrite_pol",
+        "add server 1.2.3.4 1.2.3.4",
+        "add server 1.2.3.5 1.2.3.5",
+        "add serviceGroup app1_http_sg HTTP -maxClient 0 -maxReq 0 -cip DISABLED -usip NO -useproxyport YES -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP NO",
+        "bind lb vserver app2_http_vs -policyName app2_rewrite_policy -priority 100 -gotoPriorityExpression END -type REQUEST",
+        "bind lb vserver app2_http_vs app1_http_sg",
+        "bind serviceGroup app1_http_sg -monitorName app1_http_mon",
+        "bind serviceGroup app1_http_sg 1.2.3.4 80",
+        "bind serviceGroup app1_http_sg 1.2.3.5 80"
+      ],
+      "opts": {
+        "-persistenceType": "NONE",
+        "-cltTimeout": "180"
+      },
+      "bindings": {
+        "serviceGroup": [
+          {
+            "name": "app1_http_sg",
+            "protocol": "HTTP",
+            "-maxClient": "0",
+            "-maxReq": "0",
+            "-cip": "DISABLED",
+            "-usip": "NO",
+            "-useproxyport": "YES",
+            "-cltTimeout": "180",
+            "-svrTimeout": "360",
+            "-CKA": "NO",
+            "-TCPB": "NO",
+            "-CMP": "NO",
+            "servers": [
+              {
+                "name": "1.2.3.5",
+                "port": "80",
+                "address": "1.2.3.5"
+              },
+              {
+                "name": "1.2.3.4",
+                "port": "80",
+                "address": "1.2.3.4"
+              }
+            ],
+            "monitors": [
+              {
+                "name": "app1_http_mon",
+                "protocol": "HTTP",
+                "-respCode": "200",
+                "-httpRequest": "GET /index.html",
+                "-LRTM": "DISABLED"
+              }
+            ]
+          }
+        ],
+        "-policyName": [
+          {
+            "-policyName": "app2_rewrite_policy",
+            "-priority": "100",
+            "-gotoPriorityExpression": "END",
+            "-type": "REQUEST"
+          }
+        ]
+      },
+      "apps": []
+    },
+    {
+      "name": "stp.gslb.f5flipper.com-http-vs-failover",
+      "protocol": "HTTP",
+      "ipAddress": "0.0.0.0",
+      "type": "lb",
+      "port": "0",
+      "lines": [
+        "add lb vserver stp.gslb.f5flipper.com-http-vs-failover HTTP 0.0.0.0 0 -persistenceType COOKIEINSERT -timeout 0 -cltTimeout 180 -comment \"automated deployment\"",
+        "add server stpvea1 stpvea1.f5flipper.com -comment \"automated deployment\"",
+        "add server stpvea2 stpvea2.f5flipper.com -comment \"automated deployment\"",
+        "add service stpvea1-7084-service stpvea1 SSL 7084 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP YES -comment \"automated deployment\"",
+        "add service stpvea2-7084-service stpvea2 SSL 7084 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP YES -comment \"automated deployment\"",
+        "bind lb vserver stp.gslb.f5flipper.com-http-vs-failover stpvea1-7084-service",
+        "bind lb vserver stp.gslb.f5flipper.com-http-vs-failover stpvea2-7084-service",
+        "bind service stpvea1-7084-service -monitorName https",
+        "bind service stpvea2-7084-service -monitorName https"
+      ],
+      "opts": {
+        "-persistenceType": "COOKIEINSERT",
+        "-timeout": "0",
+        "-cltTimeout": "180",
+        "-comment": "automated deployment"
+      },
+      "bindings": {
+        "service": [
+          {
+            "name": "stpvea2-7084-service",
+            "protocol": "SSL",
+            "port": "7084",
+            "server": "stpvea2",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "NO",
+              "-useproxyport": "YES",
+              "-sp": "OFF",
+              "-cltTimeout": "180",
+              "-svrTimeout": "360",
+              "-CKA": "NO",
+              "-TCPB": "NO",
+              "-CMP": "YES",
+              "-comment": "automated deployment"
+            },
+            "hostname": "stpvea2.f5flipper.com"
+          },
+          {
+            "name": "stpvea1-7084-service",
+            "protocol": "SSL",
+            "port": "7084",
+            "server": "stpvea1",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "NO",
+              "-useproxyport": "YES",
+              "-sp": "OFF",
+              "-cltTimeout": "180",
+              "-svrTimeout": "360",
+              "-CKA": "NO",
+              "-TCPB": "NO",
+              "-CMP": "YES",
+              "-comment": "automated deployment"
+            },
+            "hostname": "stpvea1.f5flipper.com"
+          }
+        ]
+      }
+    },
+    {
+      "name": "stp.gslb.f5flipper.com-http-vs",
+      "protocol": "HTTP",
+      "ipAddress": "10.5.10.33",
+      "type": "lb",
+      "port": "80",
+      "lines": [
+        "add lb vserver stp.gslb.f5flipper.com-http-vs HTTP 10.5.10.33 80 -persistenceType COOKIEINSERT -timeout 0 -cltTimeout 180 -backupVServer stp.gslb.f5flipper.com-http-vs-failover -comment \"automated deployment\"",
+        "add server stpvec1 stpvec1.f5flipper.com -comment \"automated deployment\"",
+        "add server stpvec2 stpvec2.f5flipper.com -comment \"automated deployment\"",
+        "add service stpvec1-7084-service stpvec1 SSL 7084 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP YES -comment \"automated deployment\"",
+        "add service stpvec2-7084-service stpvec2 SSL 7084 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP YES -comment \"automated deployment\"",
+        "bind lb vserver stp.gslb.f5flipper.com-http-vs stpvec1-7084-service",
+        "bind lb vserver stp.gslb.f5flipper.com-http-vs stpvec2-7084-service",
+        "bind service stpvec1-7084-service -monitorName https",
+        "bind service stpvec2-7084-service -monitorName https"
+      ],
+      "opts": {
+        "-persistenceType": "COOKIEINSERT",
+        "-timeout": "0",
+        "-cltTimeout": "180",
+        "-backupVServer": "stp.gslb.f5flipper.com-http-vs-failover",
+        "-comment": "automated deployment"
+      },
+      "bindings": {
+        "service": [
+          {
+            "name": "stpvec1-7084-service",
+            "protocol": "SSL",
+            "port": "7084",
+            "server": "stpvec1",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "NO",
+              "-useproxyport": "YES",
+              "-sp": "OFF",
+              "-cltTimeout": "180",
+              "-svrTimeout": "360",
+              "-CKA": "NO",
+              "-TCPB": "NO",
+              "-CMP": "YES",
+              "-comment": "automated deployment"
+            },
+            "hostname": "stpvec1.f5flipper.com"
+          },
+          {
+            "name": "stpvec2-7084-service",
+            "protocol": "SSL",
+            "port": "7084",
+            "server": "stpvec2",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "NO",
+              "-useproxyport": "YES",
+              "-sp": "OFF",
+              "-cltTimeout": "180",
+              "-svrTimeout": "360",
+              "-CKA": "NO",
+              "-TCPB": "NO",
+              "-CMP": "YES",
+              "-comment": "automated deployment"
+            },
+            "hostname": "stpvec2.f5flipper.com"
+          }
+        ]
+      }
+    },
+    {
+      "name": "stp.gslb.f5flipper.com-ssl-vs-failover",
+      "protocol": "SSL",
+      "ipAddress": "0.0.0.0",
+      "type": "lb",
+      "port": "0",
+      "lines": [
+        "add lb vserver stp.gslb.f5flipper.com-ssl-vs-failover SSL 0.0.0.0 0 -persistenceType COOKIEINSERT -timeout 0 -cltTimeout 180 -comment \"automated deployment\"",
+        "add rewrite policy check_x_ns_ssl_policy \"HTTP.REQ.HEADER(\\\"X-NS-SSL\\\").EXISTS\" del_x_ns_ssl",
+        "add rewrite policy insert_x_ns_ssl_policy CLIENT.SSL.IS_SSL insert_x_ns_ssl",
+        "add server stpvea1 stpvea1.f5flipper.com -comment \"automated deployment\"",
+        "add server stpvea2 stpvea2.f5flipper.com -comment \"automated deployment\"",
+        "add service stpvea1-7084-service stpvea1 SSL 7084 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP YES -comment \"automated deployment\"",
+        "add service stpvea2-7084-service stpvea2 SSL 7084 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP YES -comment \"automated deployment\"",
+        "bind lb vserver stp.gslb.f5flipper.com-ssl-vs-failover -policyName check_x_ns_ssl_policy -priority 100 -gotoPriorityExpression 200 -type REQUEST",
+        "bind lb vserver stp.gslb.f5flipper.com-ssl-vs-failover -policyName insert_x_ns_ssl_policy -priority 200 -gotoPriorityExpression END -type REQUEST",
+        "bind lb vserver stp.gslb.f5flipper.com-ssl-vs-failover stpvea1-7084-service",
+        "bind lb vserver stp.gslb.f5flipper.com-ssl-vs-failover stpvea2-7084-service",
+        "bind service stpvea1-7084-service -monitorName https",
+        "bind service stpvea2-7084-service -monitorName https"
+      ],
+      "opts": {
+        "-persistenceType": "COOKIEINSERT",
+        "-timeout": "0",
+        "-cltTimeout": "180",
+        "-comment": "automated deployment"
+      },
+      "bindings": {
+        "service": [
+          {
+            "name": "stpvea2-7084-service",
+            "protocol": "SSL",
+            "port": "7084",
+            "server": "stpvea2",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "NO",
+              "-useproxyport": "YES",
+              "-sp": "OFF",
+              "-cltTimeout": "180",
+              "-svrTimeout": "360",
+              "-CKA": "NO",
+              "-TCPB": "NO",
+              "-CMP": "YES",
+              "-comment": "automated deployment"
+            },
+            "hostname": "stpvea2.f5flipper.com"
+          },
+          {
+            "name": "stpvea1-7084-service",
+            "protocol": "SSL",
+            "port": "7084",
+            "server": "stpvea1",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "NO",
+              "-useproxyport": "YES",
+              "-sp": "OFF",
+              "-cltTimeout": "180",
+              "-svrTimeout": "360",
+              "-CKA": "NO",
+              "-TCPB": "NO",
+              "-CMP": "YES",
+              "-comment": "automated deployment"
+            },
+            "hostname": "stpvea1.f5flipper.com"
+          }
+        ],
+        "-policyName": [
+          {
+            "-policyName": "check_x_ns_ssl_policy",
+            "-priority": "100",
+            "-gotoPriorityExpression": "200",
+            "-type": "REQUEST"
+          },
+          {
+            "-policyName": "insert_x_ns_ssl_policy",
+            "-priority": "200",
+            "-gotoPriorityExpression": "END",
+            "-type": "REQUEST"
+          }
+        ]
+      },
+      "apps": []
+    },
+    {
+      "name": "stp.gslb.f5flipper.com-ssl-vs",
+      "protocol": "SSL",
+      "ipAddress": "10.5.10.33",
+      "type": "lb",
+      "port": "443",
+      "lines": [
+        "add lb vserver stp.gslb.f5flipper.com-ssl-vs SSL 10.5.10.33 443 -persistenceType COOKIEINSERT -timeout 0 -cltTimeout 180 -backupVServer stp.gslb.f5flipper.com-ssl-vs-failover -comment \"automated deployment\"",
+        "add server stpvec1 stpvec1.f5flipper.com -comment \"automated deployment\"",
+        "add server stpvec2 stpvec2.f5flipper.com -comment \"automated deployment\"",
+        "add service stpvec1-7084-service stpvec1 SSL 7084 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP YES -comment \"automated deployment\"",
+        "add service stpvec2-7084-service stpvec2 SSL 7084 -gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED X-Forwarded-For -usip NO -useproxyport YES -sp OFF -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP YES -comment \"automated deployment\"",
+        "bind lb vserver stp.gslb.f5flipper.com-ssl-vs stpvec1-7084-service",
+        "bind lb vserver stp.gslb.f5flipper.com-ssl-vs stpvec2-7084-service",
+        "bind service stpvec1-7084-service -monitorName https",
+        "bind service stpvec2-7084-service -monitorName https"
+      ],
+      "opts": {
+        "-persistenceType": "COOKIEINSERT",
+        "-timeout": "0",
+        "-cltTimeout": "180",
+        "-backupVServer": "stp.gslb.f5flipper.com-ssl-vs-failover",
+        "-comment": "automated deployment"
+      },
+      "bindings": {
+        "service": [
+          {
+            "name": "stpvec1-7084-service",
+            "protocol": "SSL",
+            "port": "7084",
+            "server": "stpvec1",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "NO",
+              "-useproxyport": "YES",
+              "-sp": "OFF",
+              "-cltTimeout": "180",
+              "-svrTimeout": "360",
+              "-CKA": "NO",
+              "-TCPB": "NO",
+              "-CMP": "YES",
+              "-comment": "automated deployment"
+            },
+            "hostname": "stpvec1.f5flipper.com"
+          },
+          {
+            "name": "stpvec2-7084-service",
+            "protocol": "SSL",
+            "port": "7084",
+            "server": "stpvec2",
+            "opts": {
+              "-gslb": "NONE",
+              "-maxClient": "0",
+              "-maxReq": "0",
+              "-cip": "ENABLED X-Forwarded-For",
+              "-usip": "NO",
+              "-useproxyport": "YES",
+              "-sp": "OFF",
+              "-cltTimeout": "180",
+              "-svrTimeout": "360",
+              "-CKA": "NO",
+              "-TCPB": "NO",
+              "-CMP": "YES",
+              "-comment": "automated deployment"
+            },
+            "hostname": "stpvec2.f5flipper.com"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ctx1.gslb.f5flipper.com",
+      "type": "gslb",
+      "protocol": "HTTP",
+      "opts": {
+        "-backupLBMethod": "ROUNDROBIN",
+        "-tolerance": "0",
+        "-appflowLog": "DISABLED"
+      },
+      "bindings": {
+        "-serviceName": [
+          {
+            "serviceName": "ctx1-nedc-gslb",
+            "protocol": "SSL",
+            "port": "443",
+            "serverName": "ctx1-nedc",
+            "-publicIP": "10.56.4.2",
+            "-publicPort": "443",
+            "-maxClient": "0",
+            "-siteName": "nedc-gslb-site",
+            "-cltTimeout": "180",
+            "-svrTimeout": "360",
+            "-downStateFlush": "DISABLED",
+            "serverDest": "10.56.4.2",
+            "-tls11": "DISABLED",
+            "-tls12": "DISABLED"
+          },
+          {
+            "serviceName": "ctx1-swdc-gslb",
+            "protocol": "SSL",
+            "port": "443",
+            "serverName": "ctx1-swdc",
+            "-publicIP": "10.5.7.2",
+            "-publicPort": "443",
+            "-maxClient": "0",
+            "-siteName": "swdc-gslb-site",
+            "-cltTimeout": "180",
+            "-svrTimeout": "360",
+            "-downStateFlush": "DISABLED",
+            "serverDest": "10.5.7.2"
+          }
+        ],
+        "-domainName": [
+          {
+            "-domainName": "ctx1.gslb.f5flipper.com",
+            "-TTL": "5"
+          }
+        ]
+      },
+      "lines": [
+        "add gslb service ctx1-nedc-gslb ctx1-nedc SSL 443 -publicIP 10.56.4.2 -publicPort 443 -maxClient 0 -siteName nedc-gslb-site -cltTimeout 180 -svrTimeout 360 -downStateFlush DISABLED",
+        "add gslb service ctx1-swdc-gslb ctx1-swdc SSL 443 -publicIP 10.5.7.2 -publicPort 443 -maxClient 0 -siteName swdc-gslb-site -cltTimeout 180 -svrTimeout 360 -downStateFlush DISABLED",
+        "add gslb vserver ctx1.gslb.f5flipper.com HTTP -backupLBMethod ROUNDROBIN -tolerance 0 -appflowLog DISABLED",
+        "add server ctx1-nedc 10.56.4.2",
+        "add server ctx1-swdc 10.5.7.2",
+        "bind gslb vserver ctx1.gslb.f5flipper.com -domainName ctx1.gslb.f5flipper.com -TTL 5",
+        "bind gslb vserver ctx1.gslb.f5flipper.com -serviceName ctx1-nedc-gslb",
+        "bind gslb vserver ctx1.gslb.f5flipper.com -serviceName ctx1-swdc-gslb",
+        "set gslb vserver ctx1.gslb.f5flipper.com -backupLBMethod ROUNDROBIN -tolerance 0 -appflowLog DISABLED",
+        "set ssl service ctx1-nedc-gslb -tls11 DISABLED -tls12 DISABLED"
+      ]
+    },
+    {
+      "name": "smtp.gslb.f5flipper.com",
+      "type": "gslb",
+      "protocol": "TCP",
+      "opts": {
+        "-backupLBMethod": "ROUNDROBIN",
+        "-tolerance": "0",
+        "-appflowLog": "DISABLED"
+      },
+      "bindings": {
+        "-serviceName": [
+          {
+            "serviceName": "smtp-nedc-gslb",
+            "protocol": "TCP",
+            "port": "25",
+            "serverName": "smtp-nedc",
+            "-publicIP": "10.56.4.1",
+            "-publicPort": "25",
+            "-maxClient": "0",
+            "-siteName": "nedc-gslb-site",
+            "-cltTimeout": "9000",
+            "-svrTimeout": "9000",
+            "-downStateFlush": "DISABLED",
+            "serverDest": "10.56.4.1"
+          },
+          {
+            "serviceName": "smtp-swdc-gslb",
+            "protocol": "TCP",
+            "port": "25",
+            "serverName": "smtp-swdc",
+            "-publicIP": "10.5.7.1",
+            "-publicPort": "25",
+            "-maxClient": "0",
+            "-siteName": "swdc-gslb-site",
+            "-cltTimeout": "9000",
+            "-svrTimeout": "9000",
+            "-downStateFlush": "DISABLED",
+            "serverDest": "10.5.7.1"
+          }
+        ],
+        "-domainName": [
+          {
+            "-domainName": "smtp.gslb.f5flipper.com",
+            "-TTL": "5"
+          }
+        ]
+      },
+      "lines": [
+        "add gslb service smtp-nedc-gslb smtp-nedc TCP 25 -publicIP 10.56.4.1 -publicPort 25 -maxClient 0 -siteName nedc-gslb-site -cltTimeout 9000 -svrTimeout 9000 -downStateFlush DISABLED",
+        "add gslb service smtp-swdc-gslb smtp-swdc TCP 25 -publicIP 10.5.7.1 -publicPort 25 -maxClient 0 -siteName swdc-gslb-site -cltTimeout 9000 -svrTimeout 9000 -downStateFlush DISABLED",
+        "add gslb vserver smtp.gslb.f5flipper.com TCP -backupLBMethod ROUNDROBIN -tolerance 0 -appflowLog DISABLED",
+        "add server smtp-nedc 10.56.4.1",
+        "add server smtp-swdc 10.5.7.1",
+        "bind gslb vserver smtp.gslb.f5flipper.com -domainName smtp.gslb.f5flipper.com -TTL 5",
+        "bind gslb vserver smtp.gslb.f5flipper.com -serviceName smtp-nedc-gslb",
+        "bind gslb vserver smtp.gslb.f5flipper.com -serviceName smtp-swdc-gslb",
+        "set gslb vserver smtp.gslb.f5flipper.com -backupLBMethod ROUNDROBIN -tolerance 0 -appflowLog DISABLED"
+      ]
+    },
+    {
+      "name": "bottle.gslb.f5flipper.com",
+      "type": "gslb",
+      "protocol": "TCP",
+      "opts": {
+        "-backupLBMethod": "ROUNDROBIN",
+        "-tolerance": "0",
+        "-appflowLog": "DISABLED"
+      },
+      "bindings": {
+        "-serviceName": [
+          {
+            "serviceName": "bottle-nedc-gslb",
+            "protocol": "TCP",
+            "port": "50607",
+            "serverName": "bottle-nedc",
+            "-publicIP": "10.56.4.25",
+            "-publicPort": "50607",
+            "-maxClient": "0",
+            "-siteName": "nedc-gslb-site",
+            "-cltTimeout": "9000",
+            "-svrTimeout": "9000",
+            "-downStateFlush": "DISABLED",
+            "serverDest": "10.56.4.25"
+          },
+          {
+            "serviceName": "bottle-swdc-gslb",
+            "protocol": "TCP",
+            "port": "50607",
+            "serverName": "bottle-swdc",
+            "-publicIP": "10.5.7.25",
+            "-publicPort": "50607",
+            "-maxClient": "0",
+            "-siteName": "swdc-gslb-site",
+            "-cltTimeout": "9000",
+            "-svrTimeout": "9000",
+            "-downStateFlush": "DISABLED",
+            "serverDest": "10.5.7.25"
+          }
+        ],
+        "-domainName": [
+          {
+            "-domainName": "bottle.gslb.f5flipper.com",
+            "-TTL": "5"
+          }
+        ]
+      },
+      "lines": [
+        "add gslb service bottle-nedc-gslb bottle-nedc TCP 50607 -publicIP 10.56.4.25 -publicPort 50607 -maxClient 0 -siteName nedc-gslb-site -cltTimeout 9000 -svrTimeout 9000 -downStateFlush DISABLED",
+        "add gslb service bottle-swdc-gslb bottle-swdc TCP 50607 -publicIP 10.5.7.25 -publicPort 50607 -maxClient 0 -siteName swdc-gslb-site -cltTimeout 9000 -svrTimeout 9000 -downStateFlush DISABLED",
+        "add gslb vserver bottle.gslb.f5flipper.com TCP -backupLBMethod ROUNDROBIN -tolerance 0 -appflowLog DISABLED",
+        "add server bottle-nedc 10.56.4.25",
+        "add server bottle-swdc 10.5.7.25",
+        "bind gslb vserver bottle.gslb.f5flipper.com -domainName bottle.gslb.f5flipper.com -TTL 5",
+        "bind gslb vserver bottle.gslb.f5flipper.com -serviceName bottle-nedc-gslb",
+        "bind gslb vserver bottle.gslb.f5flipper.com -serviceName bottle-swdc-gslb",
+        "set gslb vserver bottle.gslb.f5flipper.com -backupLBMethod ROUNDROBIN -tolerance 0 -appflowLog DISABLED"
+      ]
+    },
+    {
+      "name": "echo.gslb.f5flipper.com",
+      "type": "gslb",
+      "protocol": "HTTP",
+      "opts": {
+        "-lbMethod": "LEASTBANDWIDTH",
+        "-backupLBMethod": "ROUNDROBIN",
+        "-tolerance": "0",
+        "-appflowLog": "DISABLED"
+      },
+      "bindings": {
+        "-serviceName": [
+          {
+            "serviceName": "echo-nedc-gslb",
+            "protocol": "HTTP",
+            "port": "80",
+            "serverName": "echo-nedc",
+            "-publicIP": "10.8.103.249",
+            "-publicPort": "80",
+            "-maxClient": "0",
+            "-siteName": "nedc-gslb-site",
+            "-cltTimeout": "180",
+            "-svrTimeout": "360",
+            "-downStateFlush": "DISABLED",
+            "serverDest": "10.8.103.249"
+          },
+          {
+            "serviceName": "echo-swdc-gslb",
+            "protocol": "HTTP",
+            "port": "80",
+            "serverName": "echo-swdc",
+            "-publicIP": "10.12.103.249",
+            "-publicPort": "80",
+            "-maxClient": "0",
+            "-siteName": "swdc-gslb-site",
+            "-cltTimeout": "180",
+            "-svrTimeout": "360",
+            "-downStateFlush": "DISABLED",
+            "serverDest": "10.12.103.249"
+          }
+        ],
+        "-domainName": [
+          {
+            "-domainName": "echo.gslb.f5flipper.com",
+            "-TTL": "5"
+          },
+          {
+            "-domainName": "echo.f5flipper.com",
+            "-TTL": "5"
+          }
+        ]
+      },
+      "lines": [
+        "add gslb service echo-nedc-gslb echo-nedc HTTP 80 -publicIP 10.8.103.249 -publicPort 80 -maxClient 0 -siteName nedc-gslb-site -cltTimeout 180 -svrTimeout 360 -downStateFlush DISABLED",
+        "add gslb service echo-swdc-gslb echo-swdc HTTP 80 -publicIP 10.12.103.249 -publicPort 80 -maxClient 0 -siteName swdc-gslb-site -cltTimeout 180 -svrTimeout 360 -downStateFlush DISABLED",
+        "add gslb vserver echo.gslb.f5flipper.com HTTP -lbMethod LEASTBANDWIDTH -backupLBMethod ROUNDROBIN -tolerance 0 -appflowLog DISABLED",
+        "add server echo-nedc 10.8.103.249",
+        "add server echo-swdc 10.12.103.249",
+        "bind gslb vserver echo.gslb.f5flipper.com -domainName echo.f5flipper.com -TTL 5",
+        "bind gslb vserver echo.gslb.f5flipper.com -domainName echo.gslb.f5flipper.com -TTL 5",
+        "bind gslb vserver echo.gslb.f5flipper.com -serviceName echo-nedc-gslb",
+        "bind gslb vserver echo.gslb.f5flipper.com -serviceName echo-swdc-gslb",
+        "set gslb vserver echo.gslb.f5flipper.com -lbMethod LEASTBANDWIDTH -backupLBMethod ROUNDROBIN -tolerance 0 -appflowLog DISABLED"
+      ]
+    },
+    {
+      "name": "dorsal.gslb.f5flipper.com",
+      "type": "gslb",
+      "protocol": "SSL",
+      "opts": {
+        "-backupLBMethod": "ROUNDROBIN",
+        "-tolerance": "0",
+        "-comment": "automated deployment",
+        "-appflowLog": "DISABLED"
+      },
+      "bindings": {
+        "-serviceName": [
+          {
+            "serviceName": "dorsal-nedc-gslb",
+            "protocol": "SSL",
+            "port": "443",
+            "serverName": "dorsal-nedc",
+            "-publicIP": "10.8.101.46",
+            "-publicPort": "443",
+            "-maxClient": "0",
+            "-siteName": "nedc-gslb-site",
+            "-cip": "ENABLED X-Forwarded-For",
+            "-sitePersistence": "ConnectionProxy",
+            "-cltTimeout": "180",
+            "-svrTimeout": "360",
+            "-downStateFlush": "DISABLED",
+            "-comment": "automated deployment",
+            "serverDest": "10.8.101.46",
+            "-tls11": "DISABLED",
+            "-tls12": "DISABLED"
+          },
+          {
+            "serviceName": "dorsal-swdc-gslb",
+            "protocol": "SSL",
+            "port": "443",
+            "serverName": "dorsal-swdc",
+            "-publicIP": "10.12.101.46",
+            "-publicPort": "443",
+            "-maxClient": "0",
+            "-siteName": "swdc-gslb-site",
+            "-cip": "ENABLED X-Forwarded-For",
+            "-sitePersistence": "ConnectionProxy",
+            "-cltTimeout": "180",
+            "-svrTimeout": "360",
+            "-downStateFlush": "DISABLED",
+            "-comment": "automated deployment",
+            "serverDest": "10.12.101.46"
+          }
+        ],
+        "-domainName": [
+          {
+            "-domainName": "dorsal",
+            "-TTL": "5"
+          },
+          {
+            "-domainName": "dorsal.f5flipper.com",
+            "-TTL": "5"
+          },
+          {
+            "-domainName": "dorsal.gslb.f5flipper.com",
+            "-TTL": "5"
+          }
+        ]
+      },
+      "lines": [
+        "add gslb service dorsal-nedc-gslb dorsal-nedc SSL 443 -publicIP 10.8.101.46 -publicPort 443 -maxClient 0 -siteName nedc-gslb-site -cip ENABLED X-Forwarded-For -sitePersistence ConnectionProxy -cltTimeout 180 -svrTimeout 360 -downStateFlush DISABLED -comment \"automated deployment\"",
+        "add gslb service dorsal-swdc-gslb dorsal-swdc SSL 443 -publicIP 10.12.101.46 -publicPort 443 -maxClient 0 -siteName swdc-gslb-site -cip ENABLED X-Forwarded-For -sitePersistence ConnectionProxy -cltTimeout 180 -svrTimeout 360 -downStateFlush DISABLED -comment \"automated deployment\"",
+        "add gslb vserver dorsal.gslb.f5flipper.com SSL -backupLBMethod ROUNDROBIN -tolerance 0 -comment \"automated deployment\" -appflowLog DISABLED",
+        "add server dorsal-nedc 10.8.101.46 -comment \"automated deployment\"",
+        "add server dorsal-swdc 10.12.101.46 -comment \"automated deployment\"",
+        "bind gslb vserver dorsal.gslb.f5flipper.com -domainName dorsal -TTL 5",
+        "bind gslb vserver dorsal.gslb.f5flipper.com -domainName dorsal.f5flipper.com -TTL 5",
+        "bind gslb vserver dorsal.gslb.f5flipper.com -domainName dorsal.gslb.f5flipper.com -TTL 5",
+        "bind gslb vserver dorsal.gslb.f5flipper.com -serviceName dorsal-nedc-gslb",
+        "bind gslb vserver dorsal.gslb.f5flipper.com -serviceName dorsal-swdc-gslb",
+        "set gslb vserver dorsal.gslb.f5flipper.com -backupLBMethod ROUNDROBIN -tolerance 0 -comment \"automated deployment\" -appflowLog DISABLED",
+        "set ssl service dorsal-nedc-gslb -tls11 DISABLED -tls12 DISABLED"
+      ]
+    }
+  ]
+}

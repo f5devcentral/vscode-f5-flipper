@@ -9,13 +9,19 @@ describe('digCStoLbRefs Error Handling Tests', () => {
      * by creating configs with missing LB vserver references
      */
 
+    before(async function () {
+        // log test file name - makes it easer for troubleshooting
+        console.log('---------- file:', __filename);
+    });
+
     describe('Missing -policyName Reference', () => {
         it('should handle CS vserver binding to non-existent policy name', async () => {
             const adc = new CitrixADC();
 
             // Create a config where CS vserver binds to a policy that doesn't exist
             // This tests graceful handling when digCsVserver references a missing policy
-            const config = `#NS13.0
+            const config = 
+`#NS13.0
 add cs vserver test_cs HTTP 10.0.0.1 80 -persistenceType NONE
 bind cs vserver test_cs -policyName missing_policy_name -priority 100
 
@@ -41,7 +47,8 @@ bind lb vserver test_lb test_srv`;
             const adc = new CitrixADC();
 
             // Create a config where CS action references a non-existent LB vserver
-            const config = `#NS13.0
+            const config = 
+`#NS13.0
 add cs vserver test_cs HTTP 10.0.0.1 80 -persistenceType NONE
 bind cs vserver test_cs -policyName test_policy -priority 100
 add cs policy test_policy -rule "HTTP.REQ.HOSTNAME.EQ(\\"test.com\\")" -action test_action
@@ -73,7 +80,8 @@ bind lb vserver actual_lb test_srv`;
             const adc = new CitrixADC();
 
             // Create a config where CS vserver directly binds to a non-existent LB vserver
-            const config = `#NS13.0
+            const config = 
+`#NS13.0
 add cs vserver test_cs HTTP 10.0.0.1 80 -persistenceType NONE
 bind cs vserver test_cs -lbvserver missing_lb_vserver
 

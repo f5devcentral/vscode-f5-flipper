@@ -1,7 +1,7 @@
 import { AdcRegExTree, AdcConfObjRx } from "./models";
 import { nestedObjValue } from "./objects";
 import { deepmergeInto } from 'deepmerge-ts'
-import { parseNsOptions } from "./parseAdcUtils";
+import { parseNsOptions, sortNsLines } from "./parseAdcUtils";
 
 
 
@@ -15,10 +15,16 @@ import { parseNsOptions } from "./parseAdcUtils";
  */
 export async function parseAdcConfArraysRx(config: string[], cfgObj: AdcConfObjRx, rx: AdcRegExTree) {
 
-    // Optional: sortNsLines(config, rx) - currently disabled to process in original order
+    // Sort config lines by verb order (add -> set -> bind -> link -> enable -> disable)
+    // This matches the original parser behavior and ensures proper dependency order
+    // todo: is this still needed since everything is stored as objects now?
+    // sortNsLines(config, rx);
 
-    // Cache parent keys for faster lookups
-    const parents = Object.keys(rx.parents);
+    // Pre-compile regex patterns for parent matching (one-time cost)
+    const parentPatterns = Object.keys(rx.parents).map(parent => ({
+        pattern: new RegExp(`^${parent.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} `),
+        key: parent
+    }));
 
     // Counter for bind statements to create unique keys
     let bindCounter = 0;
@@ -30,7 +36,14 @@ export async function parseAdcConfArraysRx(config: string[], cfgObj: AdcConfObjR
         if (line.startsWith('#') || line === '') continue;
 
         // Find matching parent pattern (e.g., "add lb vserver")
-        const matchedParent = parents.find(parent => line.match(parent + ' '));
+        // Use pre-compiled regexes for faster matching
+        let matchedParent: string | undefined;
+        for (const { pattern, key } of parentPatterns) {
+            if (pattern.test(line)) {
+                matchedParent = key;
+                break;
+            }
+        }
 
         if (!matchedParent) continue;
 
@@ -99,9 +112,11 @@ function parseNsLineWithRx(
         // Extract all named capture groups
         for (const [key, value] of Object.entries(match.groups)) {
             if (value !== undefined) {
-                // Clean up quoted names
+                // Clean up quoted names and sanitize spaces
+                // TODO: Remove this quote-stripping logic in the future when old parser is removed
+                // For now, we keep quotes in names to match old parser behavior for comparison
                 if (key === 'name' && value.startsWith('"') && value.endsWith('"')) {
-                    result[key] = value.slice(1, -1);  // Remove quotes
+                    result[key] = value;  // Keep quotes to match old behavior
                 } else if (key === 'opts') {
                     // Parse options string into individual key-value pairs
                     const parsedOpts = parseNsOptions(value, rx);
