@@ -66,12 +66,17 @@ describe('Namaste App tests', function () {
     // cs -> bind ssl vserver groot-cs-vsvr -certkeyName star.groot.cer
 
     // get application we are looking for
-    const app = expld.config.apps?.find(x => x.name === '"namaste 443 vip"')
+    const app = expld.config.apps?.find(x => x.name === 'namaste 443 vip')
+
+    // Debug: check if app was found
+    assert.ok(app, 'App "namaste 443 vip" should be found');
+    assert.ok(app.bindings, 'App should have bindings');
+    assert.ok(app.bindings.serviceGroup, 'App should have serviceGroup bindings');
 
     // get the serviceGroup details
     const appServiceGroup = app!.bindings!.serviceGroup![0]
 
-    assert.deepStrictEqual(appServiceGroup.name, '"namaste 8443 svg"');
+    assert.deepStrictEqual(appServiceGroup.name, 'namaste 8443 svg');
 
   })
 
@@ -80,7 +85,7 @@ describe('Namaste App tests', function () {
 
     // lb -> bind ssl vserver starlord_offload_lb_vs -certkeyName starlord.galaxy.io_cert
 
-    const app = expld.config.apps?.find(x => x.name === '"namaste 443 vip"');
+    const app = expld.config.apps?.find(x => x.name === 'namaste 443 vip');
 
     // get the cert details
     const appServiceGroupMonitors = app?.bindings?.serviceGroup![0].monitors;
@@ -110,7 +115,7 @@ describe('Namaste App tests', function () {
   it(`serviceGroup servers count`, async () => {
 
     // get application we are looking for
-    const app = expld.config.apps?.find(x => x.name === '"namaste 443 vip"');
+    const app = expld.config.apps?.find(x => x.name === 'namaste 443 vip');
 
     // get a serviceGroup server details
     const appServiceGroupServers = app?.bindings?.serviceGroup![0].servers;
@@ -124,7 +129,7 @@ describe('Namaste App tests', function () {
   it(`serviceGroup server details with disabled`, async () => {
 
     // get application we are looking for
-    const app = expld.config.apps?.find(x => x.name === '"namaste 443 vip"');
+    const app = expld.config.apps?.find(x => x.name === 'namaste 443 vip');
 
     // get a serviceGroup server details
     const appServiceGroupServers = app?.bindings?.serviceGroup![0].servers;

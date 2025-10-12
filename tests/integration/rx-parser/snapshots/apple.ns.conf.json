@@ -1,9 +1,9 @@
 {
   "configFile": "apple.ns.conf",
-  "generatedAt": "2025-10-12T00:36:16.252Z",
+  "generatedAt": "2025-10-12T13:19:50.486Z",
   "apps": [
     {
-      "name": "\"1 APPLE_443_HTTPS\"",
+      "name": "1 APPLE_443_HTTPS",
       "protocol": "SSL",
       "ipAddress": "10.240.20.10",
       "type": "lb",
@@ -115,7 +115,7 @@
       }
     },
     {
-      "name": "\"2 APPLE_80_HTTP\"",
+      "name": "2 APPLE_80_HTTP",
       "protocol": "SSL",
       "ipAddress": "10.240.20.11",
       "type": "lb",
@@ -162,7 +162,7 @@
       }
     },
     {
-      "name": "\"3 APPLE_443_HTTPS\"",
+      "name": "3 APPLE_443_HTTPS",
       "protocol": "SSL",
       "ipAddress": "2001:db8:3333:4444:5555:6666:7777:8888",
       "type": "lb",
