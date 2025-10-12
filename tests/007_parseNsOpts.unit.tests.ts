@@ -11,21 +11,20 @@
 
 import assert from 'assert';
 import { RegExTree } from '../src/regex';
-import { parseNsOptions } from '../src/parseAdcUtils';
+import { parseNsOptions, extractOptions } from '../src/parseAdcUtils';
 
 const events = [];
 const parsedFileEvents: any[] = []
 const parsedObjEvents: any[] = []
 const rx = new RegExTree().get('13.1');
 
+// log test file name - makes it easier for troubleshooting
+console.log('----------------------------------------------------------');
+console.log('---------- file:', __filename);
+
 describe('parse NS options function tests', function () {
 
-
-
-
     before(async function () {
-        // log test file name - makes it easer for troubleshooting
-        console.log('       file:', __filename)
 
         // clear the events arrays
         parsedFileEvents.length = 0
@@ -37,28 +36,6 @@ describe('parse NS options function tests', function () {
         events.length = 0;
     })
 
-
-
-    // it(`regular options single`, async () => {
-
-    //     const items = [
-    //     'add server sprout135A_groot 192.168.160.120 -devno 108847',
-    //     'add server sprout135c_groot 192.168.160.69 -devno 108848',
-    //     'add server dorsal-nedc 10.8.101.46 -comment "automated deployment"',
-    //     'add server dorsal-swdc 10.12.101.46 -comment "automated deployment"',
-    //     'add server stpvec1 stpvec1.f5flipper.com -comment "automated deployment"',
-    //     'add server stpvec2 stpvec2.f5flipper.com -comment "automated deployment"',
-    //     ];
-
-    //     // strip off all the leading parent object details 'add server '
-    //     const slim = items.map(x => x.replace('add server ', ''))
-
-    //     const rxMatches = slim.map(x => x.match(rx.parents['add server']))
-
-    //     const misses = rxMatches.filter(x => x === undefined)
-
-    //     assert.ok(misses.length === 0, 'should not have any rx misses');
-    // })
 
     it(`lb monitor options complicated`, async () => {
 
@@ -104,5 +81,176 @@ describe('parse NS options function tests', function () {
         assert.deepStrictEqual("GET /focusReady", optsObx[7]['-send']);
     })
 
+    it('parseNsOptions - edge cases and last option handling', () => {
+        // Test that the optimized regex handles the last option without needing -devno hack
 
+        // Single option at end of string (no trailing options)
+        const result1 = parseNsOptions('-timeout 20', rx);
+        assert.deepStrictEqual(result1, { '-timeout': '20' });
+
+        // Multiple options with last one properly captured
+        const result2 = parseNsOptions('-interval 10 -timeout 5', rx);
+        assert.deepStrictEqual(result2, { '-interval': '10', '-timeout': '5' });
+
+        // Options with quoted values at the end
+        const result3 = parseNsOptions('-httpRequest "GET /health" -comment "test monitor"', rx);
+        assert.deepStrictEqual(result3, {
+            '-httpRequest': 'GET /health',
+            '-comment': 'test monitor'
+        });
+
+        // Empty string should return empty object
+        const result4 = parseNsOptions('', rx);
+        assert.deepStrictEqual(result4, {});
+
+        // Options with special characters
+        const result5 = parseNsOptions('-respCode 200-299 -secure YES', rx);
+        assert.deepStrictEqual(result5, { '-respCode': '200-299', '-secure': 'YES' });
+    });
+
+    it('extractOptions - filter parsed objects', () => {
+        // Test basic filtering of structural properties
+        const parsed1 = {
+            name: 'web_vs',
+            protocol: 'HTTP',
+            ipAddress: '10.1.1.100',
+            port: '80',
+            _line: 'add lb vserver web_vs HTTP 10.1.1.100 80 -persistenceType SOURCEIP',
+            '-persistenceType': 'SOURCEIP',
+            '-timeout': '20'
+        };
+
+        const opts1 = extractOptions(parsed1);
+        assert.deepStrictEqual(opts1, {
+            '-persistenceType': 'SOURCEIP',
+            '-timeout': '20'
+        });
+
+        // Test with server field excluded
+        const parsed2 = {
+            name: 'web_svc',
+            protocol: 'HTTP',
+            port: '80',
+            server: 'server1',
+            _line: 'add service web_svc server1 HTTP 80 -maxClient 100',
+            '-maxClient': '100'
+        };
+
+        const opts2 = extractOptions(parsed2);
+        assert.deepStrictEqual(opts2, {
+            '-maxClient': '100'
+        });
+
+        // Test with additional exclude fields
+        const parsed3 = {
+            name: 'cs_vs',
+            protocol: 'HTTP',
+            ipAddress: '10.1.1.200',
+            port: '443',
+            _line: 'add cs vserver cs_vs HTTP 10.1.1.200 443',
+            customField: 'should_be_excluded',
+            '-state': 'ENABLED'
+        };
+
+        const opts3 = extractOptions(parsed3, ['customField']);
+        assert.deepStrictEqual(opts3, {
+            '-state': 'ENABLED'
+        });
+
+        // Test object with no options (only structural fields)
+        const parsed4 = {
+            name: 'simple_vs',
+            protocol: 'TCP',
+            ipAddress: '10.1.1.50',
+            port: '22',
+            _line: 'add lb vserver simple_vs TCP 10.1.1.50 22'
+        };
+
+        const opts4 = extractOptions(parsed4);
+        assert.deepStrictEqual(opts4, {});
+    });
+
+    it('extractOptions - Set-based exclusion performance', () => {
+        // Test that Set-based exclusion works correctly
+        const parsed = {
+            name: 'test',
+            protocol: 'HTTP',
+            ipAddress: '1.1.1.1',
+            port: '80',
+            server: 'server1',
+            _line: 'line...',
+            '-opt1': 'val1',
+            '-opt2': 'val2',
+            '-opt3': 'val3',
+            '-opt4': 'val4',
+            '-opt5': 'val5'
+        };
+
+        const opts = extractOptions(parsed);
+
+        // Should have exactly 5 options, excluding all structural fields
+        assert.strictEqual(Object.keys(opts).length, 5);
+        assert.strictEqual(opts['-opt1'], 'val1');
+        assert.strictEqual(opts['-opt5'], 'val5');
+
+        // Should not have any excluded fields
+        assert.strictEqual(opts['name'], undefined);
+        assert.strictEqual(opts['protocol'], undefined);
+        assert.strictEqual(opts['ipAddress'], undefined);
+        assert.strictEqual(opts['port'], undefined);
+        assert.strictEqual(opts['server'], undefined);
+        assert.strictEqual(opts['_line'], undefined);
+    });
+
+    it('parseNsOptions - handles -cip with two values', () => {
+        // Test -cip with ENABLED and a header name (two values)
+        const result1 = parseNsOptions('-cip ENABLED client-ip -usip NO', rx);
+        assert.deepStrictEqual(result1, {
+            '-cip': 'ENABLED client-ip',
+            '-usip': 'NO'
+        });
+
+        // Test -cip with ENABLED and X-Forwarded-For
+        const result2 = parseNsOptions('-cip ENABLED X-Forwarded-For -usip NO', rx);
+        assert.deepStrictEqual(result2, {
+            '-cip': 'ENABLED X-Forwarded-For',
+            '-usip': 'NO'
+        });
+
+        // Test -cip with DISABLED (single value)
+        const result3 = parseNsOptions('-cip DISABLED -usip NO', rx);
+        assert.deepStrictEqual(result3, {
+            '-cip': 'DISABLED',
+            '-usip': 'NO'
+        });
+
+        // Test full service line from apple.ns.conf
+        const fullLine = '-gslb NONE -maxClient 0 -maxReq 0 -cip ENABLED client-ip -usip NO -useproxyport YES -sp OFF -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP YES';
+        const result4 = parseNsOptions(fullLine, rx);
+        assert.strictEqual(result4['-cip'], 'ENABLED client-ip');
+        assert.strictEqual(result4['-usip'], 'NO');
+        assert.strictEqual(result4['-devno'], undefined); // Should be excluded
+
+        // Test -cip with X-Client-IP
+        const result5 = parseNsOptions('-cip ENABLED X-Client-IP -usip NO', rx);
+        assert.deepStrictEqual(result5, {
+            '-cip': 'ENABLED X-Client-IP',
+            '-usip': 'NO'
+        });
+    });
+
+    it('parseNsOptions - excludes -devno', () => {
+        // Test that -devno is excluded
+        const result1 = parseNsOptions('-maxClient 100 -devno 12345 -timeout 20', rx);
+        assert.deepStrictEqual(result1, {
+            '-maxClient': '100',
+            '-timeout': '20'
+        });
+
+        // Test -devno at the end
+        const result2 = parseNsOptions('-secure YES -devno 363462656', rx);
+        assert.deepStrictEqual(result2, {
+            '-secure': 'YES'
+        });
+    });
 });

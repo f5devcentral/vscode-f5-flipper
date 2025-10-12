@@ -1,0 +1,59 @@
+{
+  "configFile": "sslBridge.ns.conf",
+  "generatedAt": "2025-10-12T00:36:16.294Z",
+  "apps": [
+    {
+      "name": "app_ssl_bridge_vs",
+      "protocol": "SSL_BRIDGE",
+      "ipAddress": "192.168.1.100",
+      "type": "lb",
+      "port": "443",
+      "lines": [
+        "add lb monitor ssl_tcp_monitor TCP -LRTM DISABLED -interval 10",
+        "add lb vserver app_ssl_bridge_vs SSL_BRIDGE 192.168.1.100 443 -persistenceType SSLSESSION -cltTimeout 180",
+        "add server backend_ssl_server 10.1.1.50",
+        "add serviceGroup app_ssl_bridge_sg SSL_BRIDGE -maxClient 0 -maxReq 0 -cip DISABLED -usip NO -useproxyport YES -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP NO",
+        "bind lb vserver app_ssl_bridge_vs app_ssl_bridge_sg",
+        "bind serviceGroup app_ssl_bridge_sg -monitorName ssl_tcp_monitor",
+        "bind serviceGroup app_ssl_bridge_sg backend_ssl_server 443"
+      ],
+      "opts": {
+        "-persistenceType": "SSLSESSION",
+        "-cltTimeout": "180"
+      },
+      "bindings": {
+        "serviceGroup": [
+          {
+            "name": "app_ssl_bridge_sg",
+            "protocol": "SSL_BRIDGE",
+            "-maxClient": "0",
+            "-maxReq": "0",
+            "-cip": "DISABLED",
+            "-usip": "NO",
+            "-useproxyport": "YES",
+            "-cltTimeout": "180",
+            "-svrTimeout": "360",
+            "-CKA": "NO",
+            "-TCPB": "NO",
+            "-CMP": "NO",
+            "servers": [
+              {
+                "name": "backend_ssl_server",
+                "port": "443",
+                "address": "10.1.1.50"
+              }
+            ],
+            "monitors": [
+              {
+                "name": "ssl_tcp_monitor",
+                "protocol": "TCP",
+                "-LRTM": "DISABLED",
+                "-interval": "10"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

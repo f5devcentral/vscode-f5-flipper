@@ -1,0 +1,107 @@
+{
+  "configFile": "fn-2187.ns.conf",
+  "generatedAt": "2025-10-12T00:36:16.273Z",
+  "apps": [
+    {
+      "name": "fn-2187-vip_http",
+      "protocol": "HTTP",
+      "ipAddress": "208.208.208.13",
+      "type": "lb",
+      "port": "80",
+      "lines": [
+        "add lb vserver fn-2187-vip_http HTTP 208.208.208.13 80 -persistenceType NONE -cltTimeout 180 -devno 70647808",
+        "add server bb8-01.jaku.dev bb8-01.jaku.dev -state DISABLED -devno 11761",
+        "add server bb8-03.jaku.dev bb8-03.jaku.dev -devno 11764",
+        "add server bb8-05 28.28.28.97 -state DISABLED -devno 11819",
+        "add server bb8-06.jaku.dev 28.28.28.96 -devno 11684",
+        "add server bb8-07.jaku.dev 28.28.28.39 -devno 11685",
+        "add server bb8-08 28.28.28.40 -devno 11821",
+        "add server bb8-09.jaku.dev 28.28.28.29 -devno 11728",
+        "add serviceGroup fn-2187_http_svg HTTP -maxClient 0 -maxReq 0 -cip DISABLED -usip NO -useproxyport YES -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP YES -devno 63504384",
+        "bind lb vserver fn-2187-vip_http fn-2187_http_svg",
+        "bind serviceGroup fn-2187_http_svg -monitorName HTTP -devno 524564",
+        "bind serviceGroup fn-2187_http_svg -monitorName ping -devno 111448",
+        "bind serviceGroup fn-2187_http_svg -monitorName tcp -devno 5296",
+        "bind serviceGroup fn-2187_http_svg bb8-01.jaku.dev 80 -state DISABLED -devno 111345664",
+        "bind serviceGroup fn-2187_http_svg bb8-03.jaku.dev 80 -devno 111411200",
+        "bind serviceGroup fn-2187_http_svg bb8-05 80 -state DISABLED -devno 111312896",
+        "bind serviceGroup fn-2187_http_svg bb8-06.jaku.dev 80 -devno 111280128",
+        "bind serviceGroup fn-2187_http_svg bb8-07.jaku.dev 80 -devno 111214592",
+        "bind serviceGroup fn-2187_http_svg bb8-08 80 -devno 111247360",
+        "bind serviceGroup fn-2187_http_svg bb8-09.jaku.dev 80 -devno 111181824"
+      ],
+      "opts": {
+        "-persistenceType": "NONE",
+        "-cltTimeout": "180"
+      },
+      "bindings": {
+        "serviceGroup": [
+          {
+            "name": "fn-2187_http_svg",
+            "protocol": "HTTP",
+            "-maxClient": "0",
+            "-maxReq": "0",
+            "-cip": "DISABLED",
+            "-usip": "NO",
+            "-useproxyport": "YES",
+            "-cltTimeout": "180",
+            "-svrTimeout": "360",
+            "-CKA": "NO",
+            "-TCPB": "NO",
+            "-CMP": "YES",
+            "servers": [
+              {
+                "name": "bb8-03.jaku.dev",
+                "port": "80",
+                "hostname": "bb8-03.jaku.dev"
+              },
+              {
+                "name": "bb8-01.jaku.dev",
+                "port": "80",
+                "hostname": "bb8-01.jaku.dev",
+                "-state": "DISABLED"
+              },
+              {
+                "name": "bb8-05",
+                "port": "80",
+                "address": "28.28.28.97",
+                "-state": "DISABLED"
+              },
+              {
+                "name": "bb8-06.jaku.dev",
+                "port": "80",
+                "address": "28.28.28.96"
+              },
+              {
+                "name": "bb8-08",
+                "port": "80",
+                "address": "28.28.28.40"
+              },
+              {
+                "name": "bb8-07.jaku.dev",
+                "port": "80",
+                "address": "28.28.28.39"
+              },
+              {
+                "name": "bb8-09.jaku.dev",
+                "port": "80",
+                "address": "28.28.28.29"
+              }
+            ],
+            "monitors": [
+              {
+                "name": "HTTP"
+              },
+              {
+                "name": "tcp"
+              },
+              {
+                "name": "ping"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

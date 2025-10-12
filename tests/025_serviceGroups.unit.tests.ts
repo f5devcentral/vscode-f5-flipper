@@ -29,7 +29,7 @@ describe('serviceGroup abstraction tests', function () {
 
   before(async function () {
     // log test file name - makes it easer for troubleshooting
-    console.log('       file:', __filename)
+        console.log('---------- file:', __filename);
     testFile = await archiveMake('fn-2187.ns.conf') as string;
     // clear the events arrays
     parsedFileEvents.length = 0

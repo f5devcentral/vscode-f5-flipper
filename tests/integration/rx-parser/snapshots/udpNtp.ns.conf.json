@@ -1,0 +1,83 @@
+{
+  "configFile": "udpNtp.ns.conf",
+  "generatedAt": "2025-10-12T00:36:16.313Z",
+  "apps": [
+    {
+      "name": "ntp_lb_vs",
+      "protocol": "UDP",
+      "ipAddress": "192.168.1.10",
+      "type": "lb",
+      "port": "123",
+      "lines": [
+        "add lb vserver ntp_lb_vs UDP 192.168.1.10 123 -persistenceType NONE -cltTimeout 120",
+        "add server ntp_east_primary 10.1.1.148 -comment \"Primary NTP Server East Coast\"",
+        "add server ntp_east_secondary 10.1.2.24 -comment \"Secondary NTP Server East Coast\"",
+        "add server ntp_west_primary 10.2.1.24 -comment \"Primary NTP Server West Coast\"",
+        "add serviceGroup ntp_east_sg UDP -maxClient 0 -maxReq 0 -cip DISABLED -usip NO -useproxyport YES -cltTimeout 180 -svrTimeout 180 -CKA NO -TCPB NO -CMP NO",
+        "add serviceGroup ntp_west_sg UDP -maxClient 0 -maxReq 0 -cip DISABLED -usip NO -useproxyport YES -cltTimeout 180 -svrTimeout 180 -CKA NO -TCPB NO -CMP NO",
+        "bind lb vserver ntp_lb_vs ntp_east_sg",
+        "bind lb vserver ntp_lb_vs ntp_west_sg",
+        "bind serviceGroup ntp_east_sg ntp_east_primary 123 -weight 100",
+        "bind serviceGroup ntp_east_sg ntp_east_secondary 123 -weight 100",
+        "bind serviceGroup ntp_west_sg ntp_west_primary 123"
+      ],
+      "opts": {
+        "-persistenceType": "NONE",
+        "-cltTimeout": "120"
+      },
+      "bindings": {
+        "serviceGroup": [
+          {
+            "name": "ntp_east_sg",
+            "protocol": "UDP",
+            "-maxClient": "0",
+            "-maxReq": "0",
+            "-cip": "DISABLED",
+            "-usip": "NO",
+            "-useproxyport": "YES",
+            "-cltTimeout": "180",
+            "-svrTimeout": "180",
+            "-CKA": "NO",
+            "-TCPB": "NO",
+            "-CMP": "NO",
+            "servers": [
+              {
+                "name": "ntp_east_primary",
+                "port": "123",
+                "address": "10.1.1.148",
+                "-weight": "100"
+              },
+              {
+                "name": "ntp_east_secondary",
+                "port": "123",
+                "address": "10.1.2.24",
+                "-weight": "100"
+              }
+            ]
+          },
+          {
+            "name": "ntp_west_sg",
+            "protocol": "UDP",
+            "-maxClient": "0",
+            "-maxReq": "0",
+            "-cip": "DISABLED",
+            "-usip": "NO",
+            "-useproxyport": "YES",
+            "-cltTimeout": "180",
+            "-svrTimeout": "180",
+            "-CKA": "NO",
+            "-TCPB": "NO",
+            "-CMP": "NO",
+            "servers": [
+              {
+                "name": "ntp_west_primary",
+                "port": "123",
+                "address": "10.2.1.24"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

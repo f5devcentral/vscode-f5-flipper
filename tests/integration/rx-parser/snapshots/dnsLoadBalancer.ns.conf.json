@@ -1,0 +1,106 @@
+{
+  "configFile": "dnsLoadBalancer.ns.conf",
+  "generatedAt": "2025-10-12T00:36:16.271Z",
+  "apps": [
+    {
+      "name": "dns_lb_vs",
+      "protocol": "DNS",
+      "ipAddress": "192.168.1.10",
+      "type": "lb",
+      "port": "53",
+      "lines": [
+        "add lb monitor dns_health_mon DNS -query . -queryType Address -LRTM DISABLED -destPort 53",
+        "add lb vserver dns_lb_vs DNS 192.168.1.10 53 -persistenceType NONE -cltTimeout 120",
+        "add server dns_east_primary 10.1.1.25 -comment \"Primary DNS East Coast\"",
+        "add server dns_east_secondary 10.1.1.26 -comment \"Secondary DNS East Coast\"",
+        "add server dns_west_primary 10.2.1.25 -comment \"Primary DNS West Coast\"",
+        "add serviceGroup dns_east_sg DNS -maxClient 0 -maxReq 0 -cip DISABLED -usip NO -useproxyport NO -cltTimeout 120 -svrTimeout 120 -CKA NO -TCPB NO -CMP NO",
+        "add serviceGroup dns_west_sg DNS -maxClient 0 -maxReq 0 -cip DISABLED -usip NO -useproxyport NO -cltTimeout 120 -svrTimeout 120 -CKA NO -TCPB NO -CMP NO",
+        "bind lb vserver dns_lb_vs dns_east_sg",
+        "bind lb vserver dns_lb_vs dns_west_sg",
+        "bind serviceGroup dns_east_sg -monitorName dns_health_mon -weight 100",
+        "bind serviceGroup dns_east_sg dns_east_primary 53 -weight 100",
+        "bind serviceGroup dns_east_sg dns_east_secondary 53 -weight 100",
+        "bind serviceGroup dns_west_sg -monitorName dns_health_mon",
+        "bind serviceGroup dns_west_sg dns_west_primary 53"
+      ],
+      "opts": {
+        "-persistenceType": "NONE",
+        "-cltTimeout": "120"
+      },
+      "bindings": {
+        "serviceGroup": [
+          {
+            "name": "dns_east_sg",
+            "protocol": "DNS",
+            "-maxClient": "0",
+            "-maxReq": "0",
+            "-cip": "DISABLED",
+            "-usip": "NO",
+            "-useproxyport": "NO",
+            "-cltTimeout": "120",
+            "-svrTimeout": "120",
+            "-CKA": "NO",
+            "-TCPB": "NO",
+            "-CMP": "NO",
+            "servers": [
+              {
+                "name": "dns_east_primary",
+                "port": "53",
+                "address": "10.1.1.25",
+                "-weight": "100"
+              },
+              {
+                "name": "dns_east_secondary",
+                "port": "53",
+                "address": "10.1.1.26",
+                "-weight": "100"
+              }
+            ],
+            "monitors": [
+              {
+                "name": "dns_health_mon",
+                "protocol": "DNS",
+                "-query": ".",
+                "-queryType": "Address",
+                "-LRTM": "DISABLED",
+                "-destPort": "53"
+              }
+            ]
+          },
+          {
+            "name": "dns_west_sg",
+            "protocol": "DNS",
+            "-maxClient": "0",
+            "-maxReq": "0",
+            "-cip": "DISABLED",
+            "-usip": "NO",
+            "-useproxyport": "NO",
+            "-cltTimeout": "120",
+            "-svrTimeout": "120",
+            "-CKA": "NO",
+            "-TCPB": "NO",
+            "-CMP": "NO",
+            "servers": [
+              {
+                "name": "dns_west_primary",
+                "port": "53",
+                "address": "10.2.1.25"
+              }
+            ],
+            "monitors": [
+              {
+                "name": "dns_health_mon",
+                "protocol": "DNS",
+                "-query": ".",
+                "-queryType": "Address",
+                "-LRTM": "DISABLED",
+                "-destPort": "53"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

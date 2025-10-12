@@ -1,0 +1,334 @@
+{
+  "configFile": "starlord.ns.conf",
+  "generatedAt": "2025-10-12T00:36:16.296Z",
+  "apps": [
+    {
+      "name": "starlord_cs_vs",
+      "protocol": "HTTP",
+      "ipAddress": "192.168.86.143",
+      "type": "cs",
+      "port": "443",
+      "lines": [
+        "add cs action starlord-mycsaction -targetLBVserver starlord_offload_lb_vs -comment \"Forwards requests to mylbvserver.\"",
+        "add cs policy starlord-policy-CS-4 -rule \"HTTP.REQ.HOSTNAME.EQ(\\\"starlord2.com\\\")\" -action starlord-mycsaction",
+        "add cs vserver starlord_cs_vs HTTP 192.168.86.143 443 -cltTimeout 180 -persistenceType NONE",
+        "add lb monitor starlord_http_mon HTTP -respCode 200 -httpRequest \"GET /index.html\" -LRTM DISABLED",
+        "add lb vserver starlord_offload_lb_vs SSL 192.168.86.142 443 -persistenceType NONE -cltTimeout 180 -redirectFromPort 80 -httpsRedirectUrl \"https://192.168.86.142\"",
+        "add serviceGroup starlord_http_sg HTTP -maxClient 0 -maxReq 0 -cip DISABLED -usip NO -useproxyport YES -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP NO",
+        "add ssl certKey starlord.galaxy.io_cert -cert foo.crt -key foo.key",
+        "bind cs vserver starlord_cs_vs -lbvserver starlord_offload_lb_vs",
+        "bind cs vserver starlord_cs_vs -policyName starlord-policy-CS-4 -priority 100",
+        "bind lb vserver starlord_offload_lb_vs starlord_http_sg",
+        "bind serviceGroup starlord_http_sg -monitorName starlord_http_mon",
+        "bind serviceGroup starlord_http_sg 1.2.3.4 80",
+        "bind serviceGroup starlord_http_sg 1.2.3.5 80"
+      ],
+      "opts": {
+        "-cltTimeout": "180",
+        "-persistenceType": "NONE"
+      },
+      "bindings": {
+        "-lbvserver": [
+          "starlord_offload_lb_vs"
+        ],
+        "-policyName": [
+          {
+            "-policyName": "starlord-policy-CS-4",
+            "-priority": "100"
+          }
+        ]
+      },
+      "csPolicies": [
+        {
+          "name": "starlord-policy-CS-4",
+          "-rule": "HTTP.REQ.HOSTNAME.EQ(\\\"starlord2.com\\\")",
+          "-action": "starlord-mycsaction"
+        }
+      ],
+      "csPolicyActions": [
+        {
+          "-targetLBVserver": "starlord_offload_lb_vs",
+          "-comment": "Forwards requests to mylbvserver."
+        }
+      ],
+      "apps": [
+        {
+          "name": "starlord_offload_lb_vs",
+          "type": "lb",
+          "protocol": "SSL",
+          "ipAddress": "192.168.86.142",
+          "port": "443",
+          "opts": {
+            "-persistenceType": "NONE",
+            "-cltTimeout": "180",
+            "-redirectFromPort": "80",
+            "-httpsRedirectUrl": "https://192.168.86.142"
+          },
+          "bindings": {
+            "serviceGroup": [
+              {
+                "name": "starlord_http_sg",
+                "protocol": "HTTP",
+                "-maxClient": "0",
+                "-maxReq": "0",
+                "-cip": "DISABLED",
+                "-usip": "NO",
+                "-useproxyport": "YES",
+                "-cltTimeout": "180",
+                "-svrTimeout": "360",
+                "-CKA": "NO",
+                "-TCPB": "NO",
+                "-CMP": "NO",
+                "servers": [
+                  {
+                    "name": "1.2.3.5",
+                    "port": "80"
+                  },
+                  {
+                    "name": "1.2.3.4",
+                    "port": "80"
+                  }
+                ],
+                "monitors": [
+                  {
+                    "name": "starlord_http_mon",
+                    "protocol": "HTTP",
+                    "-respCode": "200",
+                    "-httpRequest": "GET /index.html",
+                    "-LRTM": "DISABLED"
+                  }
+                ]
+              }
+            ],
+            "certs": [
+              {
+                "-cipherName": "ECDHE",
+                "-cert": "foo.crt",
+                "-key": "foo.key",
+                "-certkeyName": "starlord.galaxy.io_cert",
+                "-eccCurveName": [
+                  "P_256",
+                  "P_384",
+                  "P_224",
+                  "P_521"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "starlord_offload_lb_vs",
+          "type": "lb",
+          "protocol": "SSL",
+          "ipAddress": "192.168.86.142",
+          "port": "443",
+          "opts": {
+            "-persistenceType": "NONE",
+            "-cltTimeout": "180",
+            "-redirectFromPort": "80",
+            "-httpsRedirectUrl": "https://192.168.86.142"
+          },
+          "bindings": {
+            "serviceGroup": [
+              {
+                "name": "starlord_http_sg",
+                "protocol": "HTTP",
+                "-maxClient": "0",
+                "-maxReq": "0",
+                "-cip": "DISABLED",
+                "-usip": "NO",
+                "-useproxyport": "YES",
+                "-cltTimeout": "180",
+                "-svrTimeout": "360",
+                "-CKA": "NO",
+                "-TCPB": "NO",
+                "-CMP": "NO",
+                "servers": [
+                  {
+                    "name": "1.2.3.5",
+                    "port": "80"
+                  },
+                  {
+                    "name": "1.2.3.4",
+                    "port": "80"
+                  }
+                ],
+                "monitors": [
+                  {
+                    "name": "starlord_http_mon",
+                    "protocol": "HTTP",
+                    "-respCode": "200",
+                    "-httpRequest": "GET /index.html",
+                    "-LRTM": "DISABLED"
+                  }
+                ]
+              }
+            ],
+            "certs": [
+              {
+                "-cipherName": "ECDHE",
+                "-cert": "foo.crt",
+                "-key": "foo.key",
+                "-certkeyName": "starlord.galaxy.io_cert",
+                "-eccCurveName": [
+                  "P_256",
+                  "P_384",
+                  "P_224",
+                  "P_521"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "starlord_offload_lb_vs",
+      "protocol": "SSL",
+      "ipAddress": "192.168.86.142",
+      "type": "lb",
+      "port": "443",
+      "lines": [
+        "add lb monitor starlord_http_mon HTTP -respCode 200 -httpRequest \"GET /index.html\" -LRTM DISABLED",
+        "add lb vserver starlord_offload_lb_vs SSL 192.168.86.142 443 -persistenceType NONE -cltTimeout 180 -redirectFromPort 80 -httpsRedirectUrl \"https://192.168.86.142\"",
+        "add serviceGroup starlord_http_sg HTTP -maxClient 0 -maxReq 0 -cip DISABLED -usip NO -useproxyport YES -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP NO",
+        "add ssl certKey starlord.galaxy.io_cert -cert foo.crt -key foo.key",
+        "bind lb vserver starlord_offload_lb_vs starlord_http_sg",
+        "bind serviceGroup starlord_http_sg -monitorName starlord_http_mon",
+        "bind serviceGroup starlord_http_sg 1.2.3.4 80",
+        "bind serviceGroup starlord_http_sg 1.2.3.5 80",
+        "bind ssl vserver starlord_offload_lb_vs -certkeyName starlord.galaxy.io_cert",
+        "bind ssl vserver starlord_offload_lb_vs -cipherName ECDHE",
+        "bind ssl vserver starlord_offload_lb_vs -eccCurveName P_224",
+        "bind ssl vserver starlord_offload_lb_vs -eccCurveName P_256",
+        "bind ssl vserver starlord_offload_lb_vs -eccCurveName P_384",
+        "bind ssl vserver starlord_offload_lb_vs -eccCurveName P_521"
+      ],
+      "opts": {
+        "-persistenceType": "NONE",
+        "-cltTimeout": "180",
+        "-redirectFromPort": "80",
+        "-httpsRedirectUrl": "https://192.168.86.142"
+      },
+      "bindings": {
+        "serviceGroup": [
+          {
+            "name": "starlord_http_sg",
+            "protocol": "HTTP",
+            "-maxClient": "0",
+            "-maxReq": "0",
+            "-cip": "DISABLED",
+            "-usip": "NO",
+            "-useproxyport": "YES",
+            "-cltTimeout": "180",
+            "-svrTimeout": "360",
+            "-CKA": "NO",
+            "-TCPB": "NO",
+            "-CMP": "NO",
+            "servers": [
+              {
+                "name": "1.2.3.5",
+                "port": "80"
+              },
+              {
+                "name": "1.2.3.4",
+                "port": "80"
+              }
+            ],
+            "monitors": [
+              {
+                "name": "starlord_http_mon",
+                "protocol": "HTTP",
+                "-respCode": "200",
+                "-httpRequest": "GET /index.html",
+                "-LRTM": "DISABLED"
+              }
+            ]
+          }
+        ],
+        "certs": [
+          {
+            "-cipherName": "ECDHE",
+            "-cert": "foo.crt",
+            "-key": "foo.key",
+            "-certkeyName": "starlord.galaxy.io_cert",
+            "-eccCurveName": [
+              "P_256",
+              "P_384",
+              "P_224",
+              "P_521"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "starlord_http_lb_vs",
+      "protocol": "HTTP",
+      "ipAddress": "192.168.86.144",
+      "type": "lb",
+      "port": "80",
+      "lines": [
+        "add lb monitor starlord_http_mon HTTP -respCode 200 -httpRequest \"GET /index.html\" -LRTM DISABLED",
+        "add lb vserver starlord_http_lb_vs HTTP 192.168.86.144 80 -persistenceType NONE -cltTimeout 180",
+        "add rewrite policy starlord_rewrite_policy HTTP.REQ.IS_VALID starlord_rewrite_policy_action",
+        "add serviceGroup starlord_http_sg HTTP -maxClient 0 -maxReq 0 -cip DISABLED -usip NO -useproxyport YES -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP NO",
+        "bind lb vserver starlord_http_lb_vs -policyName starlord_rewrite_policy -priority 100 -gotoPriorityExpression END -type REQUEST",
+        "bind lb vserver starlord_http_lb_vs starlord_http_sg",
+        "bind serviceGroup starlord_http_sg -monitorName starlord_http_mon",
+        "bind serviceGroup starlord_http_sg 1.2.3.4 80",
+        "bind serviceGroup starlord_http_sg 1.2.3.5 80"
+      ],
+      "opts": {
+        "-persistenceType": "NONE",
+        "-cltTimeout": "180"
+      },
+      "bindings": {
+        "-policyName": [
+          {
+            "-policyName": "starlord_rewrite_policy",
+            "-priority": "100",
+            "-gotoPriorityExpression": "END",
+            "-type": "REQUEST"
+          }
+        ],
+        "serviceGroup": [
+          {
+            "name": "starlord_http_sg",
+            "protocol": "HTTP",
+            "-maxClient": "0",
+            "-maxReq": "0",
+            "-cip": "DISABLED",
+            "-usip": "NO",
+            "-useproxyport": "YES",
+            "-cltTimeout": "180",
+            "-svrTimeout": "360",
+            "-CKA": "NO",
+            "-TCPB": "NO",
+            "-CMP": "NO",
+            "servers": [
+              {
+                "name": "1.2.3.5",
+                "port": "80"
+              },
+              {
+                "name": "1.2.3.4",
+                "port": "80"
+              }
+            ],
+            "monitors": [
+              {
+                "name": "starlord_http_mon",
+                "protocol": "HTTP",
+                "-respCode": "200",
+                "-httpRequest": "GET /index.html",
+                "-LRTM": "DISABLED"
+              }
+            ]
+          }
+        ]
+      },
+      "apps": []
+    }
+  ]
+}

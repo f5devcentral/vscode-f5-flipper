@@ -43,11 +43,13 @@ export function digCStoLBreferences(apps: AdcApp[]) {
 
                     if(a) {
 
-                        // copy app json
-                        const b = JSON.parse(JSON.stringify(a))
+                        // Deep copy app (use structuredClone for better performance)
+                        const b = structuredClone(a)
 
-                        // copy reference app config lines to main app
-                        app.lines.push(...b.lines)
+                        // copy reference app config lines to main app, but exclude SSL bindings
+                        // (referenced LB vservers' SSL bindings are not relevant - CS handles SSL)
+                        const filteredLines = b.lines.filter((line: string) => !line.startsWith('bind ssl vserver'));
+                        app.lines.push(...filteredLines)
                         // delete app lines from referenced app
                         delete b.lines
 
@@ -73,12 +75,13 @@ export function digCStoLBreferences(apps: AdcApp[]) {
 
                     if(a) {
 
-                        // copy app json
-                        const b = JSON.parse(JSON.stringify(a))
-                        // const b = JSON.parse(JSON.stringify(a))
+                        // Deep copy app (use structuredClone for better performance)
+                        const b = structuredClone(a)
 
-                        // copy reference app config lines to main app
-                        app.lines.push(...b.lines)
+                        // copy reference app config lines to main app, but exclude SSL bindings
+                        // (referenced LB vservers' SSL bindings are not relevant - CS handles SSL)
+                        const filteredLines = b.lines.filter((line: string) => !line.startsWith('bind ssl vserver'));
+                        app.lines.push(...filteredLines)
                         // delete app lines from referenced app
                         delete b.lines
 
@@ -107,20 +110,22 @@ export function digCStoLBreferences(apps: AdcApp[]) {
 
                 if(a) {
 
-                    // copy app json
-                    const b = JSON.parse(JSON.stringify(a))
-    
-                    // copy reference app config lines to main app
-                    app.lines.push(...b.lines)
+                    // Deep copy app (use structuredClone for better performance)
+                    const b = structuredClone(a)
+
+                    // copy reference app config lines to main app, but exclude SSL bindings
+                    // (referenced LB vservers' SSL bindings are not relevant - CS handles SSL)
+                    const filteredLines = b.lines.filter((line: string) => !line.startsWith('bind ssl vserver'));
+                    app.lines.push(...filteredLines)
                     // delete app lines from referenced app
                     delete b.lines
-    
+
                     // push lb app to cs app
                     app.apps.push(sortAdcApp(b))
 
                 } else {
                     logger.error(`-lbvserver ${e} referenced by CS ${app.name} not found`)
-                
+
                 }
 
             }

@@ -1,0 +1,140 @@
+{
+  "configFile": "namaste.conf",
+  "generatedAt": "2025-10-12T00:36:16.292Z",
+  "apps": [
+    {
+      "name": "\"namaste 443 vip\"",
+      "protocol": "SSL",
+      "ipAddress": "10.240.18.68",
+      "type": "lb",
+      "port": "443",
+      "lines": [
+        "add lb monitor namaste_awaken_http8443_mon HTTP-ECV -send \"GET /look/within\" -recv \"\\\"find\\\":love\" -LRTM DISABLED -secure YES -devno 12369",
+        "add lb monitor namaste_custome_tcp_mon TCP -LRTM DISABLED -interval 30 -resptimeout 15 -secure YES -devno 12356",
+        "add lb vserver \"namaste 443 vip\" SSL 10.240.18.68 443 -persistenceType NONE -lbMethod ROUNDROBIN -backupLBMethod LEASTCONNECTION -cltTimeout 180 -devno 50003968",
+        "add responder policy namaste_443_rsp \"HTTP.REQ.URL.EQ(\\\"/\\\")\" namaste_443_rspa",
+        "add server dragonfly1.yoga.in 10.240.24.215 -devno 11476",
+        "add server dragonfly2.yoga.in 10.240.24.225 -devno 11477",
+        "add server dragonfly3.yoga.in 10.240.24.226 -devno 11478",
+        "add server lotus1.yoga.in 10.240.20.64 -devno 11415",
+        "add server lotus2.yoga.in 10.240.20.71 -devno 11416",
+        "add server lotus3.yoga.in 10.240.20.72 -devno 11417",
+        "add serviceGroup \"namaste 8443 svg\" SSL -maxClient 0 -maxReq 0 -cip DISABLED -usip NO -useproxyport YES -cltTimeout 180 -svrTimeout 360 -CKA NO -TCPB NO -CMP NO -devno 47218688",
+        "bind lb vserver \"namaste 443 vip\" \"namaste 8443 svg\"",
+        "bind lb vserver \"namaste 443 vip\" -policyName namaste_443_rsp -priority 100 -gotoPriorityExpression END -type REQUEST",
+        "bind serviceGroup \"namaste 8443 svg\" -monitorName namaste_awaken_http8443_mon -devno 72876032",
+        "bind serviceGroup \"namaste 8443 svg\" -monitorName namaste_custome_tcp_mon -devno 62685184",
+        "bind serviceGroup \"namaste 8443 svg\" dragonfly1.yoga.in 8443 -state DISABLED -devno 62521344",
+        "bind serviceGroup \"namaste 8443 svg\" dragonfly2.yoga.in 8443 -state DISABLED -devno 62554112",
+        "bind serviceGroup \"namaste 8443 svg\" dragonfly3.yoga.in 8443 -state DISABLED -devno 62586880",
+        "bind serviceGroup \"namaste 8443 svg\" lotus1.yoga.in 8443 -devno 62357504",
+        "bind serviceGroup \"namaste 8443 svg\" lotus2.yoga.in 8443 -devno 62390272",
+        "bind serviceGroup \"namaste 8443 svg\" lotus3.yoga.in 8443 -devno 62423040",
+        "bind ssl vserver \"namaste 443 vip\" -certkeyName sinsvault-new",
+        "bind ssl vserver \"namaste 443 vip\" -cipherName DEFAULT",
+        "bind ssl vserver \"namaste 443 vip\" -eccCurveName P_224",
+        "bind ssl vserver \"namaste 443 vip\" -eccCurveName P_256",
+        "bind ssl vserver \"namaste 443 vip\" -eccCurveName P_384",
+        "bind ssl vserver \"namaste 443 vip\" -eccCurveName P_521"
+      ],
+      "opts": {
+        "-persistenceType": "NONE",
+        "-lbMethod": "ROUNDROBIN",
+        "-backupLBMethod": "LEASTCONNECTION",
+        "-cltTimeout": "180"
+      },
+      "bindings": {
+        "serviceGroup": [
+          {
+            "name": "\"namaste 8443 svg\"",
+            "protocol": "SSL",
+            "-maxClient": "0",
+            "-maxReq": "0",
+            "-cip": "DISABLED",
+            "-usip": "NO",
+            "-useproxyport": "YES",
+            "-cltTimeout": "180",
+            "-svrTimeout": "360",
+            "-CKA": "NO",
+            "-TCPB": "NO",
+            "-CMP": "NO",
+            "servers": [
+              {
+                "name": "lotus1.yoga.in",
+                "port": "8443",
+                "address": "10.240.20.64"
+              },
+              {
+                "name": "lotus2.yoga.in",
+                "port": "8443",
+                "address": "10.240.20.71"
+              },
+              {
+                "name": "lotus3.yoga.in",
+                "port": "8443",
+                "address": "10.240.20.72"
+              },
+              {
+                "name": "dragonfly1.yoga.in",
+                "port": "8443",
+                "address": "10.240.24.215",
+                "-state": "DISABLED"
+              },
+              {
+                "name": "dragonfly2.yoga.in",
+                "port": "8443",
+                "address": "10.240.24.225",
+                "-state": "DISABLED"
+              },
+              {
+                "name": "dragonfly3.yoga.in",
+                "port": "8443",
+                "address": "10.240.24.226",
+                "-state": "DISABLED"
+              }
+            ],
+            "monitors": [
+              {
+                "name": "namaste_custome_tcp_mon",
+                "protocol": "TCP",
+                "-LRTM": "DISABLED",
+                "-interval": "30",
+                "-resptimeout": "15",
+                "-secure": "YES"
+              },
+              {
+                "name": "namaste_awaken_http8443_mon",
+                "protocol": "HTTP-ECV",
+                "-send": "GET /look/within",
+                "-recv": "\\\"find\\\":love",
+                "-LRTM": "DISABLED",
+                "-secure": "YES"
+              }
+            ]
+          }
+        ],
+        "-policyName": [
+          {
+            "-policyName": "namaste_443_rsp",
+            "-priority": "100",
+            "-gotoPriorityExpression": "END",
+            "-type": "REQUEST"
+          }
+        ],
+        "certs": [
+          {
+            "-cipherName": "DEFAULT",
+            "-certkeyName": "sinsvault-new",
+            "-eccCurveName": [
+              "P_256",
+              "P_384",
+              "P_224",
+              "P_521"
+            ]
+          }
+        ]
+      },
+      "apps": []
+    }
+  ]
+}

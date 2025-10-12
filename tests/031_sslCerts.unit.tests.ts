@@ -29,7 +29,7 @@ describe('ssl certificate tests', function () {
 
     before(async function () {
         // log test file name - makes it easer for troubleshooting
-        console.log('       file:', __filename)
+        console.log('---------- file:', __filename);
         testFile = await archiveMake() as string;
         // clear the events arrays
         parsedFileEvents.length = 0

@@ -13,12 +13,15 @@ const parsedFileEvents: any[] = []
 const parsedObjEvents: any[] = []
 
 
+// todo: revisit fast template and engine, flush out tests
+
 describe('tgz unpacker tests', function () {
-
+    
     before(async function () {
-        // log test file name - makes it easer for troubleshooting
-        console.log('       file:', __filename)
-
+        // log test file name - makes it easier for troubleshooting
+        console.log('----------------------------------------------------------');
+        console.log('---------- file:', __filename);
+        
         // clear the events arrays
         parsedFileEvents.length = 0
         parsedObjEvents.length = 0

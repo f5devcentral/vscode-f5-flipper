@@ -66,7 +66,7 @@ export class RegExTree {
             'add dns nameServer': /(?<server>\S+)/,
             'add lb vserver': /(?<name>("[\S ]+"|[\S]+)) (?<protocol>\S+) (?<ipAddress>[\d\w.:]+) (?<port>(\d+|\*)) (?<opts>[\S ]+)/,
             'add lb monitor': /(?<name>\S+) (?<protocol>\S+) (?<opts>[\S ]+)/,
-            'add ssl certKey': /(?<name>\S+) (?<opts>[\S ]+)/,
+            'add ssl certKey': /(?<name>("[\S ]+"|[\S]+)) (?<opts>[\S ]+)/,  // TODO: Added quote support to match old parser behavior
             'add server': /(?<name>("[\S ]+"|[\S]+)) (?<dest>\S+) ?(?<opts>[\S ]+)?/,
             'add service': /(?<name>("[\S ]+"|[\S]+)) (?<server>\S+) (?<protocol>\S+) (?<port>(\d+|\*)) (?<opts>[\S ]+)/,
             'add serviceGroup': /(?<name>("[\S ]+"|[\S]+)) (?<protocol>\S+) (?<opts>[\S ]+)/,
@@ -87,11 +87,13 @@ export class RegExTree {
             'add appflow collector': /(?<name>\S+) (?<opts>[\S ]+)/,
             'set ssl vserver': /(?<name>\S+) (?<opts>[\S ]+)/,
             'set ssl service': /(?<name>\S+) (?<opts>[\S ]+)/,
+            'set lb vserver': /(?<name>("[\S ]+"|[\S]+)) (?<opts>[\S ]+)/,
             'set lb monitor': /(?<name>\S+) (?<opts>[\S ]+)/,
+            'set cs vserver': /(?<name>("[\S ]+"|[\S]+)) (?<opts>[\S ]+)/,
             'set ns param': /(?<opts>[\S ]+)/,
             'set ns hostName': /(?<hostName>[\S ]+)/,
             'set gslb vserver': /(?<name>\S+) (?<opts>[\S ]+)/,
-            'bind service': /(?<name>("[\S ]+"|[\S]+)) ((?<serv>\S+ (\d+|\*))|(?<monitor>-monitorName \S+)|(?<opts>[\S ]+))/,
+            'bind service': /(?<name>("[\S ]+"|[\S]+)) ((?<serv>\S+ (\d+|\*))|(?<opts>[\S ]+))/,
             'bind serviceGroup': /(?<name>("[\S ]+"|[\S]+)) ((?<serv>\S+) (?<port>\d+|\*))?(?<opts>[\S ]+)?/,
             'bind lb vserver': /(?<name>("[\S ]+"|[\S]+)) ((?<opts>-[\S ]+)|(?<service>("[\S ]+"|[\S]+)))/,
             'bind cs vserver': /(?<name>("[\S ]+"|[\S]+)) (?<opts>[\S ]+)/,
@@ -147,41 +149,41 @@ export class RegExTree {
 
 
 
-export type TmosRegExTree = {
-    tmosVersion: RegExp,
-    parentObjects: RegExp,
-    parentNameValue: RegExp,
-    vs: {
-        pool: {
-            obj: RegExp,
-            members: RegExp,
-            nodesFromMembers: RegExp,
-            monitors: RegExp
-        },
-        profiles: {
-            obj: RegExp,
-            names: RegExp
-        },
-        rules: {
-            obj: RegExp,
-            names: RegExp
-        },
-        snat: {
-            obj: RegExp,
-            name: RegExp
-        },
-        ltPolicies: {
-            obj: RegExp,
-            names: RegExp
-        },
-        persist: {
-            obj: RegExp,
-            name: RegExp
-        },
-        fbPersist: RegExp,
-        destination: RegExp
-    }
-}
+// export type TmosRegExTree = {
+//     tmosVersion: RegExp,
+//     parentObjects: RegExp,
+//     parentNameValue: RegExp,
+//     vs: {
+//         pool: {
+//             obj: RegExp,
+//             members: RegExp,
+//             nodesFromMembers: RegExp,
+//             monitors: RegExp
+//         },
+//         profiles: {
+//             obj: RegExp,
+//             names: RegExp
+//         },
+//         rules: {
+//             obj: RegExp,
+//             names: RegExp
+//         },
+//         snat: {
+//             obj: RegExp,
+//             name: RegExp
+//         },
+//         ltPolicies: {
+//             obj: RegExp,
+//             names: RegExp
+//         },
+//         persist: {
+//             obj: RegExp,
+//             name: RegExp
+//         },
+//         fbPersist: RegExp,
+//         destination: RegExp
+//     }
+// }
 
 /**
  * returns full number without decimals so it can be compared

@@ -1,0 +1,655 @@
+/*
+ * Copyright 2020. F5 Networks, Inc. See End User License Agreement ("EULA") for
+ * license terms. Notwithstanding anything to the contrary in the EULA, Licensee
+ * may copy and modify this software product for its internal business purposes.
+ * Further, Licensee may upload, publish and distribute the modified version of
+ * the software product on devcentral.f5.com.
+ */
+
+'use strict';
+
+import assert from 'assert';
+import { AdcApp } from '../src/models';
+import ADC from '../src/CitrixADC';
+import ADCold from '../src/CitrixADCold';
+import { archiveMake } from './archiveBuilder';
+
+/**
+ * Comprehensive test suite that parses each test config file independently
+ * Each config file has its own describe block, and each app has its own it block
+ * This allows for easy troubleshooting and note-taking per application
+ */
+
+/**
+ * Normalize app for comparison by sorting lines array
+ * This allows comparison ignoring line order (e.g., SSL certKey can appear in different positions)
+ */
+function normalizeApp(app: AdcApp): AdcApp {
+    if (!app) return app;
+    return {
+        ...app,
+        lines: app.lines ? [...app.lines].sort() : []
+    };
+}
+
+/**
+ * Compare two apps with detailed error reporting
+ */
+function compareApps(newApp: AdcApp | undefined, origApp: AdcApp | undefined, appName: string): void {
+    if (!origApp) {
+        throw new Error(`App "${appName}" not found in original parsing`);
+    }
+
+    if (!newApp) {
+        throw new Error(`App "${appName}" not found in RX parsing`);
+    }
+
+    // Normalize both apps for comparison
+    const normalizedOrig = normalizeApp(origApp);
+    const normalizedNew = normalizeApp(newApp);
+
+    try {
+        assert.deepStrictEqual(normalizedNew, normalizedOrig);
+    } catch (error) {
+        console.log(`\n❌ FAILED: ${appName}`);
+        console.log('\n--- Differences ---');
+
+        // Show specific field differences
+        const allKeys = new Set([...Object.keys(normalizedOrig), ...Object.keys(normalizedNew)]);
+        allKeys.forEach(key => {
+            const origVal = JSON.stringify((normalizedOrig as any)[key]);
+            const newVal = JSON.stringify((normalizedNew as any)[key]);
+            if (origVal !== newVal) {
+                console.log(`  Field "${key}":`);
+                console.log(`    Original: ${origVal.substring(0, 200)}${origVal.length > 200 ? '...' : ''}`);
+                console.log(`    New RX:   ${newVal.substring(0, 200)}${newVal.length > 200 ? '...' : ''}`);
+            }
+        });
+
+        throw error;
+    }
+}
+
+// ========================================
+// anyProtocol.ns.conf
+// ========================================
+describe('parseAdcArraysRx - anyProtocol.ns.conf', function () {
+    let apps: AdcApp[] = [];
+    let appsOld: AdcApp[] = [];
+
+    before(async function () {
+        const testFile = await archiveMake('anyProtocol.ns.conf') as string;
+        const adc = new ADC();
+        await adc.loadParseAsync(testFile);
+        const explosion = await adc.explode();
+        apps = explosion?.config.apps || [];
+
+        const adcOld = new ADCold();
+        await adcOld.loadParseAsync(testFile);
+        const explosionOld = await adcOld.explode();
+        appsOld = explosionOld?.config.apps || [];
+    });
+
+    it('exchange_any_vs', function () {
+        const origApp = appsOld.find(x => x.name === 'exchange_any_vs');
+        const rxApp = apps.find(x => x.name === 'exchange_any_vs');
+        compareApps(rxApp, origApp, 'exchange_any_vs');
+    });
+});
+
+// ========================================
+// apple.ns.conf
+// ========================================
+describe('parseAdcArraysRx - apple.ns.conf', function () {
+    let apps: AdcApp[] = [];
+    let appsOld: AdcApp[] = [];
+
+    before(async function () {
+        const testFile = await archiveMake('apple.ns.conf') as string;
+        const adc = new ADC();
+        await adc.loadParseAsync(testFile);
+        const explosion = await adc.explode();
+        apps = explosion?.config.apps || [];
+
+        const adcOld = new ADCold();
+        await adcOld.loadParseAsync(testFile);
+        const explosionOld = await adcOld.explode();
+        appsOld = explosionOld?.config.apps || [];
+    });
+
+    it('"1 APPLE_443_HTTPS"', function () {
+        const origApp = appsOld.find(x => x.name === '"1 APPLE_443_HTTPS"');
+        const rxApp = apps.find(x => x.name === '"1 APPLE_443_HTTPS"');
+        compareApps(rxApp, origApp, '1 APPLE_443_HTTPS');
+    });
+
+    it('"2 APPLE_80_HTTP"', function () {
+        const origApp = appsOld.find(x => x.name === '"2 APPLE_80_HTTP"');
+        const rxApp = apps.find(x => x.name === '"2 APPLE_80_HTTP"');
+        compareApps(rxApp, origApp, '2 APPLE_80_HTTP');
+    });
+
+    it('"3 APPLE_443_HTTPS"', function () {
+        const origApp = appsOld.find(x => x.name === '"3 APPLE_443_HTTPS"');
+        const rxApp = apps.find(x => x.name === '"3 APPLE_443_HTTPS"');
+        compareApps(rxApp, origApp, '3 APPLE_443_HTTPS');
+    });
+});
+
+// ========================================
+// bren.ns.conf
+// ========================================
+describe('parseAdcArraysRx - bren.ns.conf', function () {
+    let apps: AdcApp[] = [];
+    let appsOld: AdcApp[] = [];
+
+    before(async function () {
+        const testFile = await archiveMake('bren.ns.conf') as string;
+        const adc = new ADC();
+        await adc.loadParseAsync(testFile);
+        const explosion = await adc.explode();
+        apps = explosion?.config.apps || [];
+
+        const adcOld = new ADCold();
+        await adcOld.loadParseAsync(testFile);
+        const explosionOld = await adcOld.explode();
+        appsOld = explosionOld?.config.apps || [];
+    });
+
+    it('nv-app-443', function () {
+        const origApp = appsOld.find(x => x.name === 'nv-app-443');
+        const rxApp = apps.find(x => x.name === 'nv-app-443');
+        compareApps(rxApp, origApp, 'nv-app-443');
+    });
+
+    it('nv-app-cs-8080-443', function () {
+        const origApp = appsOld.find(x => x.name === 'nv-app-cs-8080-443');
+        const rxApp = apps.find(x => x.name === 'nv-app-cs-8080-443');
+        compareApps(rxApp, origApp, 'nv-app-cs-8080-443');
+    });
+
+    it('nv-app-cs-8110-443', function () {
+        const origApp = appsOld.find(x => x.name === 'nv-app-cs-8110-443');
+        const rxApp = apps.find(x => x.name === 'nv-app-cs-8110-443');
+        compareApps(rxApp, origApp, 'nv-app-cs-8110-443');
+    });
+
+    it('nv-app-cs-8120-443', function () {
+        const origApp = appsOld.find(x => x.name === 'nv-app-cs-8120-443');
+        const rxApp = apps.find(x => x.name === 'nv-app-cs-8120-443');
+        compareApps(rxApp, origApp, 'nv-app-cs-8120-443');
+    });
+
+    it('nv-app-cs-8130-443', function () {
+        const origApp = appsOld.find(x => x.name === 'nv-app-cs-8130-443');
+        const rxApp = apps.find(x => x.name === 'nv-app-cs-8130-443');
+        compareApps(rxApp, origApp, 'nv-app-cs-8130-443');
+    });
+
+    it('nv-app-cs-8140-443', function () {
+        const origApp = appsOld.find(x => x.name === 'nv-app-cs-8140-443');
+        const rxApp = apps.find(x => x.name === 'nv-app-cs-8140-443');
+        compareApps(rxApp, origApp, 'nv-app-cs-8140-443');
+    });
+
+    it('nv-app-cs-8150-443', function () {
+        const origApp = appsOld.find(x => x.name === 'nv-app-cs-8150-443');
+        const rxApp = apps.find(x => x.name === 'nv-app-cs-8150-443');
+        compareApps(rxApp, origApp, 'nv-app-cs-8150-443');
+    });
+
+    it('orionprd1123-443', function () {
+        const origApp = appsOld.find(x => x.name === 'orionprd1123-443');
+        const rxApp = apps.find(x => x.name === 'orionprd1123-443');
+        compareApps(rxApp, origApp, 'orionprd1123-443');
+    });
+
+    it('ormdev-443', function () {
+        const origApp = appsOld.find(x => x.name === 'ormdev-443');
+        const rxApp = apps.find(x => x.name === 'ormdev-443');
+        compareApps(rxApp, origApp, 'ormdev-443');
+    });
+
+    it('syslog-splunk-13514-514', function () {
+        const origApp = appsOld.find(x => x.name === 'syslog-splunk-13514-514');
+        const rxApp = apps.find(x => x.name === 'syslog-splunk-13514-514');
+        compareApps(rxApp, origApp, 'syslog-splunk-13514-514');
+    });
+
+    it('tkb6prd-9402', function () {
+        const origApp = appsOld.find(x => x.name === 'tkb6prd-9402');
+        const rxApp = apps.find(x => x.name === 'tkb6prd-9402');
+        compareApps(rxApp, origApp, 'tkb6prd-9402');
+    });
+
+    it('vip-sharepoint-443', function () {
+        const origApp = appsOld.find(x => x.name === 'vip-sharepoint-443');
+        const rxApp = apps.find(x => x.name === 'vip-sharepoint-443');
+        compareApps(rxApp, origApp, 'vip-sharepoint-443');
+    });
+
+    it('vip-sharepoint-80', function () {
+        const origApp = appsOld.find(x => x.name === 'vip-sharepoint-80');
+        const rxApp = apps.find(x => x.name === 'vip-sharepoint-80');
+        compareApps(rxApp, origApp, 'vip-sharepoint-80');
+    });
+
+    it('vip-sharepoint-default-443', function () {
+        const origApp = appsOld.find(x => x.name === 'vip-sharepoint-default-443');
+        const rxApp = apps.find(x => x.name === 'vip-sharepoint-default-443');
+        compareApps(rxApp, origApp, 'vip-sharepoint-default-443');
+    });
+
+    it('vip-sharepoint-default-80', function () {
+        const origApp = appsOld.find(x => x.name === 'vip-sharepoint-default-80');
+        const rxApp = apps.find(x => x.name === 'vip-sharepoint-default-80');
+        compareApps(rxApp, origApp, 'vip-sharepoint-default-80');
+    });
+
+});
+
+// ========================================
+// dnsLoadBalancer.ns.conf
+// ========================================
+describe('parseAdcArraysRx - dnsLoadBalancer.ns.conf', function () {
+    let apps: AdcApp[] = [];
+    let appsOld: AdcApp[] = [];
+
+    before(async function () {
+        const testFile = await archiveMake('dnsLoadBalancer.ns.conf') as string;
+        const adc = new ADC();
+        await adc.loadParseAsync(testFile);
+        const explosion = await adc.explode();
+        apps = explosion?.config.apps || [];
+
+        const adcOld = new ADCold();
+        await adcOld.loadParseAsync(testFile);
+        const explosionOld = await adcOld.explode();
+        appsOld = explosionOld?.config.apps || [];
+    });
+
+    it('dns_lb_vs', function () {
+        const origApp = appsOld.find(x => x.name === 'dns_lb_vs');
+        const rxApp = apps.find(x => x.name === 'dns_lb_vs');
+        compareApps(rxApp, origApp, 'dns_lb_vs');
+    });
+});
+
+// ========================================
+// fn-2187.ns.conf
+// ========================================
+describe('parseAdcArraysRx - fn-2187.ns.conf', function () {
+    let apps: AdcApp[] = [];
+    let appsOld: AdcApp[] = [];
+
+    before(async function () {
+        const testFile = await archiveMake('fn-2187.ns.conf') as string;
+        const adc = new ADC();
+        await adc.loadParseAsync(testFile);
+        const explosion = await adc.explode();
+        apps = explosion?.config.apps || [];
+
+        const adcOld = new ADCold();
+        await adcOld.loadParseAsync(testFile);
+        const explosionOld = await adcOld.explode();
+        appsOld = explosionOld?.config.apps || [];
+    });
+
+    it('fn-2187-vip_http', function () {
+        const origApp = appsOld.find(x => x.name === 'fn-2187-vip_http');
+        const rxApp = apps.find(x => x.name === 'fn-2187-vip_http');
+        compareApps(rxApp, origApp, 'fn-2187-vip_http');
+    });
+});
+
+// ========================================
+// groot.ns.conf
+// ========================================
+describe('parseAdcArraysRx - groot.ns.conf', function () {
+    let apps: AdcApp[] = [];
+    let appsOld: AdcApp[] = [];
+
+    before(async function () {
+        const testFile = await archiveMake('groot.ns.conf') as string;
+        const adc = new ADC();
+        await adc.loadParseAsync(testFile);
+        const explosion = await adc.explode();
+        apps = explosion?.config.apps || [];
+
+        const adcOld = new ADCold();
+        await adcOld.loadParseAsync(testFile);
+        const explosionOld = await adcOld.explode();
+        appsOld = explosionOld?.config.apps || [];
+    });
+
+    it('groot-am-lb-vsvr', function () {
+        // LB vserver referenced by CS - FAILING
+        const origApp = appsOld.find(x => x.name === 'groot-am-lb-vsvr');
+        const rxApp = apps.find(x => x.name === 'groot-am-lb-vsvr');
+        compareApps(rxApp, origApp, 'groot-am-lb-vsvr');
+    });
+
+    it('groot-cs-redirect', function () {
+        const origApp = appsOld.find(x => x.name === 'groot-cs-redirect');
+        const rxApp = apps.find(x => x.name === 'groot-cs-redirect');
+        compareApps(rxApp, origApp, 'groot-cs-redirect');
+    });
+
+    it('groot-cs-vsvr', function () {
+        const origApp = appsOld.find(x => x.name === 'groot-cs-vsvr');
+        const rxApp = apps.find(x => x.name === 'groot-cs-vsvr');
+        compareApps(rxApp, origApp, 'groot-cs-vsvr');
+    });
+
+    it('groot-groot-lb-vsvr', function () {
+        const origApp = appsOld.find(x => x.name === 'groot-groot-lb-vsvr');
+        const rxApp = apps.find(x => x.name === 'groot-groot-lb-vsvr');
+        compareApps(rxApp, origApp, 'groot-groot-lb-vsvr');
+    });
+
+    it('groot-i-lb-vsvr', function () {
+        const origApp = appsOld.find(x => x.name === 'groot-i-lb-vsvr');
+        const rxApp = apps.find(x => x.name === 'groot-i-lb-vsvr');
+        compareApps(rxApp, origApp, 'groot-i-lb-vsvr');
+    });
+
+    it('groot-yes-lb-vsvr', function () {
+        const origApp = appsOld.find(x => x.name === 'groot-yes-lb-vsvr');
+        const rxApp = apps.find(x => x.name === 'groot-yes-lb-vsvr');
+        compareApps(rxApp, origApp, 'groot-yes-lb-vsvr');
+    });
+});
+
+// ========================================
+// namaste.conf
+// ========================================
+describe('parseAdcArraysRx - namaste.conf', function () {
+    let apps: AdcApp[] = [];
+    let appsOld: AdcApp[] = [];
+
+    before(async function () {
+        const testFile = await archiveMake('namaste.conf') as string;
+        const adc = new ADC();
+        await adc.loadParseAsync(testFile);
+        const explosion = await adc.explode();
+        apps = explosion?.config.apps || [];
+
+        const adcOld = new ADCold();
+        await adcOld.loadParseAsync(testFile);
+        const explosionOld = await adcOld.explode();
+        appsOld = explosionOld?.config.apps || [];
+    });
+
+    it('"namaste 443 vip"', function () {
+        const origApp = appsOld.find(x => x.name === '"namaste 443 vip"');
+        const rxApp = apps.find(x => x.name === '"namaste 443 vip"');
+        compareApps(rxApp, origApp, '"namaste 443 vip"');
+    });
+});
+
+// ========================================
+// skree.ns.conf
+// ========================================
+describe('parseAdcArraysRx - skree.ns.conf', function () {
+    let apps: AdcApp[] = [];
+    let appsOld: AdcApp[] = [];
+
+    before(async function () {
+        const testFile = await archiveMake('skree.ns.conf') as string;
+        const adc = new ADC();
+        await adc.loadParseAsync(testFile);
+        const explosion = await adc.explode();
+        apps = explosion?.config.apps || [];
+
+        const adcOld = new ADCold();
+        await adcOld.loadParseAsync(testFile);
+        const explosionOld = await adcOld.explode();
+        appsOld = explosionOld?.config.apps || [];
+    });
+
+    it('skree1_vip_RDP', function () {
+        const origApp = appsOld.find(x => x.name === 'skree1_vip_RDP');
+        const rxApp = apps.find(x => x.name === 'skree1_vip_RDP');
+        compareApps(rxApp, origApp, 'skree1_vip_RDP');
+    });
+});
+
+// ========================================
+// sslBridge.ns.conf
+// ========================================
+describe('parseAdcArraysRx - sslBridge.ns.conf', function () {
+    let apps: AdcApp[] = [];
+    let appsOld: AdcApp[] = [];
+
+    before(async function () {
+        const testFile = await archiveMake('sslBridge.ns.conf') as string;
+        const adc = new ADC();
+        await adc.loadParseAsync(testFile);
+        const explosion = await adc.explode();
+        apps = explosion?.config.apps || [];
+
+        const adcOld = new ADCold();
+        await adcOld.loadParseAsync(testFile);
+        const explosionOld = await adcOld.explode();
+        appsOld = explosionOld?.config.apps || [];
+    });
+
+    it('app_ssl_bridge_vs', function () {
+        const origApp = appsOld.find(x => x.name === 'app_ssl_bridge_vs');
+        const rxApp = apps.find(x => x.name === 'app_ssl_bridge_vs');
+        compareApps(rxApp, origApp, 'app_ssl_bridge_vs');
+    });
+});
+
+// ========================================
+// starlord.ns.conf
+// ========================================
+describe('parseAdcArraysRx - starlord.ns.conf', function () {
+    let apps: AdcApp[] = [];
+    let appsOld: AdcApp[] = [];
+
+    before(async function () {
+        const testFile = await archiveMake('starlord.ns.conf') as string;
+        const adc = new ADC();
+        await adc.loadParseAsync(testFile);
+        const explosion = await adc.explode();
+        apps = explosion?.config.apps || [];
+
+        const adcOld = new ADCold();
+        await adcOld.loadParseAsync(testFile);
+        const explosionOld = await adcOld.explode();
+        appsOld = explosionOld?.config.apps || [];
+    });
+
+    it('starlord_cs_vs', function () {
+        const origApp = appsOld.find(x => x.name === 'starlord_cs_vs');
+        const rxApp = apps.find(x => x.name === 'starlord_cs_vs');
+        compareApps(rxApp, origApp, 'starlord_cs_vs');
+    });
+
+    it('starlord_http_lb_vs', function () {
+        const origApp = appsOld.find(x => x.name === 'starlord_http_lb_vs');
+        const rxApp = apps.find(x => x.name === 'starlord_http_lb_vs');
+        compareApps(rxApp, origApp, 'starlord_http_lb_vs');
+    });
+
+    it('starlord_offload_lb_vs', function () {
+        const origApp = appsOld.find(x => x.name === 'starlord_offload_lb_vs');
+        const rxApp = apps.find(x => x.name === 'starlord_offload_lb_vs');
+        compareApps(rxApp, origApp, 'starlord_offload_lb_vs');
+    });
+});
+
+// ========================================
+// t1.ns.conf
+// ========================================
+describe('parseAdcArraysRx - t1.ns.conf', function () {
+    let apps: AdcApp[] = [];
+    let appsOld: AdcApp[] = [];
+
+    before(async function () {
+        const testFile = await archiveMake('t1.ns.conf') as string;
+        const adc = new ADC();
+        await adc.loadParseAsync(testFile);
+        const explosion = await adc.explode();
+        apps = explosion?.config.apps || [];
+
+        const adcOld = new ADCold();
+        await adcOld.loadParseAsync(testFile);
+        const explosionOld = await adcOld.explode();
+        appsOld = explosionOld?.config.apps || [];
+    });
+
+    it('app2_cs_vs', function () {
+        const origApp = appsOld.find(x => x.name === 'app2_cs_vs');
+        const rxApp = apps.find(x => x.name === 'app2_cs_vs');
+        compareApps(rxApp, origApp, 'app2_cs_vs');
+    });
+
+    it('app2_http_vs', function () {
+        const origApp = appsOld.find(x => x.name === 'app2_http_vs');
+        const rxApp = apps.find(x => x.name === 'app2_http_vs');
+        compareApps(rxApp, origApp, 'app2_http_vs');
+    });
+
+    it('bottle.gslb.f5flipper.com', function () {
+        const origApp = appsOld.find(x => x.name === 'bottle.gslb.f5flipper.com');
+        const rxApp = apps.find(x => x.name === 'bottle.gslb.f5flipper.com');
+        compareApps(rxApp, origApp, 'bottle.gslb.f5flipper.com');
+    });
+
+    it('ctx1.gslb.f5flipper.com', function () {
+        const origApp = appsOld.find(x => x.name === 'ctx1.gslb.f5flipper.com');
+        const rxApp = apps.find(x => x.name === 'ctx1.gslb.f5flipper.com');
+        compareApps(rxApp, origApp, 'ctx1.gslb.f5flipper.com');
+    });
+
+    it('dorsal.gslb.f5flipper.com', function () {
+        const origApp = appsOld.find(x => x.name === 'dorsal.gslb.f5flipper.com');
+        const rxApp = apps.find(x => x.name === 'dorsal.gslb.f5flipper.com');
+        compareApps(rxApp, origApp, 'dorsal.gslb.f5flipper.com');
+    });
+
+    it('echo.gslb.f5flipper.com', function () {
+        const origApp = appsOld.find(x => x.name === 'echo.gslb.f5flipper.com');
+        const rxApp = apps.find(x => x.name === 'echo.gslb.f5flipper.com');
+        compareApps(rxApp, origApp, 'echo.gslb.f5flipper.com');
+    });
+
+    it('https_offload_vs', function () {
+        const origApp = appsOld.find(x => x.name === 'https_offload_vs');
+        const rxApp = apps.find(x => x.name === 'https_offload_vs');
+        compareApps(rxApp, origApp, 'https_offload_vs');
+    });
+
+    it('smtp.gslb.f5flipper.com', function () {
+        const origApp = appsOld.find(x => x.name === 'smtp.gslb.f5flipper.com');
+        const rxApp = apps.find(x => x.name === 'smtp.gslb.f5flipper.com');
+        compareApps(rxApp, origApp, 'smtp.gslb.f5flipper.com');
+    });
+
+    it('stp.gslb.f5flipper.com-http-vs', function () {
+        const origApp = appsOld.find(x => x.name === 'stp.gslb.f5flipper.com-http-vs');
+        const rxApp = apps.find(x => x.name === 'stp.gslb.f5flipper.com-http-vs');
+        compareApps(rxApp, origApp, 'stp.gslb.f5flipper.com-http-vs');
+    });
+
+    it('stp.gslb.f5flipper.com-http-vs-failover', function () {
+        const origApp = appsOld.find(x => x.name === 'stp.gslb.f5flipper.com-http-vs-failover');
+        const rxApp = apps.find(x => x.name === 'stp.gslb.f5flipper.com-http-vs-failover');
+        compareApps(rxApp, origApp, 'stp.gslb.f5flipper.com-http-vs-failover');
+    });
+
+    it('stp.gslb.f5flipper.com-ssl-vs', function () {
+        const origApp = appsOld.find(x => x.name === 'stp.gslb.f5flipper.com-ssl-vs');
+        const rxApp = apps.find(x => x.name === 'stp.gslb.f5flipper.com-ssl-vs');
+        compareApps(rxApp, origApp, 'stp.gslb.f5flipper.com-ssl-vs');
+    });
+
+    it('stp.gslb.f5flipper.com-ssl-vs-failover', function () {
+        const origApp = appsOld.find(x => x.name === 'stp.gslb.f5flipper.com-ssl-vs-failover');
+        const rxApp = apps.find(x => x.name === 'stp.gslb.f5flipper.com-ssl-vs-failover');
+        compareApps(rxApp, origApp, 'stp.gslb.f5flipper.com-ssl-vs-failover');
+    });
+});
+
+// ========================================
+// tcpLdaps.ns.conf
+// ========================================
+describe('parseAdcArraysRx - tcpLdaps.ns.conf', function () {
+    let apps: AdcApp[] = [];
+    let appsOld: AdcApp[] = [];
+
+    before(async function () {
+        const testFile = await archiveMake('tcpLdaps.ns.conf') as string;
+        const adc = new ADC();
+        await adc.loadParseAsync(testFile);
+        const explosion = await adc.explode();
+        apps = explosion?.config.apps || [];
+
+        const adcOld = new ADCold();
+        await adcOld.loadParseAsync(testFile);
+        const explosionOld = await adcOld.explode();
+        appsOld = explosionOld?.config.apps || [];
+    });
+
+    it('ldaps_lb_vs', function () {
+        const origApp = appsOld.find(x => x.name === 'ldaps_lb_vs');
+        const rxApp = apps.find(x => x.name === 'ldaps_lb_vs');
+        compareApps(rxApp, origApp, 'ldaps_lb_vs');
+    });
+});
+
+// ========================================
+// tcpListenPolicy.ns.conf
+// ========================================
+describe('parseAdcArraysRx - tcpListenPolicy.ns.conf', function () {
+    let apps: AdcApp[] = [];
+    let appsOld: AdcApp[] = [];
+
+    before(async function () {
+        const testFile = await archiveMake('tcpListenPolicy.ns.conf') as string;
+        const adc = new ADC();
+        await adc.loadParseAsync(testFile);
+        const explosion = await adc.explode();
+        apps = explosion?.config.apps || [];
+
+        const adcOld = new ADCold();
+        await adcOld.loadParseAsync(testFile);
+        const explosionOld = await adcOld.explode();
+        appsOld = explosionOld?.config.apps || [];
+    });
+
+    it('app_multiport_vs', function () {
+        const origApp = appsOld.find(x => x.name === 'app_multiport_vs');
+        const rxApp = apps.find(x => x.name === 'app_multiport_vs');
+        compareApps(rxApp, origApp, 'app_multiport_vs');
+    });
+});
+
+// ========================================
+// udpNtp.ns.conf
+// ========================================
+describe('parseAdcArraysRx - udpNtp.ns.conf', function () {
+    let apps: AdcApp[] = [];
+    let appsOld: AdcApp[] = [];
+
+    before(async function () {
+        const testFile = await archiveMake('udpNtp.ns.conf') as string;
+        const adc = new ADC();
+        await adc.loadParseAsync(testFile);
+        const explosion = await adc.explode();
+        apps = explosion?.config.apps || [];
+
+        const adcOld = new ADCold();
+        await adcOld.loadParseAsync(testFile);
+        const explosionOld = await adcOld.explode();
+        appsOld = explosionOld?.config.apps || [];
+    });
+
+    it('ntp_lb_vs', function () {
+        const origApp = appsOld.find(x => x.name === 'ntp_lb_vs');
+        const rxApp = apps.find(x => x.name === 'ntp_lb_vs');
+        compareApps(rxApp, origApp, 'ntp_lb_vs');
+    });
+});

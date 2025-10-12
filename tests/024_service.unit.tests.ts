@@ -20,6 +20,10 @@ let testFile: string;
 const parsedFileEvents: any[] = []
 const parsedObjEvents: any[] = []
 
+// log test file name - makes it easier for troubleshooting
+console.log('----------------------------------------------------------');
+console.log('---------- file:', __filename);
+
 describe('service abstraction tests', function () {
 
     let adc: ADC;
@@ -28,9 +32,9 @@ describe('service abstraction tests', function () {
     let err;
 
     before(async function () {
-        // log test file name - makes it easer for troubleshooting
-        console.log('       file:', __filename)
+
         testFile = await archiveMake('apple.ns.conf') as string;
+
         // clear the events arrays
         parsedFileEvents.length = 0
         parsedObjEvents.length = 0
@@ -109,7 +113,7 @@ describe('service abstraction tests', function () {
         // there should only be one
         const hostnameService = appServices!.filter(x => x.hostname === 'sevcore1.jonny.dev')[0]
 
-        assert.deepStrictEqual(hostnameService, {
+        const expected = {
             name: "GALA01_HTTPS_82_SVC",
             protocol: "SSL",
             port: "82",
@@ -129,7 +133,9 @@ describe('service abstraction tests', function () {
                 "-CMP": "YES",
             },
             hostname: "sevcore1.jonny.dev",
-        }, "should have three service bindings")
+        };
+
+        assert.deepStrictEqual(hostnameService, expected)
 
         const addressService = appServices!.filter(x => x.address === "10.240.21.115")[0]
 

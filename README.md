@@ -16,6 +16,7 @@ Analyze Citrix NetScaler/ADC configurations and convert them to F5 AS3 declarati
 ## ✨ Key Features
 
 - 📦 **Parse NetScaler Configs** - Import `.conf` files or `.tgz` archives
+- ⚡ **High Performance** - NEW RX parsing engine delivers 2-3x faster processing
 - 🎯 **Application Abstraction** - Automatically extract CS/LB/GSLB applications
 - 📊 **Smart Diagnostics** - 40+ rules for feature detection and analysis
 - 🔄 **AS3 Conversion** - Generate F5 AS3 declarations via FAST templates

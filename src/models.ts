@@ -257,7 +257,9 @@ export type AdcRegExTree = {
         'add appflow collector': RegExp;
         'set ssl vserver': RegExp;
         'set ssl service': RegExp;
+        'set lb vserver': RegExp;
         'set lb monitor': RegExp;
+        'set cs vserver': RegExp;
         'set ns param': RegExp;
         'set ns hostName': RegExp;
         'set gslb vserver': RegExp;
@@ -272,6 +274,14 @@ export type AdcRegExTree = {
 }
 
 
+/**
+ * @deprecated Use AdcConfObjRx instead
+ * This type is used by the old array-based parser (CitrixADCold.ts)
+ * The new RX parser uses AdcConfObjRx which stores objects by name in Records
+ *
+ * Old parser stores config lines as string arrays
+ * New parser stores parsed objects with named capture groups
+ */
 export type AdcConfObj = {
     vserver?: string;
     add?: {
@@ -378,4 +388,210 @@ export type AdcConfObj = {
     enable?: {
         ns?: unknown;
     };
+}
+
+
+/**
+ * Parsed NS config object structure using RX engine
+ *
+ * **Key Improvements over AdcConfObj:**
+ * - Objects stored by name in Records (e.g., `Record<string, NsObject>`)
+ * - Each object fully parsed with named capture groups (name, protocol, ipAddress, port, etc.)
+ * - No need to re-parse config lines - all data is structured
+ * - Faster lookups by name vs array iteration
+ *
+ * **Structure:**
+ * ```typescript
+ * {
+ *   add: {
+ *     lb: {
+ *       vserver: {
+ *         "my_vserver": { name: "my_vserver", protocol: "HTTP", ipAddress: "10.1.1.1", ... }
+ *       }
+ *     }
+ *   }
+ * }
+ * ```
+ *
+ * **Usage Example:**
+ * ```typescript
+ * const vserver = config.add?.lb?.vserver?.["my_vserver"];
+ * console.log(vserver?.protocol); // "HTTP"
+ * ```
+ */
+export type AdcConfObjRx = {
+    vserver?: string;
+    add?: {
+        ns?: {
+            ip?: Record<string, NsObject>;
+            ip6?: Record<string, NsObject>;
+        };
+        server?: Record<string, NsObject>;
+        service?: Record<string, NsObject>;
+        serviceGroup?: Record<string, NsObject>;
+        ssl?: {
+            certKey?: Record<string, NsObject>;
+        };
+        lb?: {
+            vserver?: Record<string, NsObject>;
+            monitor?: Record<string, NsObject>;
+        };
+        cs?: {
+            vserver?: Record<string, NsObject>;
+            action?: Record<string, NsObject>;
+            policy?: Record<string, NsObject>;
+        };
+        gslb?: {
+            vserver?: Record<string, NsObject>;
+            service?: Record<string, NsObject>;
+        }
+        rewrite?: {
+            policy?: Record<string, NsObject>;
+            action?: Record<string, NsObject>;
+        };
+        responder?: {
+            policy?: Record<string, NsObject>;
+            action?: Record<string, NsObject>;
+        };
+        authentication?: {
+            policy?: Record<string, NsObject>;
+            action?: Record<string, NsObject>;
+        };
+        cache?: Record<string, NsObject>;
+        dns?: {
+            nameServer?: Record<string, NsObject>;
+        };
+        route?: Record<string, NsObject>;
+        appfw?: Record<string, NsObject>;
+        appflow?: {
+            policy?: Record<string, NsObject>;
+            action?: Record<string, NsObject>;
+            collector?: Record<string, NsObject>;
+        }
+    };
+    set?: {
+        ns?: {
+            config?: Record<string, NsObject>;
+            hostName?: Record<string, NsObject>;
+
+        };
+        gslb?: {
+            vserver?: Record<string, NsObject>;
+        }
+        system?: Record<string, NsObject>;
+        rsskeytype?: Record<string, NsObject>;
+        lacp?: Record<string, NsObject>;
+        interface?: Record<string, NsObject>;
+        nd6RAvariables?: Record<string, NsObject>;
+        snmp?: Record<string, NsObject>;
+        cmp?: Record<string, NsObject>;
+        service?: Record<string, NsObject>;
+        aaa?: Record<string, NsObject>;
+        lb?: Record<string, NsObject>;
+        cache?: Record<string, NsObject>;
+        appflow?: Record<string, NsObject>;
+        bot?: Record<string, NsObject>;
+        appfw?: Record<string, NsObject>;
+        subscriber?: Record<string, NsObject>;
+        ssl?: {
+            service?: Record<string, NsObject>;
+        };
+        cloud?: Record<string, NsObject>;
+        cloudtunnel?: Record<string, NsObject>;
+        ip6TunnelParam?: Record<string, NsObject>;
+        ptp?: Record<string, NsObject>;
+        videooptimization?: Record<string, NsObject>;
+    };
+    bind?: {
+        cache?: Record<string, NsObject>;
+        lb?: {
+            vserver?: Record<string, NsObject>;
+        };
+        cs?: {
+            vserver?: Record<string, NsObject>;
+        };
+        gslb?: {
+            vserver?: Record<string, NsObject>;
+        }
+        service?: Record<string, NsObject>;
+        serviceGroup?: Record<string, NsObject>;
+        audit?: Record<string, NsObject>;
+        tunnel?: Record<string, NsObject>;
+        ssl?: {
+            service?: Record<string, NsObject>;
+            vserver?: Record<string, NsObject>;
+        };
+    };
+    enable?: {
+        ns?: unknown;
+    };
+}
+
+/**
+ * Base NS object with parsed properties from regex named capture groups
+ *
+ * **Required Fields:**
+ * - `name` - Object name (e.g., vserver name, service name)
+ * - `_line` - Original config line for reference
+ *
+ * **Common Optional Fields (added by regex capture groups):**
+ * - `protocol` - Protocol type (HTTP, SSL, TCP, DNS, etc.)
+ * - `ipAddress` - IP address for vservers/services
+ * - `port` - Port number
+ * - `server` - Server name for services
+ * - Options prefixed with `-` (e.g., `-persistenceType`, `-cltTimeout`)
+ *
+ * **Examples:**
+ * ```typescript
+ * // LB VServer
+ * {
+ *   name: "web_vs",
+ *   protocol: "HTTP",
+ *   ipAddress: "10.1.1.100",
+ *   port: "80",
+ *   "-persistenceType": "SOURCEIP",
+ *   "-cltTimeout": "180",
+ *   _line: "add lb vserver web_vs HTTP 10.1.1.100 80 -persistenceType SOURCEIP"
+ * }
+ *
+ * // Service
+ * {
+ *   name: "web_svc",
+ *   server: "server1",
+ *   protocol: "HTTP",
+ *   port: "8080",
+ *   "-maxClient": "1000",
+ *   _line: "add service web_svc server1 HTTP 8080 -maxClient 1000"
+ * }
+ * ```
+ */
+export interface NsObject {
+    /** Object name (vserver, service, etc.) */
+    name: string;
+
+    /** Original config line */
+    _line: string;
+
+    // Common fields from capture groups
+    /** Protocol (HTTP, SSL, TCP, DNS, etc.) */
+    protocol?: string;
+
+    /** IP address for vservers/services */
+    ipAddress?: string;
+
+    /** Port number */
+    port?: string;
+
+    /** Server name (for services) */
+    server?: string;
+
+    /** Server hostname (alternative to address) */
+    hostname?: string;
+
+    /** Server address (alternative to hostname) */
+    address?: string;
+
+    // All other properties from regex capture groups or parsed options
+    // Options prefixed with - (e.g., -persistenceType, -cltTimeout)
+    [key: string]: any;
 }
