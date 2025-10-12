@@ -34,7 +34,7 @@ describe('Utilities Helper Functions', function () {
     before(async function () {
         // log test file name - makes it easier for troubleshooting
         console.log('----------------------------------------------------------');
-        console.log('---------- file:', __filename);
+        // console.log('---------- file:', __filename);
         
     });
 
