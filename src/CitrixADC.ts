@@ -118,6 +118,54 @@ export default class ADC extends EventEmitter {
         return;
     }
 
+    /**
+     * Load and parse NetScaler config from a string
+     * Useful for programmatic config generation/testing without requiring file system access
+     *
+     * @param configContent - Raw NetScaler config content as string
+     * @param fileName - Optional filename for identification (defaults to 'config.conf')
+     * @returns Promise<void>
+     *
+     * @example
+     * ```typescript
+     * const adc = new ADC();
+     * const configString = `
+     *   #NS13.1 Build 37.38
+     *   add lb vserver web_vs HTTP 10.1.1.100 80
+     *   add service web_svc 10.1.1.10 HTTP 80
+     *   bind lb vserver web_vs web_svc
+     * `;
+     * await adc.loadParseFromString(configString);
+     * const explosion = await adc.explode();
+     * ```
+     */
+    async loadParseFromString(configContent: string, fileName: string = 'config.conf'): Promise<void> {
+        const startTime = process.hrtime.bigint();
+
+        // Set input file properties
+        this.inputFileType = '.conf';
+        this.inputFile = fileName.replace(/\.conf$/, ''); // Remove .conf extension if present
+
+        // Create a ConfigFile object from the string content
+        const configFile: ConfigFile = {
+            fileName: fileName,
+            size: configContent.length,
+            content: configContent
+        };
+
+        // Parse the config directly
+        await this.parseConf(configFile);
+
+        // Set stats
+        this.stats.sourceSize = configContent.length;
+        this.stats.sourceAdcVersion = this.adcVersion;
+
+        // Calculate parse time
+        this.stats.parseTime = Number(process.hrtime.bigint() - startTime) / 1000000;
+
+        return;
+    }
+
 
     /**
      * async parsing of config files

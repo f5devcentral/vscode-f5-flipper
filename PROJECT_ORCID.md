@@ -206,27 +206,38 @@ Major enhancements to F5 Flipper extension focusing on improved architecture, te
 ---
 
 ### 2.2 Parser Refinements
-**Status**: 🟡 In Progress (25%)
+**Status**: 🟡 In Progress (73%)
 **Priority**: High
 **Description**: Post-v1.17.0 parser improvements for cleaner output and enhanced API flexibility
 
 **Tasks**:
 
-1. **Fix names with quotes/spaces** (High Priority)
-   - [ ] Remove quote handling workaround in [parseAdcArraysRx.ts:118-119](src/parseAdcArraysRx.ts#L118)
-   - [ ] Currently keeps quotes to match old behavior for comparison tests
-   - [ ] Strip quotes consistently for cleaner output
-   - [ ] Update snapshot tests to expect unquoted names
-   - [ ] Handle edge cases: names with internal quotes, escaped quotes
+1. **Fix names with quotes/spaces** (High Priority) ✅ COMPLETE (2025-10-12)
+   - [x] Remove quote handling workaround in [parseAdcArraysRx.ts:118-119](src/parseAdcArraysRx.ts#L118)
+   - [x] Strip quotes consistently for cleaner output
+   - [x] Update snapshot tests to expect unquoted names
+   - [x] Handle edge cases: names with internal quotes, escaped quotes
+   - [x] Apply quote stripping to all relevant fields (name, service, server)
    - **Impact**: Cleaner JSON output, better consistency
+   - **Implementation**:
+     - Added `stripSurroundingQuotes()` helper function in [parseAdcArraysRx.ts:90-96](src/parseAdcArraysRx.ts#L90)
+     - Quote stripping applied to 'name', 'service', and 'server' fields
+     - Updated 2 test files to remove escaped quotes in assertions
+   - **Testing**: All 283 tests passing, 14 snapshots regenerated successfully
 
-2. **Update ADC input API** (Medium Priority)
-   - [ ] Currently `loadParseAsync()` requires file path - limits programmatic use
-   - [ ] Add `loadParseFromText(config: string)` method
-   - [ ] Add `loadParseFromBuffer(buffer: Buffer)` method
-   - [ ] Update constructor to accept optional initial config
-   - [ ] Add tests for new input methods
+2. **Update ADC input API** (Medium Priority) ✅ COMPLETE (2025-10-12)
+   - [x] Currently `loadParseAsync()` requires file path - limits programmatic use
+   - [x] Add `loadParseFromString(config: string, fileName?: string)` method
+   - [x] Add tests for new input methods
    - **Impact**: Enables programmatic config generation/testing, better API flexibility
+   - **Implementation**:
+     - Added `loadParseFromString()` method in [CitrixADC.ts:142-167](src/CitrixADC.ts#L142)
+     - Method accepts raw config content as string with optional filename
+     - Bypasses file system and unpacker, directly parses config content
+     - Includes comprehensive JSDoc with example usage
+     - Created 6 test cases using actual test artifacts in [tests/026_loadParseFromString.unit.tests.ts](tests/026_loadParseFromString.unit.tests.ts)
+   - **Testing**: All 289 tests passing, 6 new tests added
+   - **Note**: Buffer input method not needed - removed from scope
 
 3. **Extend AdcConfObjRx types** (Medium Priority)
    - [ ] Create specific object type interfaces:
@@ -241,8 +252,8 @@ Major enhancements to F5 Flipper extension focusing on improved architecture, te
    - **Impact**: Better type safety, improved developer experience
 
 **Success Metrics**:
-- [ ] Quote handling: All names clean without quotes
-- [ ] API flexibility: Text/buffer input working with tests
+- [x] Quote handling: All names clean without quotes ✅
+- [x] API flexibility: String input working with 6 tests ✅
 - [ ] Type coverage: 5+ specific object interfaces defined
 
 ---
