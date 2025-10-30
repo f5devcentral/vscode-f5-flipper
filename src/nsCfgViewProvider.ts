@@ -244,22 +244,129 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                     .forEach(app => {
                         const descA = [`(${app.lines.length})`, app.type]
                         descA.push(`${app.ipAddress}:${app.port}`);
+
+                        // NEW: Add complexity + platform recommendation to description
+                        if (app.featureAnalysis) {
+                            const complexity = app.featureAnalysis.complexity;
+                            const platform = app.featureAnalysis.recommendedPlatform;
+                            descA.push(`[${complexity}/10 → ${platform}]`);
+                        }
+
                         const desc = descA.join(' - ');
-                        const clonedApp = JSON.parse(JSON.stringify(app));
-                        delete clonedApp.lines;
-                        delete clonedApp.diagnostics;
-                        const appYaml = jsYaml.dump(clonedApp, { indent: 4 })
-                        const toolTip = new MarkdownString().appendCodeblock(appYaml, 'yaml');
 
-                        //if diag enabled, figure out icon
-                        let icon = '';
-                        if (ext.nsDiag.enabled) {
-                            // todo: add diag stats to tooltip
+                        // Build rich tooltip with diagnostics and feature analysis
+                        const toolTip = new MarkdownString();
+                        toolTip.appendMarkdown(`### ${app.name}\n\n`);
+                        toolTip.appendMarkdown(`**Type:** ${app.type.toUpperCase()} | **Protocol:** ${app.protocol} | **Address:** ${app.ipAddress}:${app.port}\n\n`);
+
+                        // Add feature analysis to tooltip (if present)
+                        if (app.featureAnalysis) {
+                            const fa = app.featureAnalysis;
+
+                            // Complexity rating
+                            const rating = fa.complexity >= 8 ? 'High 🔴'
+                                : fa.complexity >= 6 ? 'Medium-High 🟠'
+                                : fa.complexity >= 4 ? 'Medium 🟡'
+                                : 'Low 🟢';
+
+                            toolTip.appendMarkdown(`---\n\n**🎯 Migration Analysis**\n\n`)
+                                .appendMarkdown(`**Complexity:** ${fa.complexity}/10 (${rating})\n\n`)
+                                .appendMarkdown(`**Recommended Platform:** ${fa.recommendedPlatform} (${fa.confidence} confidence)\n\n`)
+                                .appendMarkdown(`**Features Detected:** ${fa.features.length}\n`);
+
+                            // Show features grouped by category
+                            if (fa.features.length > 0) {
+                                // Group features by category
+                                const byCategory: Record<string, typeof fa.features> = {};
+                                fa.features.forEach(f => {
+                                    if (!byCategory[f.category]) {
+                                        byCategory[f.category] = [];
+                                    }
+                                    byCategory[f.category].push(f);
+                                });
+
+                                toolTip.appendMarkdown(`\n**Feature Breakdown (${Object.keys(byCategory).length} categories):**\n`);
+
+                                // Show top 3 categories with their features
+                                const categories = Object.entries(byCategory)
+                                    .sort((a, b) => b[1].length - a[1].length) // Sort by feature count
+                                    .slice(0, 3);
+
+                                categories.forEach(([category, features]) => {
+                                    toolTip.appendMarkdown(`\n_${category}:_\n`);
+                                    features.slice(0, 3).forEach(f => {
+                                        // Show F5 platform mapping
+                                        const mapping = f.f5Mapping
+                                            ? ` → ${f.f5Mapping.tmos === 'full' ? '✅ TMOS' : f.f5Mapping.nginx === 'full' ? '✅ NGINX+' : f.f5Mapping.xc === 'full' ? '✅ XC' : '⚠️ Partial'}`
+                                            : '';
+                                        toolTip.appendMarkdown(`  • ${f.name} (${f.complexityWeight}/10)${mapping}\n`);
+                                    });
+                                    if (features.length > 3) {
+                                        toolTip.appendMarkdown(`  • _(+${features.length - 3} more in this category)_\n`);
+                                    }
+                                });
+
+                                const totalCategories = Object.keys(byCategory).length;
+                                if (totalCategories > 3) {
+                                    toolTip.appendMarkdown(`\n_+${totalCategories - 3} more categories_\n`);
+                                }
+                            }
+
+                            // Show conversion gaps if present
+                            if (fa.conversionGaps && fa.conversionGaps.length > 0) {
+                                toolTip.appendMarkdown(`\n---\n\n**⚠️ Conversion Gaps:**\n`);
+                                fa.conversionGaps.forEach(gap => {
+                                    const icon = gap.severity === 'Critical' ? '🔴'
+                                        : gap.severity === 'Warning' ? '🟡'
+                                        : 'ℹ️';
+                                    toolTip.appendMarkdown(`- ${icon} ${gap.feature}: ${gap.notes}\n`);
+                                });
+                            }
+                        }
+
+                        // Add condensed diagnostics summary to tooltip bottom (if diagnostics enabled and present)
+                        if (app.diagnostics && app.diagnostics.length > 0 && ext.nsDiag.enabled) {
                             const stats = ext.nsDiag.getDiagStats(app.diagnostics as Diagnostic[]);
+                            const parts = [];
+                            if (stats?.Error) {
+                                parts.push(`❌ ${stats.Error} error${stats.Error > 1 ? 's' : ''}`);
+                            }
+                            if (stats?.Warning) {
+                                parts.push(`⚠️  ${stats.Warning} warning${stats.Warning > 1 ? 's' : ''}`);
+                            }
+                            if (stats?.Information) {
+                                parts.push(`ℹ️  ${stats.Information} info`);
+                            }
+                            if (parts.length > 0) {
+                                toolTip.appendMarkdown(`\n---\n\n**📋 Diagnostics:** ${parts.join('  ')}\n`);
+                            }
+                        }
 
-                            icon = stats?.Error ? this.redDot
-                                : stats?.Warning ? this.orangeDot
-                                    : stats?.Information ? this.greenDot : this.greenDot;
+                        // Calculate icon based on BOTH diagnostics and complexity
+                        let icon = '';
+                        if (ext.nsDiag.enabled || app.featureAnalysis) {
+                            // Get diagnostic severity (if diagnostics enabled)
+                            let diagSeverity: 'Error' | 'Warning' | 'Information' | 'Green' = 'Green';
+                            if (ext.nsDiag.enabled && app.diagnostics) {
+                                const stats = ext.nsDiag.getDiagStats(app.diagnostics as Diagnostic[]);
+                                diagSeverity = stats?.Error ? 'Error'
+                                    : stats?.Warning ? 'Warning'
+                                    : stats?.Information ? 'Information'
+                                    : 'Green';
+                            }
+
+                            // Get complexity level
+                            const complexity = app.featureAnalysis?.complexity || 0;
+
+                            // PRIORITY: Diagnostics errors/warnings override complexity
+                            // Otherwise show complexity color
+                            icon = diagSeverity === 'Error' ? this.redDot
+                                : diagSeverity === 'Warning' ? this.orangeDot
+                                : diagSeverity === 'Information' ? this.greenDot
+                                : complexity >= 8 ? this.redDot       // 🔴 High complexity
+                                : complexity >= 6 ? this.orangeDot    // 🟠 Medium-high
+                                : complexity >= 4 ? this.yellowDot    // 🟡 Medium
+                                : this.greenDot;                      // 🟢 Low complexity
                         }
 
                         treeItems.push(new NsCfgApp(
@@ -295,28 +402,130 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
                 this.explosion.config.apps.filter(x => x.type === 'gslb').forEach(app => {
 
-                    const clonedApp = JSON.parse(JSON.stringify(app));
-                    delete clonedApp.lines;
-                    delete clonedApp.diagnostics;
-                    const appYaml = jsYaml.dump(clonedApp, { indent: 4 })
-                    const toolTip = new MarkdownString().appendCodeblock(appYaml, 'yaml');
+                    // Build rich tooltip with diagnostics and feature analysis
+                    const toolTip = new MarkdownString();
+                    toolTip.appendMarkdown(`### ${app.name}\n\n`);
+                    toolTip.appendMarkdown(`**Type:** GSLB | **Protocol:** ${app.protocol} | **Address:** ${app.ipAddress}:${app.port}\n\n`);
 
-
-                    //if diag enabled, figure out icon
-                    let icon = '';
-                    if (ext.nsDiag.enabled) {
-                        // todo: add diag stats to tooltip
+                    // Add diagnostics summary to tooltip (if diagnostics enabled and present)
+                    if (app.diagnostics && app.diagnostics.length > 0 && ext.nsDiag.enabled) {
                         const stats = ext.nsDiag.getDiagStats(app.diagnostics as Diagnostic[]);
+                        toolTip.appendMarkdown(`\n\n**🔍 Diagnostics**\n`);
+                        if (stats?.Error) {
+                            toolTip.appendMarkdown(`- ❌ ${stats.Error} error${stats.Error > 1 ? 's' : ''}\n`);
+                        }
+                        if (stats?.Warning) {
+                            toolTip.appendMarkdown(`- ⚠️  ${stats.Warning} warning${stats.Warning > 1 ? 's' : ''}\n`);
+                        }
+                        if (stats?.Information) {
+                            toolTip.appendMarkdown(`- ℹ️  ${stats.Information} info\n`);
+                        }
+                    }
 
-                        icon = stats?.Error ? this.redDot
-                            : stats?.Warning ? this.orangeDot
-                                : stats?.Information ? this.greenDot : this.greenDot;
+                    // Add feature analysis to tooltip (if present)
+                    if (app.featureAnalysis) {
+                        const fa = app.featureAnalysis;
+
+                        // Complexity rating
+                        const rating = fa.complexity >= 8 ? 'High 🔴'
+                            : fa.complexity >= 6 ? 'Medium-High 🟠'
+                            : fa.complexity >= 4 ? 'Medium 🟡'
+                            : 'Low 🟢';
+
+                        toolTip.appendMarkdown(`---\n\n**🎯 Migration Analysis**\n\n`)
+                            .appendMarkdown(`**Complexity:** ${fa.complexity}/10 (${rating})\n\n`)
+                            .appendMarkdown(`**Recommended Platform:** ${fa.recommendedPlatform} (${fa.confidence} confidence)\n\n`)
+                            .appendMarkdown(`**Features Detected:** ${fa.features.length}\n`);
+
+                        // Show features grouped by category
+                        if (fa.features.length > 0) {
+                            // Group features by category
+                            const byCategory: Record<string, typeof fa.features> = {};
+                            fa.features.forEach(f => {
+                                if (!byCategory[f.category]) {
+                                    byCategory[f.category] = [];
+                                }
+                                byCategory[f.category].push(f);
+                            });
+
+                            toolTip.appendMarkdown(`\n**Feature Breakdown (${Object.keys(byCategory).length} categories):**\n`);
+
+                            // Show top 3 categories with their features
+                            const categories = Object.entries(byCategory)
+                                .sort((a, b) => b[1].length - a[1].length) // Sort by feature count
+                                .slice(0, 3);
+
+                            categories.forEach(([category, features]) => {
+                                toolTip.appendMarkdown(`\n_${category}:_\n`);
+                                features.slice(0, 3).forEach(f => {
+                                    // Show F5 platform mapping
+                                    const mapping = f.f5Mapping
+                                        ? ` → ${f.f5Mapping.tmos === 'full' ? '✅ TMOS' : f.f5Mapping.nginx === 'full' ? '✅ NGINX+' : f.f5Mapping.xc === 'full' ? '✅ XC' : '⚠️ Partial'}`
+                                        : '';
+                                    toolTip.appendMarkdown(`  • ${f.name} (${f.complexityWeight}/10)${mapping}\n`);
+                                });
+                                if (features.length > 3) {
+                                    toolTip.appendMarkdown(`  • _(+${features.length - 3} more in this category)_\n`);
+                                }
+                            });
+
+                            const totalCategories = Object.keys(byCategory).length;
+                            if (totalCategories > 3) {
+                                toolTip.appendMarkdown(`\n_+${totalCategories - 3} more categories_\n`);
+                            }
+                        }
+
+                        // Show conversion gaps if present
+                        if (fa.conversionGaps && fa.conversionGaps.length > 0) {
+                            toolTip.appendMarkdown(`\n---\n\n**⚠️ Conversion Gaps:**\n`);
+                            fa.conversionGaps.forEach(gap => {
+                                const icon = gap.severity === 'Critical' ? '🔴'
+                                    : gap.severity === 'Warning' ? '🟡'
+                                    : 'ℹ️';
+                                toolTip.appendMarkdown(`- ${icon} ${gap.feature}: ${gap.notes}\n`);
+                            });
+                        }
+                    }
+
+                    // Calculate icon based on BOTH diagnostics and complexity
+                    let icon = '';
+                    if (ext.nsDiag.enabled || app.featureAnalysis) {
+                        // Get diagnostic severity (if diagnostics enabled)
+                        let diagSeverity: 'Error' | 'Warning' | 'Information' | 'Green' = 'Green';
+                        if (ext.nsDiag.enabled && app.diagnostics) {
+                            const stats = ext.nsDiag.getDiagStats(app.diagnostics as Diagnostic[]);
+                            diagSeverity = stats?.Error ? 'Error'
+                                : stats?.Warning ? 'Warning'
+                                : stats?.Information ? 'Information'
+                                : 'Green';
+                        }
+
+                        // Get complexity level
+                        const complexity = app.featureAnalysis?.complexity || 0;
+
+                        // PRIORITY: Diagnostics errors/warnings override complexity
+                        // Otherwise show complexity color
+                        icon = diagSeverity === 'Error' ? this.redDot
+                            : diagSeverity === 'Warning' ? this.orangeDot
+                            : diagSeverity === 'Information' ? this.greenDot
+                            : complexity >= 8 ? this.redDot       // 🔴 High complexity
+                            : complexity >= 6 ? this.orangeDot    // 🟠 Medium-high
+                            : complexity >= 4 ? this.yellowDot    // 🟡 Medium
+                            : this.greenDot;                      // 🟢 Low complexity
+                    }
+
+                    // Build description with complexity if available
+                    let desc = '';
+                    if (app.featureAnalysis) {
+                        const complexity = app.featureAnalysis.complexity;
+                        const platform = app.featureAnalysis.recommendedPlatform;
+                        desc = `[${complexity}/10 → ${platform}]`;
                     }
 
                     treeItems.push(new NsCfgApp(
                         app.name,
                         toolTip,
-                        '',
+                        desc,
                         'nsGSLB', icon,
                         TreeItemCollapsibleState.None, {
                         command: 'f5-flipper.viewNsJson',
@@ -552,7 +761,6 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                 arguments: []
             }
             ));
-
 
             // sources parent folder
             const allSources = this.explosion.config.sources.map((el) => el.content);

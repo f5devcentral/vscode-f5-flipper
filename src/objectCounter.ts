@@ -74,19 +74,76 @@ export async function countMainObjectsRx(cfgObjRx: AdcConfObjRx): Promise<ObjSta
     // Note: In RX structure, every 'add' object is stored as { name: { ...props } }
     // We count the number of keys at each path
 
-    // Items to get counts for (same as legacy)
+    // Items to get counts for - expanded with new object types from BORG research
     const items = [
+        // Core Load Balancing
+        { path: ['add', 'lb', 'vserver'], label: 'lbVserver' },
+        { path: ['add', 'lb', 'monitor'], label: 'lbMonitor' },
+        { path: ['add', 'lb', 'persistenceSession'], label: 'lbPersistenceSession' },
+
+        // Content Switching
         { path: ['add', 'cs', 'vserver'], label: 'csVserver' },
         { path: ['add', 'cs', 'policy'], label: 'csPolicy' },
         { path: ['add', 'cs', 'action'], label: 'csAction' },
-        { path: ['add', 'lb', 'vserver'], label: 'lbVserver' },
-        { path: ['add', 'lb', 'monitor'], label: 'lbMonitor' },
+
+        // GSLB
         { path: ['add', 'gslb', 'vserver'], label: 'gslbVserver' },
         { path: ['add', 'gslb', 'service'], label: 'gslbService' },
+        { path: ['add', 'gslb', 'site'], label: 'gslbSite' },
+
+        // Services & Servers
         { path: ['add', 'server'], label: 'server' },
         { path: ['add', 'service'], label: 'service' },
         { path: ['add', 'serviceGroup'], label: 'serviceGroup' },
-        { path: ['add', 'ssl', 'certKey'], label: 'sslCertKey' }
+
+        // SSL
+        { path: ['add', 'ssl', 'certKey'], label: 'sslCertKey' },
+        { path: ['add', 'ssl', 'profile'], label: 'sslProfile' },
+
+        // Profiles
+        { path: ['add', 'ns', 'tcpProfile'], label: 'tcpProfile' },
+        { path: ['add', 'ns', 'httpProfile'], label: 'httpProfile' },
+        { path: ['add', 'dns', 'profile'], label: 'dnsProfile' },
+
+        // Policies
+        { path: ['add', 'rewrite', 'policy'], label: 'rewritePolicy' },
+        { path: ['add', 'rewrite', 'action'], label: 'rewriteAction' },
+        { path: ['add', 'responder', 'policy'], label: 'responderPolicy' },
+        { path: ['add', 'responder', 'action'], label: 'responderAction' },
+        { path: ['add', 'cache', 'policy'], label: 'cachePolicy' },
+        { path: ['add', 'cache', 'action'], label: 'cacheAction' },
+        { path: ['add', 'cache', 'contentGroup'], label: 'cacheContentGroup' },
+        { path: ['add', 'cmp', 'policy'], label: 'compressionPolicy' },
+        { path: ['add', 'cmp', 'action'], label: 'compressionAction' },
+
+        // Authentication & Authorization
+        { path: ['add', 'authentication', 'policy'], label: 'authenticationPolicy' },
+        { path: ['add', 'authentication', 'action'], label: 'authenticationAction' },
+        { path: ['add', 'authorization', 'policy'], label: 'authorizationPolicy' },
+        { path: ['add', 'authorization', 'action'], label: 'authorizationAction' },
+        { path: ['add', 'aaa', 'vserver'], label: 'aaaVserver' },
+
+        // AppFlow
+        { path: ['add', 'appflow', 'policy'], label: 'appflowPolicy' },
+        { path: ['add', 'appflow', 'action'], label: 'appflowAction' },
+        { path: ['add', 'appflow', 'collector'], label: 'appflowCollector' },
+
+        // Rate Limiting
+        { path: ['add', 'ns', 'limitIdentifier'], label: 'rateLimitIdentifier' },
+        { path: ['add', 'ns', 'limitSelector'], label: 'rateLimitSelector' },
+
+        // Audit
+        { path: ['add', 'audit', 'nslogPolicy'], label: 'auditNslogPolicy' },
+        { path: ['add', 'audit', 'syslogPolicy'], label: 'auditSyslogPolicy' },
+
+        // Spillover
+        { path: ['add', 'spillover', 'policy'], label: 'spilloverPolicy' },
+        { path: ['add', 'spillover', 'action'], label: 'spilloverAction' },
+
+        // Network
+        { path: ['add', 'vlan'], label: 'vlan' },
+        { path: ['add', 'ns', 'netProfile'], label: 'netProfile' },
+        { path: ['add', 'ns', 'trafficDomain'], label: 'trafficDomain' },
     ]
 
     items.forEach(({ path, label }) => {

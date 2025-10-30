@@ -1,6 +1,6 @@
 import { deepmergeInto } from "deepmerge-ts";
 import { logger } from "./logger";
-import { AdcApp, AdcConfObjRx, AdcRegExTree, PolicyRef } from "./models";
+import { AdcApp, AdcConfObjRx, AdcRegExTree, PolicyRef, LbVserver } from "./models";
 import { isIP } from "net";
 import { extractOptions } from "./parseAdcUtils";
 
@@ -16,6 +16,7 @@ export async function digLbVserverRx(coaRx: AdcConfObjRx, rx: AdcRegExTree) {
     if (!coaRx.add?.lb?.vserver) return apps;
 
     // Iterate over LB vserver objects (keyed by name)
+    // TypeScript now knows 'vs' is type LbVserver with full autocomplete support
     for (const [vsName, vs] of Object.entries(coaRx.add.lb.vserver)) {
 
         // TODO: Names with quotes are preserved from parseAdcArraysRx to match old behavior
@@ -23,12 +24,12 @@ export async function digLbVserverRx(coaRx: AdcConfObjRx, rx: AdcRegExTree) {
 
         const app: AdcApp = {
             name: vs.name,
-            protocol: vs.protocol,
-            ipAddress: vs.ipAddress,
+            protocol: vs.protocol,  // ✅ TypeScript knows this is required
+            ipAddress: vs.ipAddress,  // ✅ Autocomplete suggests LbVserver properties
             type: 'lb',
             port: vs.port,
             lines: [vs._line],
-            opts: extractOptions(vs)
+            opts: extractOptions(vs)  // ✅ Extracts all -options from LbVserver
         };
 
         // Process bindings for this vserver

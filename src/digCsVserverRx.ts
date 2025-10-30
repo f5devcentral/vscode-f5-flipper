@@ -1,5 +1,5 @@
 import { logger } from "./logger";
-import { AdcApp, AdcConfObjRx, AdcRegExTree, Appflow, PolicyRef } from "./models";
+import { AdcApp, AdcConfObjRx, AdcRegExTree, Appflow, PolicyRef, CsVserver, CsPolicy, CsAction } from "./models";
 import { digSslBindingRx } from "./digLbVserverRx";
 import { extractOptions } from "./parseAdcUtils";
 
