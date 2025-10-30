@@ -8,6 +8,7 @@
 - **Core Features**
   - [Configuration Parsing](features/parsing.md)
   - [Application Abstraction](features/abstraction.md)
+  - [Feature Detection](features/feature-detection.md)
   - [Diagnostics Engine](features/diagnostics.md)
   - [AS3 Conversion](features/conversion.md)
 

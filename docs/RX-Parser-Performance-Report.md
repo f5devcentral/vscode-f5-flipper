@@ -5,6 +5,7 @@
 The new RX-based parsing engine delivers **2-3x faster performance** compared to the legacy array-based parser while providing **superior accuracy** in configuration abstraction. This document details the comprehensive rewrite, optimizations, testing methodology, and results.
 
 **Key Results:**
+
 - **Up to 3.11x faster** end-to-end processing
 - **Up to 82.5% faster** application digestion
 - **Better accuracy** with improved binding detection and duplicate removal
@@ -47,6 +48,7 @@ configObjectArry = {
 ```
 
 **Limitations:**
+
 - Required multiple regex passes to extract object properties
 - Inefficient duplicate detection (O(n²) complexity)
 - Missed complex binding relationships
@@ -77,6 +79,7 @@ configObjectArryRx = {
 ```
 
 **Benefits:**
+
 - Single-pass parsing with immediate object creation
 - O(1) lookup by name
 - All properties extracted during parsing
@@ -302,16 +305,19 @@ const b = structuredClone(a)
 ### Test Categories
 
 #### 1. Unit Tests
+
 - **Parser function tests** (`tests/007_parseNsOpts.unit.tests.ts`)
 - **Object counter tests** (`tests/045_objectCounter.unit.tests.ts`)
 - **Utility function tests** (`tests/044_utilities.unit.tests.ts`)
 
 #### 2. Integration Tests
+
 - **Individual digester tests** (`tests/301-304_parseAdcArraysRx.*.int.tests.ts`)
 - **CS to LB reference tests** (`tests/046_csToLbRefs.unit.tests.ts`)
 - **Full pipeline tests** (`tests/011_tgz_unpacker.unit.tests.ts`)
 
 #### 3. Performance Tests
+
 - **Isolated component tests** (`tests/305_performance.comparison.tests.ts`)
 - **End-to-end benchmarks** (`tests/306_final.performance.tests.ts`)
 
@@ -328,11 +334,13 @@ const b = structuredClone(a)
 ### Performance Measurement
 
 Tests measure three key phases:
+
 1. **Parse Time** - Config line parsing to object structure
 2. **Digest Time** - Application abstraction from parsed objects
 3. **Total E2E Time** - Complete processing pipeline
 
 **Methodology:**
+
 - Use `process.hrtime.bigint()` for nanosecond precision
 - Convert to milliseconds for reporting
 - Run old and new parsers on identical inputs
@@ -407,6 +415,7 @@ Large configs (2000+ lines):      2.0-3.0x faster
 **Problem:** Old parser missed CS→LB binding relationships.
 
 **Example (groot.ns.conf):**
+
 ```typescript
 // OLD: Missed bindings on CS vserver
 csApp.bindings = {
@@ -436,6 +445,7 @@ csApp.bindings = {
 **Problem:** Old parser created duplicate entries for array-based options.
 
 **Example (bren.ns.conf SSL certificates):**
+
 ```typescript
 // OLD: Duplicates in eccCurveName
 sslCert['-eccCurveName'] = [
@@ -465,6 +475,7 @@ sslCert['-eccCurveName'] = [
 **Problem:** Old parser missed SSL certificate bindings in some scenarios.
 
 **Example (starlord.ns.conf):**
+
 ```typescript
 // OLD: Missing certKey bindings
 csApp.bindings.certs = []  // Empty
@@ -491,6 +502,7 @@ csApp.bindings.certs = [
 **Problem:** Old parser created duplicate CS policy binding entries.
 
 **Example (groot.ns.conf):**
+
 ```typescript
 // OLD: Duplicate policies
 csApp.csPolicies = [
@@ -568,9 +580,6 @@ Run the comparison test suite:
 # Full test suite
 npm test
 
-# Performance comparison
-npx mocha tests/306_final.performance.tests.ts
-
 # Integration tests
 npx mocha tests/30*_parseAdcArraysRx*.int.tests.ts
 ```
@@ -607,7 +616,6 @@ npx mocha tests/30*_parseAdcArraysRx*.int.tests.ts
 | `tests/303_parseAdcArraysRx.apple.int.tests.ts` | Simple config | 3 | apple.ns.conf |
 | `tests/304_parseAdcArraysRx.allConfigs.int.tests.ts` | All configs | 25+ | All test configs |
 | `tests/305_performance.comparison.tests.ts` | Component perf | 5 | Parser/digester isolation |
-| `tests/306_final.performance.tests.ts` | End-to-end perf | 5 | Full pipeline |
 
 ### B. Optimization Summary Table
 
@@ -639,9 +647,9 @@ objectCounter.ts     |     100 |      100 |     100 |     100 |
 
 Requirements: 80% lines/functions, 70% branches ✅
 
-### D. Benchmark Data
+### D. Historical Benchmark Data
 
-Raw performance data from `tests/306_final.performance.tests.ts`:
+Representative performance data from RX parser implementation:
 
 ```json
 {

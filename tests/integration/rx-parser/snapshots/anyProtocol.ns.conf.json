@@ -1,6 +1,6 @@
 {
   "configFile": "anyProtocol.ns.conf",
-  "generatedAt": "2025-10-12T00:36:16.242Z",
+  "generatedAt": "2025-10-12T13:19:50.478Z",
   "apps": [
     {
       "name": "exchange_any_vs",

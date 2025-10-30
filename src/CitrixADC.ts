@@ -15,6 +15,7 @@ import { parseAdcConfArraysRx } from './parseAdcArraysRx';
 import { digCsVserversRx } from './digCsVserverRx';
 import { digLbVserverRx } from './digLbVserverRx';
 import { digGslbVserversRx } from './digGslbVserverRx';
+import { FeatureDetector, mapFeaturesToApp, calculateAppComplexity, getAppPlatformRecommendation } from './featureDetector';
 
 
 
@@ -113,6 +114,54 @@ export default class ADC extends EventEmitter {
         this.stats.sourceAdcVersion = this.adcVersion
 
         // end processing time, convert microseconds to miliseconds
+        this.stats.parseTime = Number(process.hrtime.bigint() - startTime) / 1000000;
+
+        return;
+    }
+
+    /**
+     * Load and parse NetScaler config from a string
+     * Useful for programmatic config generation/testing without requiring file system access
+     *
+     * @param configContent - Raw NetScaler config content as string
+     * @param fileName - Optional filename for identification (defaults to 'config.conf')
+     * @returns Promise<void>
+     *
+     * @example
+     * ```typescript
+     * const adc = new ADC();
+     * const configString = `
+     *   #NS13.1 Build 37.38
+     *   add lb vserver web_vs HTTP 10.1.1.100 80
+     *   add service web_svc 10.1.1.10 HTTP 80
+     *   bind lb vserver web_vs web_svc
+     * `;
+     * await adc.loadParseFromString(configString);
+     * const explosion = await adc.explode();
+     * ```
+     */
+    async loadParseFromString(configContent: string, fileName: string = 'config.conf'): Promise<void> {
+        const startTime = process.hrtime.bigint();
+
+        // Set input file properties
+        this.inputFileType = '.conf';
+        this.inputFile = fileName.replace(/\.conf$/, ''); // Remove .conf extension if present
+
+        // Create a ConfigFile object from the string content
+        const configFile: ConfigFile = {
+            fileName: fileName,
+            size: configContent.length,
+            content: configContent
+        };
+
+        // Parse the config directly
+        await this.parseConf(configFile);
+
+        // Set stats
+        this.stats.sourceSize = configContent.length;
+        this.stats.sourceAdcVersion = this.adcVersion;
+
+        // Calculate parse time
         this.stats.parseTime = Number(process.hrtime.bigint() - startTime) / 1000000;
 
         return;
@@ -254,21 +303,54 @@ export default class ADC extends EventEmitter {
         // Build CS to LB references (adds referenced LB apps to CS apps)
         digCStoLBreferences(apps);
 
+        // ✨ Per-App Feature Detection
+        try {
+            // Step 1: Run global feature detection once
+            const detector = new FeatureDetector();
+            const globalFeatures = detector.analyze(this.configObjectArryRx);
+            logger.info(`Global feature detection complete: ${globalFeatures.length} features detected`);
+
+            // Step 2: Map features to each individual app
+            for (const app of apps) {
+                try {
+                    const appFeatures = mapFeaturesToApp(app, globalFeatures, this.configObjectArryRx);
+                    const complexity = calculateAppComplexity(appFeatures);
+                    const recommendation = getAppPlatformRecommendation(appFeatures);
+
+                    // Simple feature name array for quick reference
+                    app.features = appFeatures.map(f => f.name);
+
+                    // Detailed feature analysis
+                    app.featureAnalysis = {
+                        features: appFeatures,
+                        complexity: complexity,
+                        recommendedPlatform: recommendation.recommended,
+                        confidence: recommendation.confidence
+                    };
+                } catch (err) {
+                    logger.warn(`Per-app feature mapping failed for ${app.name}:`, err);
+                }
+            }
+            logger.info(`Per-app feature analysis complete for ${apps.length} apps`);
+        } catch (err) {
+            logger.warn('Feature detection failed:', err);
+        }
+
         // Post-process all apps: remove duplicate lines and sort properties
-        for (const app of apps) {
+        for (let i = 0; i < apps.length; i++) {
             // Use Set for O(n) duplicate removal instead of O(n²) indexOf
-            app.lines = [...new Set(app.lines)];
+            apps[i].lines = [...new Set(apps[i].lines)];
 
             // Remove empty or invalid certs arrays
-            if (app.bindings?.certs) {
-                if (app.bindings.certs.length === 0 ||
-                    (app.bindings.certs.length === 1 && Object.keys(app.bindings.certs[0]).length === 0)) {
-                    delete app.bindings.certs;
+            if (apps[i].bindings?.certs) {
+                if (apps[i].bindings.certs.length === 0 ||
+                    (apps[i].bindings.certs.length === 1 && Object.keys(apps[i].bindings.certs[0]).length === 0)) {
+                    delete apps[i].bindings.certs;
                 }
             }
 
             // Resort the app object properties for better human reading
-            sortAdcApp(app);
+            apps[i] = sortAdcApp(apps[i]);
         }
 
         // capture app abstraction time
@@ -316,26 +398,27 @@ export default class ADC extends EventEmitter {
 
 /**
  * sorts AdcApp object properties
- *  mainly makes sure name/type/ipAddress/port are at the top and lines are at the bottom
- * @param app 
- * @returns 
+ *  mainly makes sure name/type/ipAddress/port are at the top, features before lines
+ * @param app - The app object to sort
+ * @returns Sorted app object with consistent property order
  */
-export function sortAdcApp(app: AdcApp) {
-
-    const sorted: AdcApp = {
+export function sortAdcApp(app: AdcApp): AdcApp {
+    return {
         name: app.name,
         type: app.type,
         protocol: app.protocol,
         ...(app.ipAddress && { ipAddress: app.ipAddress }),
         ...(app.port && { port: app.port }),
+        ...(app.features && { features: app.features }),
         ...(app.opts && { opts: app.opts }),
         ...(app.bindings && { bindings: app.bindings }),
         ...(app.csPolicies && { csPolicies: app.csPolicies }),
         ...(app.csPolicyActions && { csPolicyActions: app.csPolicyActions }),
         ...(app.appflows && { appflows: app.appflows }),
+        ...(app.diagnostics && { diagnostics: app.diagnostics }),
+        ...(app.featureAnalysis && { featureAnalysis: app.featureAnalysis }),
+        ...(app.fastTempParams && { fastTempParams: app.fastTempParams }),
         ...(app.lines && { lines: app.lines }),
         ...(app.apps && { apps: app.apps })
-    }
-
-    return app = sorted;
+    };
 }

@@ -76,6 +76,26 @@ export async function parseAdcConfArraysRx(config: string[], cfgObj: AdcConfObjR
 
 
 /**
+ * Strip surrounding quotes from a string
+ * Handles edge cases:
+ * - Double quotes: "name" -> name
+ * - Already unquoted: name -> name
+ * - Empty string: "" -> "" (empty)
+ * - Single quote at start/end only: "name -> "name (no change)
+ * - Escaped quotes preserved inside: "name\"with\"quotes" -> name"with"quotes
+ *
+ * @param str String that may have surrounding quotes
+ * @returns String with surrounding quotes removed
+ */
+function stripSurroundingQuotes(str: string): string {
+    // Only strip if both start and end have quotes
+    if (str.startsWith('"') && str.endsWith('"') && str.length >= 2) {
+        return str.slice(1, -1);
+    }
+    return str;
+}
+
+/**
  * Parse NS config line fully with RX patterns
  * Uses named capture groups from regex patterns to extract all properties
  * @param objectType Full object type (e.g., "add lb vserver")
@@ -101,7 +121,7 @@ function parseNsLineWithRx(
     if (!pattern) {
         // Fallback: just extract name if no pattern exists
         const tokens = body.split(/\s+/);
-        result.name = tokens[0];
+        result.name = stripSurroundingQuotes(tokens[0]);
         return result;
     }
 
@@ -112,16 +132,14 @@ function parseNsLineWithRx(
         // Extract all named capture groups
         for (const [key, value] of Object.entries(match.groups)) {
             if (value !== undefined) {
-                // Clean up quoted names and sanitize spaces
-                // TODO: Remove this quote-stripping logic in the future when old parser is removed
-                // For now, we keep quotes in names to match old parser behavior for comparison
-                if (key === 'name' && value.startsWith('"') && value.endsWith('"')) {
-                    result[key] = value;  // Keep quotes to match old behavior
-                } else if (key === 'opts') {
+                if (key === 'opts') {
                     // Parse options string into individual key-value pairs
                     const parsedOpts = parseNsOptions(value, rx);
                     // Merge parsed options into result object (keep dashes to match NS format)
                     Object.assign(result, parsedOpts);
+                } else if (key === 'name' || key === 'service' || key === 'server') {
+                    // Strip quotes from names, services, and servers for cleaner output
+                    result[key] = stripSurroundingQuotes(value);
                 } else {
                     result[key] = value;
                 }
@@ -130,7 +148,7 @@ function parseNsLineWithRx(
     } else {
         // Fallback: extract just the name
         const tokens = body.split(/\s+/);
-        result.name = tokens[0];
+        result.name = stripSurroundingQuotes(tokens[0]);
     }
 
     return result;

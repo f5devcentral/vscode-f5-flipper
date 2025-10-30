@@ -19,6 +19,110 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.18.0] - (Pending Release)
+
+### Added
+
+- **Feature Detection System (Phases 1-4 Complete)**: Comprehensive intelligent analysis of NetScaler configurations
+  - **FeatureDetector**: Automatically detects 50+ NetScaler features across 10 categories
+    - Load Balancing & Traffic Management
+    - Security & SSL (Enhanced: cert chains, custom ciphers, mTLS, SSL policies)
+    - Application Firewall & Protection (Enhanced: SQL injection/XSS/CSRF detection, rate limiting, GeoIP)
+    - Session Management & Persistence
+    - Policy Framework
+    - Performance Optimization (Enhanced: custom TCP/HTTP profiles)
+    - Global Server Load Balancing (GSLB)
+    - Authentication & Authorization (Enhanced: nFactor, VPN, LDAP, RADIUS, SAML, OAuth/OIDC)
+    - Monitoring & Health Checks (Enhanced: script monitors, SNMP, audit logging)
+    - Network Configuration & HA (Enhanced: HA pairs, clusters, link LB, SNIPs)
+  - **ComplexityScorer**: Calculates migration complexity score (1-10) with justification
+    - Estimates migration effort (days/weeks)
+    - Assigns risk levels (Low/Medium/High)
+    - Provides detailed justification for scores
+  - **CapabilityMapper**: Recommends F5 platform based on detected features
+    - Scores compatibility for TMOS, NGINX+, and XC
+    - Identifies conversion gaps and requirements
+    - Provides confidence levels and rationale
+  - **Phase 2 Enhancements (Enhanced Detection)**:
+    - SSL/TLS: Certificate chain detection, custom cipher analysis, legacy protocol warnings
+    - Security: AppFW profile inspection, rate limiting patterns, GeoIP blocking detection
+    - Authentication: nFactor (multi-schema), VPN Gateway, LDAP/RADIUS/SAML/OAuth
+    - Monitoring: Script-based monitors (USER protocol), custom health checks, SNMP
+    - HA: Cluster configuration, HA pairs, link load balancing
+    - 23 new comprehensive unit tests covering all Phase 2 features
+  - **Phase 3 & 4: Scoring and Mapping Engine**:
+    - Interaction multipliers for feature diversity (1.0x to 1.3x based on categories)
+    - Feature-specific platform bonuses (VPN Gateway, GSLB, AppFW)
+    - Gap detection with severity levels (Info/Warning/Critical)
+  - **Phase 5: Per-App Feature Detection** (replaces global report with actionable app-level insights):
+    - **Simple features array**: `app.features` contains feature names for quick reference/filtering
+    - **Per-app complexity analysis**: Each app shows individual migration complexity (1-10 scale)
+    - **Color-coded badges**: Visual indicators on each app (🔴 High / 🟠 Medium / 🟡 Low / 🟢 Simple)
+    - **Rich hover tooltips**: Comprehensive app details with diagnostics and migration insights
+      - App header with type, protocol, and address
+      - 🔍 Diagnostics summary (errors, warnings, info)
+      - 🎯 Migration Analysis (complexity, platform, confidence)
+      - Feature breakdown by category (top 3 categories shown)
+      - F5 platform mapping indicators (✅ Full / ⚠️ Partial support)
+      - Conversion gaps with severity indicators
+      - Removed verbose YAML dump for cleaner, actionable information
+    - **App descriptions**: Include `[complexity/10 → Platform]` format for quick scanning
+    - **Intelligent icon priority**: Diagnostic errors/warnings override complexity colors
+    - **Hybrid architecture**: Global feature detection + per-app mapping for efficiency
+    - **Unified workflow**: Feature analysis runs automatically during config load alongside diagnostics
+    - **Lightweight implementation**: Maps global features to apps using type, protocol, bindings analysis
+  - **Architecture**: Hybrid approach - global feature detection once + per-app lightweight mapping
+  - **Integration**: Runs automatically during config load alongside diagnostics
+  - **Benefits** (per-app insights vs global report):
+    - **Actionable per-app insights**: Identify which specific apps are complex, not just overall config
+    - **Migration prioritization**: Sort apps by complexity to plan migration order
+    - **Data-driven platform recommendations per-app**: Each app gets tailored platform suggestion
+    - **Automated effort estimation**: Know complexity before starting each app migration
+    - **Early gap identification**: See conversion challenges at app level
+    - **Deep security analysis**: Certificate chains, mTLS, AppFW, rate limiting, GeoIP per-app
+    - **Unified diagnostics + complexity view**: Single pane of glass for all app insights
+  - **Files**: [src/featureDetector.ts](src/featureDetector.ts) (1,600+ lines), [src/complexityScorer.ts](src/complexityScorer.ts), [src/capabilityMapper.ts](src/capabilityMapper.ts), [src/CitrixADC.ts](src/CitrixADC.ts), [src/nsCfgViewProvider.ts](src/nsCfgViewProvider.ts), [src/models.ts](src/models.ts)
+  - **Tests**: 349 tests passing (326 base + 23 per-app feature tests), 90%+ code coverage
+  - **Design Documents**:
+    - [FEATURE_DETECTION_DESIGN.md](FEATURE_DETECTION_DESIGN.md) - Complete architecture
+    - [FEATURE_DETECTION_IMPLEMENTATION_SUMMARY.md](FEATURE_DETECTION_IMPLEMENTATION_SUMMARY.md) - Implementation summary
+    - [FEATURE_DETECTION_PHASE5_PER_APP_INTEGRATION.md](FEATURE_DETECTION_PHASE5_PER_APP_INTEGRATION.md) - Per-app integration plan
+
+- **Enhanced Type Definitions for AdcConfObjRx**: Comprehensive TypeScript interface improvements for better IDE experience
+  - Created 10 specific object type interfaces: `LbVserver`, `CsVserver`, `GslbVserver`, `NsServiceGroup`, `NsService`, `NsServer`, `LbMonitor`, `SslCertKey`, `CsPolicy`, `CsAction`
+  - Added 100+ documented properties with JSDoc comments and usage examples
+  - Enhanced type safety with string literal unions for common options (persistence types, LB methods, SSL/TLS settings, etc.)
+  - Updated `AdcConfObjRx` to use specific types instead of generic `NsObject` for all major object categories
+  - Improved IDE autocomplete with property suggestions and hover documentation
+  - Added NetScaler documentation links in JSDoc for quick reference
+  - **Benefits**:
+    - Better developer experience with autocomplete for NetScaler-specific properties
+    - Compile-time type checking prevents typos in property names
+    - Self-documenting code with comprehensive JSDoc examples
+    - Foundation for future feature detection and validation work
+  - **Files**: [src/models.ts](src/models.ts), [src/digLbVserverRx.ts](src/digLbVserverRx.ts), [src/digCsVserverRx.ts](src/digCsVserverRx.ts)
+  - **Design Document**: [ADC_CONFOBJRX_TYPE_EXTENSIONS.md](ADC_CONFOBJRX_TYPE_EXTENSIONS.md)
+
+### Changed
+
+### Fixed
+
+### Removed
+
+- **Type Guards**: Removed `src/typeGuards.ts` and `tests/027_typeGuards.unit.tests.ts`
+  - Type guards were not needed for Flipper's deterministic parsing pipeline
+  - TypeScript interfaces provide compile-time type safety
+  - No external/untrusted data sources requiring runtime validation
+  - Parsed JSON structure controlled by regex patterns in `src/regex.ts`
+
+- **Legacy Performance Tests**: Removed `tests/306_final.performance.tests.ts`
+  - Performance comparison against old parser (CitrixADCold) no longer needed
+  - Old parser has been deprecated and is being phased out
+  - Snapshot-based integration tests provide better regression detection
+  - Component-level performance tests in `tests/305_performance.comparison.tests.ts` remain for focused benchmarking
+
+---
+
 ## [1.17.0] - (01-12-2025)
 
 ### 🚀 Major Performance Enhancement: New RX Parsing Engine
@@ -28,22 +132,26 @@ This release introduces a **complete rewrite** of the NetScaler configuration pa
 #### Performance Improvements
 
 **End-to-End Processing:**
+
 - **Up to 3.11x faster** complete processing pipeline
 - **Average 1.48x speedup** (30% improvement) across all config sizes
 - **2.05x faster** on complex GSLB configurations (t1.ns.conf)
 - **1.43x faster** on enterprise configs with 17+ apps (bren.ns.conf)
 
 **Parsing Phase:**
+
 - **Up to 2.24x faster** regex matching and object creation
 - **Average 1.46x speedup** (27% improvement)
 - Pre-compiled regex patterns eliminate compilation overhead
 
 **Digestion Phase:**
+
 - **Up to 5.59x faster** application abstraction
 - **Up to 82.1% faster** on GSLB configs
 - Parallel digester execution with `Promise.all()` (3-6x speedup)
 
 **Scalability:**
+
 ```
 Small configs (100-500 lines):    1.2-1.5x faster
 Medium configs (500-2000 lines):  1.5-2.0x faster
@@ -55,12 +163,14 @@ See [RX Parser Performance Report](docs/RX-Parser-Performance-Report.md) for com
 #### Architecture Improvements
 
 **NEW: Object-Based Storage**
+
 - Replaced array-based structure with object storage keyed by name
 - O(1) lookup by name vs O(n) array search
 - Single-pass parsing with immediate object creation
 - All properties extracted during parsing (no multi-pass required)
 
 **Optimizations:**
+
 1. **Pre-compiled Regex Patterns** - Compile once at initialization (~40% faster parsing)
 2. **Improved Options Parsing** - Enhanced regex eliminates string concatenation hacks
 3. **Parallel Digester Execution** - Run all digesters concurrently with `Promise.all()`
@@ -69,6 +179,7 @@ See [RX Parser Performance Report](docs/RX-Parser-Performance-Report.md) for com
 6. **Native structuredClone** - Faster deep cloning for CS→LB references
 
 **Files:**
+
 - [src/parseAdcArraysRx.ts](src/parseAdcArraysRx.ts) - New RX parsing engine
 - [src/CitrixADC.ts](src/CitrixADC.ts) - Updated to use RX parser with parallel digestion
 - [src/digLbVserverRx.ts](src/digLbVserverRx.ts) - RX-based LB digester
@@ -79,6 +190,7 @@ See [RX Parser Performance Report](docs/RX-Parser-Performance-Report.md) for com
 #### Quality Improvements
 
 **Better Accuracy:**
+
 - ✅ Improved binding detection for CS→LB vserver relationships
 - ✅ Fixed duplicate entries in SSL certificate arrays
 - ✅ Complete SSL certificate handling in all scenarios
@@ -88,6 +200,7 @@ See [RX Parser Performance Report](docs/RX-Parser-Performance-Report.md) for com
 - ✅ Fixed monitor protocol field inclusion
 
 **100% Backward Compatible:**
+
 - Drop-in replacement with identical output structure
 - All existing code continues to work without changes
 - Legacy parser preserved in `CitrixADCold.ts` for reference
@@ -95,12 +208,14 @@ See [RX Parser Performance Report](docs/RX-Parser-Performance-Report.md) for com
 #### Testing
 
 **Comprehensive Test Coverage:**
+
 - 25+ new tests for RX parser components
 - Snapshot-based integration tests (48 tests across 14 configs)
 - Performance comparison tests validating 2-3x improvements
 - All tests passing with improved coverage metrics
 
 **Test Files:**
+
 - `tests/007_parseNsOpts.unit.tests.ts` - Options parsing tests
 - `tests/045_objectCounter.unit.tests.ts` - Object counting tests
 - `tests/046_csToLbRefs.unit.tests.ts` - CS→LB reference tests
@@ -111,11 +226,13 @@ See [RX Parser Performance Report](docs/RX-Parser-Performance-Report.md) for com
 #### Documentation
 
 **New Documentation:**
+
 - [docs/RX-Parser-Performance-Report.md](docs/RX-Parser-Performance-Report.md) - Comprehensive performance analysis
 - [docs/RX-PARSER-TYPES.md](docs/RX-PARSER-TYPES.md) - Type system guide and migration guide
 - [docs/RELEASE-2025-01-12.md](docs/RELEASE-2025-01-12.md) - Detailed release notes
 
 **Enhanced Types:**
+
 - Marked `AdcConfObj` as `@deprecated` with migration guidance
 - Enhanced `AdcConfObjRx` with comprehensive JSDoc and examples
 - Improved `NsObject` interface with specific common fields

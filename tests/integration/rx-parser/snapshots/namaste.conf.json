@@ -1,9 +1,9 @@
 {
   "configFile": "namaste.conf",
-  "generatedAt": "2025-10-12T00:36:16.292Z",
+  "generatedAt": "2025-10-12T13:19:50.505Z",
   "apps": [
     {
-      "name": "\"namaste 443 vip\"",
+      "name": "namaste 443 vip",
       "protocol": "SSL",
       "ipAddress": "10.240.18.68",
       "type": "lb",
@@ -46,7 +46,7 @@
       "bindings": {
         "serviceGroup": [
           {
-            "name": "\"namaste 8443 svg\"",
+            "name": "namaste 8443 svg",
             "protocol": "SSL",
             "-maxClient": "0",
             "-maxReq": "0",

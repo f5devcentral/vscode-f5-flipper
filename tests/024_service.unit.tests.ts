@@ -69,7 +69,7 @@ describe('service abstraction tests', function () {
         // this app should have three different service bindings and 15 total line of config
 
         // get application we are looking for
-        const app = expld.config.apps?.find(x => x.name === "\"1 APPLE_443_HTTPS\"")
+        const app = expld.config.apps?.find(x => x.name === "1 APPLE_443_HTTPS")
 
         assert.deepStrictEqual(app!.bindings!.service!.length, 3, "should have three service bindings")
         assert.deepStrictEqual(app!.lines!.length, 16, "should have 16 total lines of ns config")
@@ -81,7 +81,7 @@ describe('service abstraction tests', function () {
         // this app should have three different service bindings and 15 total line of config
 
         // get application we are looking for
-        const app = expld.config.apps?.find(x => x.name === "\"2 APPLE_80_HTTP\"")
+        const app = expld.config.apps?.find(x => x.name === "2 APPLE_80_HTTP")
 
         assert.deepStrictEqual(app!.bindings!.service!.length, 1, "should have three service bindings")
         assert.deepStrictEqual(app!.lines!.length, 6, "should have 16 total lines of ns config")
@@ -93,7 +93,7 @@ describe('service abstraction tests', function () {
         // this app should have three different service bindings and 15 total line of config
 
         // get application we are looking for
-        const app = expld.config.apps?.find(x => x.name === "\"3 APPLE_443_HTTPS\"")
+        const app = expld.config.apps?.find(x => x.name === "3 APPLE_443_HTTPS")
 
         assert.deepStrictEqual(app!.bindings!.service!.length, 1, "should have one service bindings")
         assert.deepStrictEqual(app!.lines!.length, 9, "should have 16 total lines of ns config")
@@ -106,7 +106,7 @@ describe('service abstraction tests', function () {
         // this app should have three different service bindings and 15 total line of config
 
         // get application we are looking for
-        const app = expld.config.apps?.find(x => x.name === "\"1 APPLE_443_HTTPS\"")
+        const app = expld.config.apps?.find(x => x.name === "1 APPLE_443_HTTPS")
 
         const appServices = app!.bindings!.service;
 
