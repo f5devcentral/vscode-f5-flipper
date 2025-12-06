@@ -135,9 +135,46 @@ template: |
 - Test files mirror src structure with `.tests.ts` suffix
 - Use diagnostics.json for test fixtures and validation
 
+## Project Planning Documents
+
+The project uses two main planning frameworks located in `specs/`:
+
+### PROJECT ORCID (`specs/PROJECT_ORCID.md`)
+**Purpose**: Overall project roadmap and major enhancement tracking
+
+- **Scope**: 12 major initiatives across documentation, architecture, testing, and features
+- **Status**: 6/12 sections complete (50% progress)
+- **Focus Areas**:
+  - Documentation updates (website, README)
+  - RX Parsing Engine (✅ Complete)
+  - Parser refinements (✅ Complete)
+  - Unit test coverage (✅ Complete)
+  - Extended feature detection (✅ Complete Phases 1-4)
+  - Future work: Conversion templates, sanitization, WebView enhancements
+
+### PROJECT BORG (`specs/BORG*.md`)
+**Purpose**: Research and integration of predecessor NetScaler conversion tools
+
+- **Relationship**: Implements PROJECT_ORCID Section 4.1 (Review Related Tools)
+- **Scope**: Analysis of 13 existing conversion tools (6 local, 7 external)
+- **Status**: Phase 1 ✅ COMPLETE (October 2025)
+- **Key Outcomes**:
+  - Analyzed competing/complementary tools (ns2f5.pl, cstalhood/Get-ADCVServerConfig, NSPEPI)
+  - Object Type Expansion: 41 → 81 regex patterns (from cstalhood research)
+  - Parser type enhancements and architecture decisions
+  - Identified critical gaps: AppFW, nFactor chains, expression parsing
+
+**Related Documents**:
+- `specs/BORG.md` - Main research document (2408 lines)
+- `specs/BORG_AUTH_REFERENCE.md` - Authentication patterns reference
+- `specs/BORG_PHASE1_IMPLEMENTATION.md` - Phase 1 implementation details
+- `specs/BORG_PHASE1_SUMMARY.md` - Phase 1 completion summary
+
+**Key Insight**: BORG research directly informed the parser expansion and type system enhancements, providing battle-tested patterns from the NetScaler community.
+
 ## Development Notes
 
-- Extension activates on `onView:f5-ns-container` 
+- Extension activates on `onView:f5-ns-container`
 - Main processing happens asynchronously with EventEmitter patterns
 - Heavy use of regex patterns for NetScaler config parsing
 - Config abstraction follows NetScaler object hierarchy (CS → LB → Services → Servers)
