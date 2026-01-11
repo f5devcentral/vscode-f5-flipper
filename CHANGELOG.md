@@ -19,6 +19,20 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.18.1] - 2026-01-11
+
+### Changed
+
+- Updated test configurations for verified NetScaler patterns
+- Simplified SSL certificate examples (PEM format instead of PFX with encrypted passwords)
+
+### Fixed
+
+- Updated test assertions to match current config line counts
+- Fixed SSL certificate test expectations to match simplified cert format
+
+---
+
 ## [1.18.0] - (Pending Release)
 
 ### Added

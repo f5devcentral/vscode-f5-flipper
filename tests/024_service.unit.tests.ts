@@ -72,7 +72,7 @@ describe('service abstraction tests', function () {
         const app = expld.config.apps?.find(x => x.name === "1 APPLE_443_HTTPS")
 
         assert.deepStrictEqual(app!.bindings!.service!.length, 3, "should have three service bindings")
-        assert.deepStrictEqual(app!.lines!.length, 16, "should have 16 total lines of ns config")
+        assert.deepStrictEqual(app!.lines!.length, 17, "should have 17 total lines of ns config")
 
     })
 

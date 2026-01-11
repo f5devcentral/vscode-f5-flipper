@@ -73,11 +73,8 @@ describe('ssl certificate tests', function () {
         const appCert = app?.bindings?.certs![0]
 
         assert.deepStrictEqual(appCert, {
-            "-cert": "www.star.groot_2022.pfx",
-            "-key": "www.star.groot_2022.pfx",
-            "-inform": "PFX",
-            "-passcrypt": "XXXX",
-            "-encrypted": "-encryptmethod ENCMTHD_3",
+            "-cert": "star.groot.cer.pem",
+            "-key": "star.groot.key.pem",
             "-certkeyName": "star.groot.cer",
             "-eccCurveName": [
                 "P_256",
