@@ -32,6 +32,14 @@ export async function digLbVserverRx(coaRx: AdcConfObjRx, rx: AdcRegExTree) {
             opts: extractOptions(vs)  // ✅ Extracts all -options from LbVserver
         };
 
+        // Merge options from 'set lb vserver' commands (e.g., -backupVServer, -soMethod)
+        const setVs = coaRx.set?.lb?.vserver?.[vsName];
+        if (setVs) {
+            app.lines.push(setVs._line);
+            const setOpts = extractOptions(setVs);
+            app.opts = { ...app.opts, ...setOpts };
+        }
+
         // Process bindings for this vserver
         const bindings = coaRx.bind?.lb?.vserver?.[vsName];
         if (bindings) {

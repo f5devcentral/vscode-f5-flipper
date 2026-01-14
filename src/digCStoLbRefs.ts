@@ -9,6 +9,9 @@ export function digCStoLBreferences(apps: AdcApp[]) {
 
     logger.info('digging lb app references from cs servers')
 
+    // First pass: Add backup vserver references to apps
+    digBackupVserverReferences(apps);
+
     // loop through all the apps and add -targetLBVserver and -lbvserver reference details
 
     for (const app of apps) {
@@ -138,4 +141,46 @@ export function digCStoLBreferences(apps: AdcApp[]) {
 
     // nothing to return since we just added details to existing apps
     return;
+}
+
+
+/**
+ * Crawl backup vserver references and add their config lines to the primary app
+ * Handles chained backup vservers (backup of backup)
+ *
+ * @param apps - Array of all parsed apps
+ */
+function digBackupVserverReferences(apps: AdcApp[]) {
+
+    logger.info('digging backup vserver references')
+
+    for (const app of apps) {
+
+        // Check if app has a backup vserver configured
+        const backupVsName = app.opts?.['-backupVServer'] as string;
+        if (!backupVsName) continue;
+
+        // Track visited backup vservers to prevent infinite loops
+        const visited = new Set<string>([app.name]);
+        let currentBackupName: string | undefined = backupVsName;
+
+        while (currentBackupName && !visited.has(currentBackupName)) {
+            visited.add(currentBackupName);
+
+            // Find the backup vserver app
+            const backupApp = apps.find((a: AdcApp) => a.name === currentBackupName);
+
+            if (backupApp) {
+                // Add separator comment and backup vserver lines
+                app.lines.push(`# -------- Backup VServer: ${backupApp.name} --------`);
+                app.lines.push(...backupApp.lines);
+
+                // Check if this backup has its own backup (chained backups)
+                currentBackupName = backupApp.opts?.['-backupVServer'] as string;
+            } else {
+                logger.error(`backup vserver ${currentBackupName} referenced by ${app.name} not found`);
+                break;
+            }
+        }
+    }
 }

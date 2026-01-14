@@ -129,21 +129,24 @@ export async function activateInternal(context: ExtensionContext) {
 
         } else if (item?.path.startsWith('Untitled-') && item?.scheme === 'untitled') {
 
-            // this is an unsaved file in vscode
+            // this is an unsaved file in vscode - parse directly from editor text
+            const editor = window.activeTextEditor;
 
-            // one spot to setup direct text to engine
-            const editors = window.activeTextEditor;;
+            if (!editor) {
+                window.showErrorMessage('f5-flipper.cfgExplore -> No active editor found');
+                return logger.error('f5-flipper.cfgExplore -> No active editor found');
+            }
 
-            const editorText = editors.document.getText();
+            const editorText = editor.document.getText();
+            const fileName = item.path;  // e.g., 'Untitled-1'
 
-            // save the text the a local temp file
+            logger.info(`f5-flipper.cfgExplore: parsing from unsaved editor -> ${fileName}`);
 
-            // then return the filePath of the temp file
-            filePath = ''
+            ext.nsCfgProvider.makeExplosion(fileName, editorText);
 
-            window.showErrorMessage('f5-flipper.cfgExplore -> save file first:  feature in development');
-            return logger.error('f5-flipper.cfgExplore -> save file first:  feature in development');
-
+            await new Promise(resolve => { setTimeout(resolve, 2000); });
+            commands.executeCommand('nsConfigView.focus');
+            return;
 
         } else if (item?.path) {
 
