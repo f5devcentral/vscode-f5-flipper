@@ -9,13 +9,22 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
-## [Unreleased]
+## [1.19.0] - 2026-01-14
 
 ### Added
+
+- **Backup vserver config line separation** ([#44](https://github.com/f5devcentral/vscode-f5-flipper/issues/44)): Primary vserver config lines are now clearly separated from backup vserver lines with comment separators
+  - Format: `# -------- Backup VServer: <name> --------`
+  - Supports chained backup vservers (backup of backup)
+- **`set lb vserver` options parsing**: Options like `-backupVServer`, `-soMethod`, `-soThreshold` from `set lb vserver` commands are now merged into app options
 
 ### Changed
 
 ### Fixed
+
+- **Unsaved editor support** ([#31](https://github.com/f5devcentral/vscode-f5-flipper/issues/31)): Right-click "Explore NS Config" now works on unsaved editors
+  - No longer requires saving the file first
+  - Parses config directly from editor text content
 
 ---
 

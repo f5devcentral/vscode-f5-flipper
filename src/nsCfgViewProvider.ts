@@ -109,10 +109,11 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
     }
 
     /**
-     * 
-     * @param file file path to explode Citix ADC/NS config
+     * Explode Citrix ADC/NS config from file path or raw text content
+     * @param file file path to explode, or filename for text content
+     * @param content optional raw NS config content as string (for unsaved editors)
      */
-    async makeExplosion(file: string) {
+    async makeExplosion(file: string, content?: string) {
 
         window.withProgress({
             location: {
@@ -132,7 +133,12 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
 
             ext.eventEmitterGlobal.emit('log-info', `f5-flipper.cfgExplore, opening archive`);
 
-            await this.adc.loadParseAsync(file)
+            // Use loadParseFromString if content provided, otherwise load from file
+            const loadPromise = content
+                ? this.adc.loadParseFromString(content, file)
+                : this.adc.loadParseAsync(file);
+
+            await loadPromise
                 .then(async () => {
                     ext.eventEmitterGlobal.emit('log-info', `f5-flipper.cfgExplore, extracting apps`);
                     await this.adc.explode()
