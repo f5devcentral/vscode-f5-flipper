@@ -348,5 +348,113 @@
         "title": "Configuration Validation",
         "message": "Validate all converted configurations thoroughly in F5 environment before production deployment",
         "regex": "add (cs|lb) vserver"
+    },
+    {
+        "code": "7a3f",
+        "severity": "Information",
+        "title": "SSL Certificate File Reference",
+        "message": "Certificate references external file - will need to be imported to F5. Extract cert/key files from NetScaler before migration.",
+        "regex": "add ssl certKey [\\S]+ -cert ([\\S]+)",
+        "category": "ssl_tls",
+        "description": "Conversion Readiness: Identifies SSL certificates that reference external files which must be exported from NetScaler and imported into F5."
+    },
+    {
+        "code": "b8d2",
+        "severity": "Information",
+        "title": "Custom Cipher Group Definition",
+        "message": "Custom SSL cipher group detected - requires F5 cipher string mapping. Review cipher suite compatibility.",
+        "regex": "add ssl cipher ([\\S]+)",
+        "category": "ssl_tls",
+        "description": "Conversion Readiness: Custom cipher groups need to be translated to F5 cipher string syntax."
+    },
+    {
+        "code": "e4c1",
+        "severity": "Information",
+        "title": "Auto-Created Server Object",
+        "message": "Server where name equals IP (auto-created by NetScaler). Maps directly to F5 pool member IP - no named node needed.",
+        "regex": "add server (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}) \\1(?:\\s|$)",
+        "category": "load_balancing",
+        "description": "Conversion Readiness: Auto-created servers (name=IP) occur when services reference IPs directly. These map to F5 pool member IPs without requiring named node objects."
+    },
+    {
+        "code": "5f9e",
+        "severity": "Information",
+        "title": "Built-in Monitor Reference (ping-default)",
+        "message": "Built-in NS monitor 'ping-default' - maps to F5 'gateway_icmp' monitor.",
+        "regex": "-monitorName ping-default",
+        "category": "monitoring",
+        "description": "Conversion Readiness: NetScaler built-in monitors map to F5 equivalents."
+    },
+    {
+        "code": "2c6b",
+        "severity": "Information",
+        "title": "Built-in Monitor Reference (tcp-default)",
+        "message": "Built-in NS monitor 'tcp-default' - maps to F5 'tcp' monitor.",
+        "regex": "-monitorName tcp-default",
+        "category": "monitoring",
+        "description": "Conversion Readiness: NetScaler built-in monitors map to F5 equivalents."
+    },
+    {
+        "code": "91a4",
+        "severity": "Information",
+        "title": "Built-in Monitor Reference (http)",
+        "message": "Built-in NS monitor 'http' - maps to F5 'http' monitor.",
+        "regex": "-monitorName http(?!s)",
+        "category": "monitoring",
+        "description": "Conversion Readiness: NetScaler built-in monitors map to F5 equivalents."
+    },
+    {
+        "code": "d3f7",
+        "severity": "Information",
+        "title": "Built-in Monitor Reference (https)",
+        "message": "Built-in NS monitor 'https' - maps to F5 'https' monitor.",
+        "regex": "-monitorName https",
+        "category": "monitoring",
+        "description": "Conversion Readiness: NetScaler built-in monitors map to F5 equivalents."
+    },
+    {
+        "code": "6e08",
+        "severity": "Information",
+        "title": "Built-in Monitor Reference (tcp-ecv/http-ecv)",
+        "message": "Built-in NS ECV monitor - maps to F5 monitor with custom send/receive strings.",
+        "regex": "-monitorName (tcp-ecv|http-ecv|https-ecv|tcps-ecv)",
+        "category": "monitoring",
+        "description": "Conversion Readiness: ECV (Extended Content Verification) monitors use custom send/receive strings."
+    },
+    {
+        "code": "a5bc",
+        "severity": "Information",
+        "title": "NetScaler Version 13.0 or Earlier",
+        "message": "Config from NS 13.0 or earlier - may contain legacy CS policy syntax (targetLBVserver in bind command).",
+        "regex": "#NS1[0-2]\\.|#NS13\\.0",
+        "category": "compatibility",
+        "description": "Conversion Readiness: Identifies NetScaler version for compatibility assessment. Pre-13.1 configs may use legacy CS policy binding syntax."
+    },
+    {
+        "code": "48d9",
+        "severity": "Information",
+        "title": "NetScaler Version 13.1+",
+        "message": "Config from NS 13.1+ - uses modern CS policy syntax with explicit actions.",
+        "regex": "#NS13\\.1|#NS14\\.",
+        "category": "compatibility",
+        "description": "Conversion Readiness: Identifies NetScaler version. 13.1+ uses explicit CS actions in policy definitions."
+    },
+    {
+        "code": "c72e",
+        "severity": "Information",
+        "title": "Legacy CS Policy Binding Pattern",
+        "message": "Legacy CS policy binding with -targetLBVserver in bind command. This pattern works but is deprecated in NS 13.1+.",
+        "regex": "bind cs vserver [\\S]+ -policyName [\\S]+ -targetLBVserver",
+        "category": "compatibility",
+        "description": "Conversion Readiness: Legacy CS policy binding syntax puts target in the bind command rather than a separate action."
+    },
+    {
+        "code": "3b5a",
+        "severity": "Information",
+        "title": "Service References IP Directly",
+        "message": "Service references IP address directly (not a named server). NetScaler auto-creates a server object for this.",
+        "regex": "add service [\\S]+ (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}) [A-Z]+ \\d+",
+        "category": "load_balancing",
+        "description": "Conversion Readiness: Services can reference IPs directly. The referenced IP maps to an F5 pool member."
     }
 ]

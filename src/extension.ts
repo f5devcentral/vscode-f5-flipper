@@ -416,6 +416,11 @@ export async function activateInternal(context: ExtensionContext) {
             .then(async (doc) => {
                 await window.showTextDocument(doc);
                 // this.documents.push(doc);  // add the document to this class doc list
+
+                // fold all the json down
+                await commands.executeCommand("editor.foldAll");
+                // expand the first two levels of json for better visibility
+                await commands.executeCommand("editor.unfold", { levels: 2 });
                 return doc;
             });
 

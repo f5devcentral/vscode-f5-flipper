@@ -17,13 +17,15 @@ Major enhancements to F5 Flipper extension focusing on improved architecture, te
 | 2.3 | [Conversion Templates](#23-conversion-templates) | Not Started | High |
 | 3.1 | [Unit Test Coverage](#31-unit-test-coverage) | ✅ Complete | High |
 | 3.2 | [Production Config Testing](#32-production-config-testing) | Not Started | Medium |
-| 4.1 | [Review Related Tools](#41-review-related-tools) | Not Started | Medium |
+| 4.1 | [Review Related Tools](#41-review-related-tools) | ✅ Complete | Medium |
+| 4.2 | [MCP Server Learnings](#42-mcp-server-learnings) | ✅ Complete | Medium |
 | 5.1 | [Config Sanitization Function](#51-config-sanitization-function) | Not Started | High |
 | 6.1 | [JSON Output WebView](#61-json-output-webview) | Not Started | Medium |
 | 7.1 | [Extended Feature Detection](#71-extended-feature-detection) | ✅ Complete (Phases 1-4) | High |
 | 7.2 | [Reference Validation UI Integration](#72-reference-validation-ui-integration) | Not Started | High |
+| 7.3 | [Conversion Readiness Diagnostics](#73-conversion-readiness-diagnostics) | ✅ Complete | Medium |
 
-**Overall Progress**: 6/12 sections complete (50%) - Core parsing infrastructure + Feature Detection complete
+**Overall Progress**: 9/14 sections complete (64%) - Core parsing infrastructure + Feature Detection + Tool Review + Conversion Diagnostics complete
 
 ---
 
@@ -380,31 +382,86 @@ Major enhancements to F5 Flipper extension focusing on improved architecture, te
 
 ### 4.1 Review Related Tools
 
-**Status**: Not Started
+**Status**: ✅ Complete
 **Priority**: Medium
 **Description**: Review 3+ other tools for logic/feature mapping incorporation
 
-**Tools to Review**:
+**Tools Reviewed**:
 
-1. [ ] Tool 1: (name/details to be provided)
-2. [ ] Tool 2: (name/details to be provided)
-3. [ ] Tool 3: (name/details to be provided)
+1. [x] **PROJECT BORG Tools** - 13 NetScaler conversion tools analyzed (see [BORG.md](BORG.md))
+   - ns2f5.pl, cstalhood/Get-ADCVServerConfig, NSPEPI, and 10 others
+   - Resulted in regex expansion: 41 → 81 patterns
+   - Phase 1 complete (October 2025)
 
-**Review Process**:
+2. [x] **NetScaler MCP Server** - Claude MCP server for NetScaler management
+   - Source: [flipperAgents](https://github.com/DumpySquare/flipperAgents)
+   - Discovered deployment patterns and edge cases
+   - Integration items tracked in Section 4.2 below
 
-- [ ] Document each tool's approach
-- [ ] Identify unique features/capabilities
-- [ ] Map applicable features to Flipper
-- [ ] Design integration approach
-- [ ] Prioritize features for implementation
+3. [x] **F5 FAST Core** - Already integrated (v0.23.0)
+   - Template processing for AS3 output
+   - See `src/fastCore.ts`
+
+**Review Process**: ✅ Complete
+
+- [x] Document each tool's approach
+- [x] Identify unique features/capabilities
+- [x] Map applicable features to Flipper
+- [x] Design integration approach
+- [x] Prioritize features for implementation
 
 **Integration Areas**:
 
-- Parsing techniques
-- Application abstraction logic
-- Conversion mappings
-- Diagnostics patterns
-- UI/UX approaches
+- ✅ Parsing techniques (BORG → regex expansion)
+- ✅ Application abstraction logic (BORG → type enhancements)
+- 🔄 Deployment patterns (MCP → Section 4.2)
+- ✅ Diagnostics patterns (Feature Detection complete)
+- ⏳ UI/UX approaches (WebView planned)
+
+---
+
+### 4.2 MCP Server Learnings
+
+**Status**: ✅ Complete (items redistributed)
+**Priority**: Medium
+**Description**: Patterns discovered during NetScaler MCP server development
+
+**Source**: [flipperAgents/docs/FLIPPER_INTEGRATION_NOTES.md](https://github.com/DumpySquare/flipperAgents/blob/main/docs/FLIPPER_INTEGRATION_NOTES.md)
+
+> **Note**: After review, items from MCP server development fall into two categories:
+> 1. **Flipper (F5 Conversion)**: Keep all config details for accurate F5 mapping; add *diagnostics* to help users understand their config
+> 2. **NS MCP (NS Deployment)**: Filter/transform configs for clean deployment back to NetScaler
+>
+> Items 3, 4, 5, 9, 10 moved back to flipperAgents as deployment concerns.
+> Items 6, 7, 8 reframed as Flipper diagnostics (see Section 7.3 below).
+
+#### Completed Items (Flipper)
+
+1. [x] **Strip `-devno` parameter** ✅ Implemented
+   - Internal NetScaler device numbers stripped during parsing
+   - Location: [src/parseAdcUtils.ts:42-45](../src/parseAdcUtils.ts#L42)
+
+2. [x] **Version Detection** ✅ Implemented
+   - Parses `#NS13.x Build xx.xx` version headers from config
+   - Location: [src/CitrixADC.ts:134](../src/CitrixADC.ts#L134), [src/regex.ts:30](../src/regex.ts#L30)
+
+#### Moved to NS MCP Server
+
+The following items are **deployment concerns** for re-deploying configs to NetScaler, not F5 conversion concerns. They have been moved to [flipperAgents/docs/NS_DEPLOYMENT_NOTES.md](https://github.com/DumpySquare/flipperAgents/blob/main/docs/NS_DEPLOYMENT_NOTES.md):
+
+- **Filter Auto-Created Servers** - Avoid "Resource already exists" errors on NS deployment
+- **Exclude System Monitors** - System monitors exist on target NS
+- **Exclude System Certificates** - System certs exist on target NS
+- **Enhanced Command Dependency Ordering** - Deployment order for NS batch execution
+- **Strip Comments for Batch Deployment** - NS SSH batch doesn't support `#` comments
+
+#### Reframed as Flipper Diagnostics
+
+The following items are useful for F5 conversion planning and have been added to **Section 7.3 (Conversion Readiness Diagnostics)**:
+
+- **SSL Certificate Path Tracking** → Diagnostic: "Certificate files needed for F5 import"
+- **Custom Cipher Group Detection** → Diagnostic: "Custom cipher groups require F5 cipher string mapping"
+- **CS Policy Syntax Variations** → Diagnostic: "CS policy patterns detected" (informational for abstraction)
 
 ---
 
@@ -768,6 +825,51 @@ During unit test development (section 3.1), tests revealed that when CS vservers
 
 ---
 
+### 7.3 Conversion Readiness Diagnostics
+
+**Status**: ✅ Complete
+**Priority**: Medium
+**Description**: Diagnostics to help users understand config characteristics relevant to F5 conversion
+
+**Background**:
+During MCP server development, several config patterns were identified that are important for conversion planning. Rather than filtering these out (which would lose information), Flipper should detect and report them as diagnostics.
+
+**Implementation**: Added 12 new diagnostic rules to `diagnostics.json`:
+
+| Code   | Diagnostic                       | Description                                               |
+| ------ | -------------------------------- | --------------------------------------------------------- |
+| 7a3f   | SSL Certificate File Reference   | Identifies certs referencing external files for F5 import |
+| b8d2   | Custom Cipher Group Definition   | Custom cipher groups need F5 cipher string mapping        |
+| e4c1   | Auto-Created Server Object       | Server name=IP pattern, maps to F5 pool member IP         |
+| 5f9e   | Built-in Monitor (ping-default)  | Maps to F5 'gateway_icmp' monitor                         |
+| 2c6b   | Built-in Monitor (tcp-default)   | Maps to F5 'tcp' monitor                                  |
+| 91a4   | Built-in Monitor (http)          | Maps to F5 'http' monitor                                 |
+| d3f7   | Built-in Monitor (https)         | Maps to F5 'https' monitor                                |
+| 6e08   | Built-in Monitor (ECV types)     | ECV monitors use custom send/receive strings              |
+| a5bc   | NS Version 13.0 or Earlier       | May contain legacy CS policy syntax                       |
+| 48d9   | NS Version 13.1+                 | Uses modern CS policy syntax with explicit actions        |
+| c72e   | Legacy CS Policy Binding         | Deprecated -targetLBVserver in bind command               |
+| 3b5a   | Service References IP Directly   | Direct IP reference in service definition                 |
+
+**Completed Tasks**:
+
+- [x] Add SSL Certificate File References diagnostic
+- [x] Add Custom Cipher Groups diagnostic
+- [x] Add Auto-Created Server Objects diagnostic
+- [x] Add System Monitor References diagnostics (5 rules)
+- [x] Add NetScaler Version Compatibility diagnostics (2 rules)
+- [x] Add Legacy CS Policy Binding diagnostic
+- [x] Add Service IP Reference diagnostic
+
+**Integration with Existing Systems**:
+
+- Uses existing `diagnostics.json` rule system in `src/nsDiag.ts`
+- Information severity (non-blocking, informational only)
+- Shown in VS Code diagnostics panel when viewing app configs
+- No filtering of config data - purely informational for conversion planning
+
+---
+
 ## Implementation Phases
 
 ### Phase 1: Foundation (Q1)
@@ -845,6 +947,6 @@ During unit test development (section 3.1), tests revealed that when CS vservers
 
 ---
 
-**Last Updated**: 2025-10-17
+**Last Updated**: 2026-01-14
 **Project Lead**: Ted
-**Status**: Active Development (6/12 sections complete - 50%)
+**Status**: Active Development (8/14 sections complete - 57%)

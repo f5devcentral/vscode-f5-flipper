@@ -85,7 +85,7 @@ export class RegExTree {
             'set dns profile': /(?<name>\S+) (?<opts>[\S ]+)/,
 
             // ==== Load Balancing ====
-            'add lb vserver': /(?<name>("[\S ]+"|[\S]+)) (?<protocol>\S+) (?<ipAddress>[\d\w.:]+) (?<port>(\d+|\*)) (?<opts>[\S ]+)/,
+            'add lb vserver': /(?<name>("[\S ]+"|[\S]+)) (?<protocol>\S+) (?<ipAddress>[\d\w.:]+) (?<port>(\d+|\*))( (?<opts>[\S ]+))?/,
             'set lb vserver': /(?<name>("[\S ]+"|[\S]+)) (?<opts>[\S ]+)/,
             'bind lb vserver': /(?<name>("[\S ]+"|[\S]+)) ((?<opts>-[\S ]+)|(?<service>("[\S ]+"|[\S]+)))/,
             'add lb monitor': /(?<name>\S+) (?<protocol>\S+) (?<opts>[\S ]+)/,
@@ -95,13 +95,13 @@ export class RegExTree {
 
             // ==== Services ====
             'add server': /(?<name>("[\S ]+"|[\S]+)) (?<dest>\S+) ?(?<opts>[\S ]+)?/,
-            'add service': /(?<name>("[\S ]+"|[\S]+)) (?<server>\S+) (?<protocol>\S+) (?<port>(\d+|\*)) (?<opts>[\S ]+)/,
+            'add service': /(?<name>("[\S ]+"|[\S]+)) (?<server>\S+) (?<protocol>\S+) (?<port>(\d+|\*))( (?<opts>[\S ]+))?/,
             'bind service': /(?<name>("[\S ]+"|[\S]+)) ((?<serv>\S+ (\d+|\*))|(?<opts>[\S ]+))/,
-            'add serviceGroup': /(?<name>("[\S ]+"|[\S]+)) (?<protocol>\S+) (?<opts>[\S ]+)/,
+            'add serviceGroup': /(?<name>("[\S ]+"|[\S]+)) (?<protocol>\S+)( (?<opts>[\S ]+))?/,
             'bind serviceGroup': /(?<name>("[\S ]+"|[\S]+)) ((?<serv>\S+) (?<port>\d+|\*))?(?<opts>[\S ]+)?/,
 
             // ==== Content Switching ====
-            'add cs vserver': /(?<name>("[\S ]+"|[\S]+)) (?<protocol>\S+) (?<ipAddress>[\d\w.:]+) (?<port>(\d+|\*)) (?<opts>[\S ]+)/,
+            'add cs vserver': /(?<name>("[\S ]+"|[\S]+)) (?<protocol>\S+) (?<ipAddress>[\d\w.:]+) (?<port>(\d+|\*))( (?<opts>[\S ]+))?/,
             'set cs vserver': /(?<name>("[\S ]+"|[\S]+)) (?<opts>[\S ]+)/,
             'bind cs vserver': /(?<name>("[\S ]+"|[\S]+)) (?<opts>[\S ]+)/,
             'add cs action': /(?<name>\S+) (?<opts>[\S ]+)/,

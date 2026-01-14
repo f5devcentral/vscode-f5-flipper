@@ -342,12 +342,12 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                             }
                         }
 
-                        // Calculate icon based on BOTH diagnostics and complexity
+                        // Calculate icon based on diagnostics and complexity (only when diagnostics enabled)
                         let icon = '';
-                        if (ext.nsDiag.enabled || app.featureAnalysis) {
-                            // Get diagnostic severity (if diagnostics enabled)
+                        if (ext.nsDiag.enabled) {
+                            // Get diagnostic severity
                             let diagSeverity: 'Error' | 'Warning' | 'Information' | 'Green' = 'Green';
-                            if (ext.nsDiag.enabled && app.diagnostics) {
+                            if (app.diagnostics) {
                                 const stats = ext.nsDiag.getDiagStats(app.diagnostics as Diagnostic[]);
                                 diagSeverity = stats?.Error ? 'Error'
                                     : stats?.Warning ? 'Warning'
@@ -487,12 +487,12 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
                         }
                     }
 
-                    // Calculate icon based on BOTH diagnostics and complexity
+                    // Calculate icon based on diagnostics and complexity (only when diagnostics enabled)
                     let icon = '';
-                    if (ext.nsDiag.enabled || app.featureAnalysis) {
-                        // Get diagnostic severity (if diagnostics enabled)
+                    if (ext.nsDiag.enabled) {
+                        // Get diagnostic severity
                         let diagSeverity: 'Error' | 'Warning' | 'Information' | 'Green' = 'Green';
-                        if (ext.nsDiag.enabled && app.diagnostics) {
+                        if (app.diagnostics) {
                             const stats = ext.nsDiag.getDiagStats(app.diagnostics as Diagnostic[]);
                             diagSeverity = stats?.Error ? 'Error'
                                 : stats?.Warning ? 'Warning'
@@ -739,7 +739,10 @@ export class NsCfgProvider implements TreeDataProvider<NsCfgApp> {
             }
 
             const diagStatsYml = jsYaml.dump(this.diagStats, { indent: 4 });
-            nsTooltip = new MarkdownString().appendCodeblock(diagStatsYml, 'yaml');
+            nsTooltip = new MarkdownString();
+            nsTooltip.appendMarkdown('**Click to toggle diagnostic indicators**\n\n');
+            nsTooltip.appendMarkdown('Controls colored status icons (🔴🟠🟡🟢) for both diagnostic severity and complexity scoring.\n\n');
+            nsTooltip.appendCodeblock(diagStatsYml, 'yaml');
 
             // Reports section
             treeItems.push(new NsCfgApp(
