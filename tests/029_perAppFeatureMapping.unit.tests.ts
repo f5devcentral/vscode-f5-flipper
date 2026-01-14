@@ -264,6 +264,124 @@ describe('Per-App Feature Mapping Tests', () => {
             assert.ok(result.some(f => f.name === 'Compression'), 'Should map HTTP features to HTTP apps');
         });
 
+        it('should only map Service Groups feature when app has serviceGroup bindings', () => {
+            const app: AdcApp = {
+                name: 'lb_with_sg',
+                type: 'lb',
+                protocol: 'HTTP',
+                bindings: {
+                    serviceGroup: [{
+                        name: 'sg1',
+                        servers: [],
+                        monitors: []
+                    }]
+                }
+            };
+
+            const globalFeatures: DetectedFeature[] = [
+                {
+                    category: 'Load Balancing',
+                    name: 'Service Groups',
+                    detected: true,
+                    count: 5,
+                    complexityWeight: 1,
+                    evidence: '5 Service Group(s)',
+                    objectType: 'serviceGroup'
+                },
+                {
+                    category: 'Load Balancing',
+                    name: 'Services',
+                    detected: true,
+                    count: 10,
+                    complexityWeight: 1,
+                    evidence: '10 Service(s)',
+                    objectType: 'service'
+                }
+            ];
+
+            const result = mapFeaturesToApp(app, globalFeatures, {});
+
+            assert.ok(result.some(f => f.name === 'Service Groups'), 'Should include Service Groups feature');
+            assert.ok(!result.some(f => f.name === 'Services'), 'Should NOT include Services feature');
+        });
+
+        it('should only map Services feature when app has service bindings', () => {
+            const app: AdcApp = {
+                name: 'lb_with_svc',
+                type: 'lb',
+                protocol: 'HTTP',
+                bindings: {
+                    service: [{
+                        name: 'svc1',
+                        protocol: 'HTTP',
+                        port: '80',
+                        server: 'srv1',
+                        address: '10.0.0.1'
+                    }]
+                }
+            };
+
+            const globalFeatures: DetectedFeature[] = [
+                {
+                    category: 'Load Balancing',
+                    name: 'Service Groups',
+                    detected: true,
+                    count: 5,
+                    complexityWeight: 1,
+                    evidence: '5 Service Group(s)',
+                    objectType: 'serviceGroup'
+                },
+                {
+                    category: 'Load Balancing',
+                    name: 'Services',
+                    detected: true,
+                    count: 10,
+                    complexityWeight: 1,
+                    evidence: '10 Service(s)',
+                    objectType: 'service'
+                }
+            ];
+
+            const result = mapFeaturesToApp(app, globalFeatures, {});
+
+            assert.ok(result.some(f => f.name === 'Services'), 'Should include Services feature');
+            assert.ok(!result.some(f => f.name === 'Service Groups'), 'Should NOT include Service Groups feature');
+        });
+
+        it('should not map backend type features when LB app has no bindings', () => {
+            const app: AdcApp = {
+                name: 'lb_no_bindings',
+                type: 'lb',
+                protocol: 'HTTP'
+            };
+
+            const globalFeatures: DetectedFeature[] = [
+                {
+                    category: 'Load Balancing',
+                    name: 'Service Groups',
+                    detected: true,
+                    count: 5,
+                    complexityWeight: 1,
+                    evidence: '5 Service Group(s)',
+                    objectType: 'serviceGroup'
+                },
+                {
+                    category: 'Load Balancing',
+                    name: 'Services',
+                    detected: true,
+                    count: 10,
+                    complexityWeight: 1,
+                    evidence: '10 Service(s)',
+                    objectType: 'service'
+                }
+            ];
+
+            const result = mapFeaturesToApp(app, globalFeatures, {});
+
+            assert.ok(!result.some(f => f.name === 'Service Groups'), 'Should NOT include Service Groups feature');
+            assert.ok(!result.some(f => f.name === 'Services'), 'Should NOT include Services feature');
+        });
+
     });
 
     describe('calculateAppComplexity()', () => {

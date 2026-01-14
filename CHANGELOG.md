@@ -19,6 +19,29 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.18.2] - 2026-01-14
+
+### Added
+
+- **Services feature detection**: Now detects individual backend services separately from service groups
+- Per-app feature mapping correctly distinguishes between Services and Service Groups based on actual bindings
+- Integrated MCP server deployment patterns into PROJECT_ORCID roadmap (Section 4.2)
+
+### Changed
+
+- Diagnostics toggle now controls ALL colored status icons (both diagnostic severity and complexity scoring)
+- JSON Report output now folds/unfolds consistently with NS as JSON view (first two levels expanded)
+- Improved Diagnostics button tooltip with explanation of what the toggle controls
+
+### Fixed
+
+- Fixed regex patterns for quoted names with spaces when no trailing options are present
+  - `add lb vserver`, `add cs vserver`, `add service`, `add serviceGroup` now correctly parse names like `"Web App Server"` even without `-option` flags
+  - Previously, lines like `add lb vserver "Web App Server" HTTP 10.1.1.100 80` would incorrectly parse the name as `"Web` instead of `"Web App Server"`
+- Fixed per-app feature detection incorrectly showing Service Groups for apps that only use Services
+
+---
+
 ## [1.18.1] - 2026-01-11
 
 ### Changed
@@ -166,7 +189,7 @@ This release introduces a **complete rewrite** of the NetScaler configuration pa
 
 **Scalability:**
 
-```
+```plaintext
 Small configs (100-500 lines):    1.2-1.5x faster
 Medium configs (500-2000 lines):  1.5-2.0x faster
 Large configs (2000+ lines):      2.0-3.0x faster
@@ -176,7 +199,7 @@ See [RX Parser Performance Report](docs/RX-Parser-Performance-Report.md) for com
 
 #### Architecture Improvements
 
-**NEW: Object-Based Storage**
+NEW: Object-Based Storage
 
 - Replaced array-based structure with object storage keyed by name
 - O(1) lookup by name vs O(n) array search
@@ -429,7 +452,7 @@ See [RX Parser Performance Report](docs/RX-Parser-Performance-Report.md) for com
   - Contributing guides: Development, Testing, Vendor Support
   - Reference documentation: API, Troubleshooting
   - Deployment instructions in docs/DEPLOY.md
-  - Documentation URL: https://f5devcentral.github.io/vscode-f5-flipper/
+  - Documentation URL: <https://f5devcentral.github.io/vscode-f5-flipper/>
 
 ### Changed
 

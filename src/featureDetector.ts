@@ -178,6 +178,28 @@ export class FeatureDetector {
             });
         }
 
+        // Services (individual backend services, not service groups)
+        const svcCount = Object.keys(config.add?.service || {}).length;
+        if (svcCount > 0) {
+            features.push({
+                category: 'Load Balancing',
+                name: 'Services',
+                detected: true,
+                count: svcCount,
+                objectType: 'service',
+                complexityWeight: 1,
+                evidence: `${svcCount} Service(s)`,
+                f5Mapping: {
+                    tmos: 'full',
+                    tmosNotes: 'Maps to pool members',
+                    nginx: 'full',
+                    nginxNotes: 'Maps to upstream servers',
+                    xc: 'full',
+                    xcNotes: 'Maps to origin pool members'
+                }
+            });
+        }
+
         // Traffic Domains
         const tdCount = Object.keys(config.add?.ns?.trafficDomain || {}).length;
         if (tdCount > 0) {
@@ -1130,10 +1152,16 @@ export function mapFeaturesToApp(
     if (app.type === 'lb') {
         appFeatures.push(...globalFeatures.filter(f =>
             f.category === 'Load Balancing & Traffic Management' ||
-            f.objectType === 'lb vserver' ||
-            f.objectType === 'serviceGroup' ||
-            f.objectType === 'service'
+            f.objectType === 'lb vserver'
         ));
+        // Only add Service Groups feature if this app actually uses service groups
+        if (app.bindings?.serviceGroup && app.bindings.serviceGroup.length > 0) {
+            appFeatures.push(...globalFeatures.filter(f => f.objectType === 'serviceGroup'));
+        }
+        // Only add Services feature if this app actually uses services
+        if (app.bindings?.service && app.bindings.service.length > 0) {
+            appFeatures.push(...globalFeatures.filter(f => f.objectType === 'service'));
+        }
     }
 
     if (app.type === 'gslb') {

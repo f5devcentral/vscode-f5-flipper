@@ -63,6 +63,70 @@ describe('Feature Detection System', () => {
             assert.strictEqual(csFeature.category, 'Traffic Management');
         });
 
+        it('should detect service groups', () => {
+            const config = {
+                add: {
+                    serviceGroup: {
+                        'sg1': { name: 'sg1', protocol: 'HTTP' },
+                        'sg2': { name: 'sg2', protocol: 'SSL' }
+                    }
+                }
+            } as any;
+
+            const features = new FeatureDetector().analyze(config);
+
+            const sgFeature = features.find(f => f.name === 'Service Groups');
+            assert.ok(sgFeature, 'Service Groups feature should be detected');
+            assert.strictEqual(sgFeature.count, 2);
+            assert.strictEqual(sgFeature.objectType, 'serviceGroup');
+            assert.strictEqual(sgFeature.category, 'Load Balancing');
+        });
+
+        it('should detect services (individual backend services)', () => {
+            const config = {
+                add: {
+                    service: {
+                        'svc1': { name: 'svc1', protocol: 'HTTP', port: '80' },
+                        'svc2': { name: 'svc2', protocol: 'SSL', port: '443' },
+                        'svc3': { name: 'svc3', protocol: 'TCP', port: '8080' }
+                    }
+                }
+            } as any;
+
+            const features = new FeatureDetector().analyze(config);
+
+            const svcFeature = features.find(f => f.name === 'Services');
+            assert.ok(svcFeature, 'Services feature should be detected');
+            assert.strictEqual(svcFeature.count, 3);
+            assert.strictEqual(svcFeature.objectType, 'service');
+            assert.strictEqual(svcFeature.category, 'Load Balancing');
+            assert.ok(svcFeature.evidence.includes('3 Service(s)'));
+        });
+
+        it('should detect both services and service groups separately', () => {
+            const config = {
+                add: {
+                    serviceGroup: {
+                        'sg1': { name: 'sg1', protocol: 'HTTP' }
+                    },
+                    service: {
+                        'svc1': { name: 'svc1', protocol: 'HTTP', port: '80' },
+                        'svc2': { name: 'svc2', protocol: 'SSL', port: '443' }
+                    }
+                }
+            } as any;
+
+            const features = new FeatureDetector().analyze(config);
+
+            const sgFeature = features.find(f => f.name === 'Service Groups');
+            const svcFeature = features.find(f => f.name === 'Services');
+
+            assert.ok(sgFeature, 'Service Groups feature should be detected');
+            assert.ok(svcFeature, 'Services feature should be detected');
+            assert.strictEqual(sgFeature.count, 1);
+            assert.strictEqual(svcFeature.count, 2);
+        });
+
         it('should detect SSL certificates', () => {
             const config = {
                 add: {

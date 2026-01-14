@@ -858,6 +858,38 @@ describe('tgz unpacker tests', function () {
             });
         });
 
+        it('should handle quoted names with spaces when no options follow', function () {
+            // This tests the fix for the bug where patterns required opts group to match
+            // When no options followed the required fields, the regex would fail and
+            // fallback to splitting by whitespace, incorrectly parsing "Web App" as just "Web
+            const patterns = {
+                'add lb vserver': {
+                    line: 'add lb vserver "Web App Server" HTTP 10.1.1.100 80',
+                    expectedName: '"Web App Server"'
+                },
+                'add cs vserver': {
+                    line: 'add cs vserver "Content Switch App" SSL 10.1.1.101 443',
+                    expectedName: '"Content Switch App"'
+                },
+                'add service': {
+                    line: 'add service "My Service" my-server HTTP 8080',
+                    expectedName: '"My Service"'
+                },
+                'add serviceGroup': {
+                    line: 'add serviceGroup "Production Pool" HTTP',
+                    expectedName: '"Production Pool"'
+                }
+            };
+
+            Object.entries(patterns).forEach(([pattern, testCase]) => {
+                const slim = testCase.line.replace(pattern + ' ', '');
+                const match = slim.match(rx.parents[pattern as keyof typeof rx.parents]);
+                assert.notStrictEqual(match, null, `Pattern '${pattern}' should match when no options follow: ${testCase.line}`);
+                assert.strictEqual(match?.groups?.name, testCase.expectedName,
+                    `Pattern '${pattern}' should capture full quoted name including spaces`);
+            });
+        });
+
         it('should handle names with special characters (underscores, hyphens, dots)', function () {
             const names = [
                 'web-server-01',
