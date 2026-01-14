@@ -23,9 +23,9 @@ Major enhancements to F5 Flipper extension focusing on improved architecture, te
 | 6.1 | [JSON Output WebView](#61-json-output-webview) | Not Started | Medium |
 | 7.1 | [Extended Feature Detection](#71-extended-feature-detection) | ✅ Complete (Phases 1-4) | High |
 | 7.2 | [Reference Validation UI Integration](#72-reference-validation-ui-integration) | Not Started | High |
-| 7.3 | [Conversion Readiness Diagnostics](#73-conversion-readiness-diagnostics) | Not Started | Medium |
+| 7.3 | [Conversion Readiness Diagnostics](#73-conversion-readiness-diagnostics) | ✅ Complete | Medium |
 
-**Overall Progress**: 8/14 sections complete (57%) - Core parsing infrastructure + Feature Detection + Tool Review complete
+**Overall Progress**: 9/14 sections complete (64%) - Core parsing infrastructure + Feature Detection + Tool Review + Conversion Diagnostics complete
 
 ---
 
@@ -827,58 +827,46 @@ During unit test development (section 3.1), tests revealed that when CS vservers
 
 ### 7.3 Conversion Readiness Diagnostics
 
-**Status**: Not Started
+**Status**: ✅ Complete
 **Priority**: Medium
 **Description**: Diagnostics to help users understand config characteristics relevant to F5 conversion
 
 **Background**:
 During MCP server development, several config patterns were identified that are important for conversion planning. Rather than filtering these out (which would lose information), Flipper should detect and report them as diagnostics.
 
-**Proposed Diagnostics**:
+**Implementation**: Added 12 new diagnostic rules to `diagnostics.json`:
 
-1. [ ] **SSL Certificate File References**
-   - Detect `add ssl certKey` with `-cert` and `-key` file paths
-   - Diagnostic: "X certificates reference external files that will need to be imported to F5"
-   - Severity: Info
-   - Action: List cert names and file paths in feature report
+| Code   | Diagnostic                       | Description                                               |
+| ------ | -------------------------------- | --------------------------------------------------------- |
+| 7a3f   | SSL Certificate File Reference   | Identifies certs referencing external files for F5 import |
+| b8d2   | Custom Cipher Group Definition   | Custom cipher groups need F5 cipher string mapping        |
+| e4c1   | Auto-Created Server Object       | Server name=IP pattern, maps to F5 pool member IP         |
+| 5f9e   | Built-in Monitor (ping-default)  | Maps to F5 'gateway_icmp' monitor                         |
+| 2c6b   | Built-in Monitor (tcp-default)   | Maps to F5 'tcp' monitor                                  |
+| 91a4   | Built-in Monitor (http)          | Maps to F5 'http' monitor                                 |
+| d3f7   | Built-in Monitor (https)         | Maps to F5 'https' monitor                                |
+| 6e08   | Built-in Monitor (ECV types)     | ECV monitors use custom send/receive strings              |
+| a5bc   | NS Version 13.0 or Earlier       | May contain legacy CS policy syntax                       |
+| 48d9   | NS Version 13.1+                 | Uses modern CS policy syntax with explicit actions        |
+| c72e   | Legacy CS Policy Binding         | Deprecated -targetLBVserver in bind command               |
+| 3b5a   | Service References IP Directly   | Direct IP reference in service definition                 |
 
-2. [ ] **Custom Cipher Groups**
-   - Detect `add ssl cipher` commands (custom cipher groups)
-   - Compare against built-in cipher list to identify custom groups
-   - Diagnostic: "X custom cipher groups detected - require F5 cipher string mapping"
-   - Severity: Info
-   - Built-in list: `ALL`, `DEFAULT`, `kRSA`, `kEDH`, `DH`, `EDH`, `aRSA`, `aDSS`, `aNULL`, `DSS`, `DES`, `3DES`, `RC4`, `RC2`, `eNULL`, `MD5`, `SHA`, `SHA1`, `EXP`, `EXPORT`, `EXPORT40`, `EXPORT56`, `LOW`, `MEDIUM`, `HIGH`, `RSA`, `NULL`, `ECDHE`, `ECDSA`, `AES`, `AES128`, `AES256`, `AESGCM`, `AESCCM`, `ARIA128`, `ARIA256`, `CAMELLIA128`, `CAMELLIA256`, `CHACHA20`
+**Completed Tasks**:
 
-3. [ ] **Auto-Created Server Objects**
-   - Detect `add server <IP> <IP>` pattern (name equals IP)
-   - Diagnostic: "X auto-created server objects detected (services reference IPs directly)"
-   - Severity: Info
-   - Note: These map directly to F5 pool member IPs
-
-4. [ ] **System Monitor References**
-   - Detect bindings to built-in monitors
-   - Diagnostic: "X services use built-in NetScaler monitors - will map to F5 equivalents"
-   - Severity: Info
-   - Built-in list: `ping-default`, `tcp-default`, `arp`, `nd6`, `ping`, `tcp`, `http`, `tcp-ecv`, `http-ecv`, `udp-ecv`, `dns`, `ftp`, `tcps`, `https`, `tcps-ecv`, `https-ecv`, `xdm`, `xnc`, `mqtt`, `mqtt-tls`, `http2direct`, `http2ssl`, `ldns-ping`, `ldns-tcp`, `ldns-dns`, `stasecure`, `sta`
-
-5. [ ] **NetScaler Version Compatibility**
-   - Already detected via version header
-   - Diagnostic: "Config from NS version X.X - CS policy syntax: [legacy/modern]"
-   - Severity: Info
-   - Helps users understand abstraction behavior
-
-**Implementation**:
-
-- [ ] Add detectors to FeatureDetector class
-- [ ] Include in feature detection report
-- [ ] Add to JSON export
-- [ ] Consider tree view indicators
+- [x] Add SSL Certificate File References diagnostic
+- [x] Add Custom Cipher Groups diagnostic
+- [x] Add Auto-Created Server Objects diagnostic
+- [x] Add System Monitor References diagnostics (5 rules)
+- [x] Add NetScaler Version Compatibility diagnostics (2 rules)
+- [x] Add Legacy CS Policy Binding diagnostic
+- [x] Add Service IP Reference diagnostic
 
 **Integration with Existing Systems**:
 
-- Leverages existing FeatureDetector infrastructure (Section 7.1)
-- Outputs to same JSON report structure
-- No filtering of config data - purely informational
+- Uses existing `diagnostics.json` rule system in `src/nsDiag.ts`
+- Information severity (non-blocking, informational only)
+- Shown in VS Code diagnostics panel when viewing app configs
+- No filtering of config data - purely informational for conversion planning
 
 ---
 
