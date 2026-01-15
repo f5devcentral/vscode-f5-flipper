@@ -1,9 +1,11 @@
 # DIRECT CONVERSION ENGINE
 ## Architectural Decision Record
 
-**Status**: PROPOSED  
+**Status**: IN PROGRESS  
 **Created**: 2026-01-14  
+**Updated**: 2026-01-15  
 **Decision**: Direct TypeScript conversion over FAST templates  
+**Implementation**: [DIRECT_CONVERSION_IMPL_SPEC.md](DIRECT_CONVERSION_IMPL_SPEC.md)  
 **Related**: [CONVERSION_COVERAGE_SPEC.md](CONVERSION_COVERAGE_SPEC.md), [NS_TO_F5_MAPPINGS.md](NS_TO_F5_MAPPINGS.md), [BULK_CONVERSION_ENGINE_SPEC.md](BULK_CONVERSION_ENGINE_SPEC.md)
 
 ---
@@ -399,7 +401,9 @@ Yes, direct conversion is better for this project. Templates add complexity with
 
 ## 5. Implementation Design
 
-### Package Structure
+> **UPDATE:** Originally spec'd as standalone `flipperFAST` package. Now revised to **deep integration** into Flipper codebase under `src/as3/`. See [DIRECT_CONVERSION_IMPL_SPEC.md](DIRECT_CONVERSION_IMPL_SPEC.md) for updated design.
+
+### ~~Package Structure~~ File Structure
 
 ```
 flipperFAST/
@@ -559,12 +563,12 @@ Keep templates in place until new engine is validated. Feature flag to switch be
 
 ### Next Steps
 
-1. ☐ Review and approve this decision
-2. ☐ Create `flipperFAST` package structure
-3. ☐ Port mappings from NS_TO_F5_MAPPINGS.md to TypeScript
-4. ☐ Implement builders with tests
+1. ✅ Review and approve this decision
+2. ✅ Create `src/as3/` directory in Flipper
+3. ✅ Port mappings from NS_TO_F5_MAPPINGS.md to TypeScript
+4. ✅ Implement builders with tests
 5. ☐ Parallel test against current output
-6. ☐ Integrate into Flipper
+6. ☐ Wire into Flipper (replace template calls)
 7. ☐ Remove old template infrastructure
 
 ---
