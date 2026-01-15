@@ -76,7 +76,9 @@ F5 Flipper is a VS Code extension that analyzes and converts Citrix NetScaler/AD
 
 ### F5 FAST Core Integration
 
-The project relies heavily on the [@f5devcentral/f5-fast-core](https://github.com/f5devcentral/f5-fast-core) library (v0.23.0) for template processing:
+**NOTE**: The FAST template approach is being replaced by direct TypeScript conversion. See [AS3 Direct Conversion Engine](#as3-direct-conversion-engine) below.
+
+The project relied on the [@f5devcentral/f5-fast-core](https://github.com/f5devcentral/f5-fast-core) library (v0.23.0) for template processing:
 
 **Core Functionality**:
 - Parses Mustache templates with extended YAML format
@@ -120,6 +122,67 @@ template: |
 
 **VS Code Extension Development**:
 - [VS Code Webview API](https://code.visualstudio.com/api/extension-guides/webview) - Official documentation for VS Code webview communication patterns, message passing between extension and webview, and security considerations. Essential for understanding bidirectional communication between the extension and HTML preview pages.
+
+### AS3 Direct Conversion Engine
+
+**Status**: IN PROGRESS (Phase 1 Complete, Phase 2 In Progress)
+
+The project is transitioning from FAST templates to direct TypeScript-based AS3 generation:
+
+**New Architecture** (`src/as3/`):
+- `index.ts` - Main entry: `buildAS3()`, `buildAS3Bulk()`
+- `builders.ts` - Declaration, Service, Pool, Monitor builders
+- `mappings.ts` - All NS → F5 mappings (LB methods, persistence, service types, monitors)
+- `coverage.ts` - Coverage analysis and reporting
+
+**Key Functions**:
+```typescript
+import { buildAS3, buildAS3Bulk } from './as3';
+
+// Single app conversion
+const result = buildAS3(app);
+if (result.success) {
+  console.log(JSON.stringify(result.as3, null, 2));
+}
+
+// Bulk conversion (multiple apps → single declaration)
+const bulkResult = buildAS3Bulk(apps);
+if (bulkResult.merged) {
+  // Deploy merged declaration with all tenants
+}
+```
+
+**Design Decisions**:
+- No `template` property in Application (uses implicit generic)
+- Custom naming: `vs_${appName}`, `pool_${appName}`, `mon_${monName}`
+- Configurable tenant prefix (default: `t_`)
+- Full type safety with TypeScript
+- ~160 unit tests for mappings, builders, integration, coverage
+
+**Output Structure**:
+```json
+{
+  "class": "AS3",
+  "declaration": {
+    "class": "ADC",
+    "schemaVersion": "3.50.0",
+    "t_web_app": {
+      "class": "Tenant",
+      "app_web_app": {
+        "class": "Application",
+        "vs_web_app": { "class": "Service_HTTP", ... },
+        "pool_web_app": { "class": "Pool", ... }
+      }
+    }
+  }
+}
+```
+
+**Planning Documents**:
+- `specs/DIRECT_CONVERSION_ADR.md` - Architecture decision record
+- `specs/DIRECT_CONVERSION_IMPL_SPEC.md` - Implementation specification
+- `specs/NS_TO_F5_MAPPINGS.md` - Complete mapping reference
+- `specs/CONVERSION_COVERAGE_SPEC.md` - Coverage tracking spec
 
 ### Configuration Files
 

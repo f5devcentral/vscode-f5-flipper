@@ -9,3 +9,6 @@ cache
 vscode-f5-flipper-*.tgz
 *.vsix
 private*.conf
+
+# Generated AS3 outputs (regenerated from source configs)
+tests/artifacts/as3_output/
