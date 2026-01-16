@@ -23,6 +23,7 @@ import { NsCodeLensProvider } from './codeLens';
 import { FastCore } from './fastCore';
 import { NsTemplateProvider } from './templateViewProvider';
 import { isArray } from 'f5-conx-core';
+import { buildBulkAS3ExportReport } from './bulkAS3Export';
 
 ext.logger = logger;
 
@@ -428,7 +429,96 @@ export async function activateInternal(context: ExtensionContext) {
             });
 
 
-    }))
+    }));
+
+
+    // =========================================================================
+    // Bulk AS3 Export Command
+    // =========================================================================
+    context.subscriptions.push(commands.registerCommand('f5-flipper.exportAS3Bulk', async () => {
+        ext.telemetry.capture({ command: 'f5-flipper.exportAS3Bulk' });
+
+        f5FlipperOutputChannel.show();
+
+        // Validate that we have apps loaded
+        if (!ext.nsCfgProvider.explosion?.config?.apps?.length) {
+            window.showErrorMessage('No applications loaded. Import a NetScaler config first.');
+            return;
+        }
+
+        const apps = ext.nsCfgProvider.explosion.config.apps;
+        const nonGslbCount = apps.filter(a => a.type !== 'gslb').length;
+        const gslbCount = apps.filter(a => a.type === 'gslb').length;
+
+        logger.info(`f5-flipper.exportAS3Bulk: Starting bulk export of ${apps.length} apps (${nonGslbCount} CS/LB, ${gslbCount} GSLB)`);
+
+        // Show progress notification
+        await window.withProgress({
+            location: { viewId: 'nsConfigView' },
+            title: 'Exporting AS3...',
+        }, async () => {
+            try {
+                // Build the comprehensive report
+                const report = buildBulkAS3ExportReport(ext.nsCfgProvider.explosion, {
+                    schemaVersion: '3.50.0',
+                    tenantPrefix: 't_',
+                    includeDisabled: true,
+                    includeGslb: false,
+                    extensionVersion: context.extension.packageJSON.version,
+                });
+
+                // Log summary
+                logger.info(`Bulk AS3 Export Complete:`, {
+                    totalApps: report.summary.totalApps,
+                    converted: report.summary.converted,
+                    failed: report.summary.failed,
+                    skipped: report.summary.skipped,
+                    withWarnings: report.summary.withWarnings,
+                    alerts: report.alerts.length,
+                });
+
+                // Capture telemetry (anonymized)
+                ext.telemetry.capture({
+                    command: 'f5-flipper.exportAS3Bulk.complete',
+                    totalApps: report.summary.totalApps,
+                    converted: report.summary.converted,
+                    failed: report.summary.failed,
+                    skipped: report.summary.skipped,
+                    inputFileType: ext.nsCfgProvider.explosion.inputFileType,
+                });
+
+                // Convert to JSON and display
+                const content = JSON.stringify(report, null, 2);
+
+                await workspace.openTextDocument({ language: 'json', content })
+                    .then(async (doc) => {
+                        await window.showTextDocument(doc);
+
+                        // Fold all JSON and expand first 2 levels for summary visibility
+                        await commands.executeCommand('editor.foldAll');
+                        await commands.executeCommand('editor.unfold', { levels: 2 });
+                        await commands.executeCommand('cursorTop');
+
+                        return doc;
+                    });
+
+                // Show completion message
+                const successRate = report.summary.totalApps > 0
+                    ? Math.round((report.summary.converted / report.summary.totalApps) * 100)
+                    : 0;
+
+                window.showInformationMessage(
+                    `AS3 Export Complete: ${report.summary.converted}/${report.summary.totalApps} apps converted (${successRate}%). ` +
+                    `${report.alerts.length} alert(s) generated.`
+                );
+
+            } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : String(error);
+                logger.error('f5-flipper.exportAS3Bulk failed:', errorMessage);
+                window.showErrorMessage(`AS3 Export failed: ${errorMessage}`);
+            }
+        });
+    }));
 }
 
 

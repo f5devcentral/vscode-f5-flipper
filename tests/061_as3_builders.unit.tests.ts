@@ -223,10 +223,10 @@ describe('AS3 Builders Tests', function () {
             assert.deepStrictEqual(service.persistenceMethods, ['source-address']);
         });
 
-        it('maps persistence SSLSESSION to ssl', () => {
+        it('maps persistence SSLSESSION to tls-session-id', () => {
             const result = buildDeclaration(sslApp, { tenantPrefix: 't' });
             const service = result.declaration['t_ssl_app']['ssl_app_ssl443']['ssl_app_ssl443_vs'];
-            assert.deepStrictEqual(service.persistenceMethods, ['ssl']);
+            assert.deepStrictEqual(service.persistenceMethods, ['tls-session-id']);
         });
 
         it('sets idle timeout from cltTimeout', () => {
@@ -242,11 +242,13 @@ describe('AS3 Builders Tests', function () {
             assert.strictEqual(service.pool, 'web_app_http80_pool');
         });
 
-        it('includes serverTLS for HTTPS with certs', () => {
+        it('includes serverTLS reference for HTTPS services', () => {
             const result = buildDeclaration(sslApp, { tenantPrefix: 't' });
             const service = result.declaration['t_ssl_app']['ssl_app_ssl443']['ssl_app_ssl443_vs'];
+            // serverTLS is now a string reference to a TLS_Server object in the Application
             assert.ok(service.serverTLS, 'Should have serverTLS');
-            assert.ok(service.serverTLS.bigip.includes('wildcard_cert'), 'Should reference cert');
+            assert.strictEqual(typeof service.serverTLS, 'string', 'serverTLS should be a string reference');
+            assert.strictEqual(service.serverTLS, 'ssl_app_tls', 'Should reference the TLS_Server object');
         });
     });
 

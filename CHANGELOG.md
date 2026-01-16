@@ -9,6 +9,35 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ---
 
+## [1.20.0] - 2026-01-16
+
+### Added
+
+- **Bulk AS3 Export Command**: New command to export all discovered applications to AS3 declarations
+  - Accessible via "Export All Apps to AS3" button in the Apps header of the NS Config view
+  - Generates comprehensive JSON report with:
+    - Individual AS3 declarations for each app
+    - Conversion metadata (status, warnings, errors)
+    - Feature analysis per app (detected features, complexity score, recommended platform)
+    - Coverage analysis (mapped, unmapped, and ignored parameters)
+    - Global alerts for cross-app issues (duplicate IPs, shared certs, GSLB apps skipped)
+    - Summary statistics (total apps, converted, failed, skipped, with warnings)
+  - Professional Services-ready output format for migration planning
+  - See `specs/BULK_AS3_EXPORT_COMMAND_SPEC.md` for full specification
+
+### Changed
+
+- **AS3 Persistence Mappings**: Updated to use correct AS3 property names
+  - `SSLSESSION` now maps to `tls-session-id` (was incorrectly `ssl`)
+  - `RULE` and `CALLID` now correctly return `null` (require iRule/additional config)
+- **AS3 serverTLS**: Now uses string reference to TLS_Server object instead of inline bigip reference
+
+### Fixed
+
+- Fixed unit tests to match updated AS3 mapping behavior
+
+---
+
 ## [1.19.0] - 2026-01-14
 
 ### Added

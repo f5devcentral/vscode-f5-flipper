@@ -93,20 +93,20 @@ describe('AS3 Mappings Tests', function () {
             assert.strictEqual(getPersistence('COOKIEINSERT'), 'cookie');
         });
 
-        it('maps SSLSESSION to ssl', () => {
-            assert.strictEqual(getPersistence('SSLSESSION'), 'ssl');
+        it('maps SSLSESSION to tls-session-id', () => {
+            assert.strictEqual(getPersistence('SSLSESSION'), 'tls-session-id');
         });
 
-        it('maps RULE to universal (requires iRule)', () => {
-            assert.strictEqual(getPersistence('RULE'), 'universal');
+        it('maps RULE to null (requires iRule - not auto-convertible)', () => {
+            assert.strictEqual(getPersistence('RULE'), null);
         });
 
         it('maps DESTIP to destination-address', () => {
             assert.strictEqual(getPersistence('DESTIP'), 'destination-address');
         });
 
-        it('maps CALLID to sip', () => {
-            assert.strictEqual(getPersistence('CALLID'), 'sip');
+        it('maps CALLID to null (SIP requires additional config)', () => {
+            assert.strictEqual(getPersistence('CALLID'), null);
         });
 
         it('maps NONE to null', () => {

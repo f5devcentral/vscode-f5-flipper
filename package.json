@@ -3,7 +3,7 @@
   "displayName": "F5 Flipper",
   "description": "Breaking down Citrix NetScaler ADC configs",
   "publisher": "F5DevCentral",
-  "version": "1.19.0",
+  "version": "1.20.0",
   "keywords": [
     "F5",
     "F5Networks",
@@ -142,6 +142,13 @@
         "category": "F5-Flipper",
         "icon": "$(edit)",
         "enablement": "view == nsConfigView"
+      },
+      {
+        "command": "f5-flipper.exportAS3Bulk",
+        "title": "Export All Apps to AS3",
+        "category": "F5-Flipper",
+        "icon": "$(export)",
+        "enablement": "view == nsConfigView"
       }
     ],
     "menus": {
@@ -165,6 +172,11 @@
         },
         {
           "command": "f5-flipper.afton",
+          "when": "view == nsConfigView && viewItem =~ /(appsHeader)/",
+          "group": "inline"
+        },
+        {
+          "command": "f5-flipper.exportAS3Bulk",
           "when": "view == nsConfigView && viewItem =~ /(appsHeader)/",
           "group": "inline"
         },
